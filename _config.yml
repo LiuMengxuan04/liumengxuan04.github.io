@@ -2,7 +2,7 @@
 title: 刘孟玄 Blog
 SEOTitle: 刘孟玄 Blog
 header-img: img/home-bg.jpg
-email: huxpro@gmail.com
+email: liumengxuan829@gmail.com
 description: "这里是刘孟玄的个人博客，记录技术成长与生活随想。"
 keyword: "刘孟玄, 小黑菌, 博客, 个人网站, 技术, 随想录, 机器学习, 东南大学, B站, 软件工程"
 url: "https://liumengxuan.github.io" # your host, for absolute URL
@@ -13,7 +13,7 @@ future: true
 
 # SNS settings
 RSS: false
-github_username: huxpro
+github_username: liumengxuan04
 #facebook_username:  huxpro
 #linkedin_username:  firstname-lastname-idxxxx
 
