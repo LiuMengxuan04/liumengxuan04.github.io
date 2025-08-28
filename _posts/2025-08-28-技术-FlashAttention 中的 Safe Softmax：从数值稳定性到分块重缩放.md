@@ -87,22 +87,89 @@ GPU 存储对比：
 ### 4.3 全局最大值
 <p align="center">$m = \max(m^{(1)}, m^{(2)})$</p>
 
-### 4.4 显微镜：重缩放公式（第三步）
-目标：  
-<p align="center">$\sum_{\text{子块 1}} e^{x_i - m}$  </p>
-现有：  
-<p align="center">$\ell^{(1)} = \sum_{\text{子块 1}} e^{x_i - m^{(1)}}$</p>
+下面给出 **“第三步”重缩放公式** 的 **完整、逐步、细节级** 整合版。  
+阅读节奏：先场景 → 再推导 → 再数值直觉 → 一句话总结。  
+所有公式统一用 `$...$`，可直接贴到 GitHub Markdown。
 
-整体平移量 $m^{(1)} - m$：
+---
 
-<p align="center">$\sum_{\text{子块 1}} e^{x_i - m} = e^{m^{(1)} - m}\cdot \ell^{(1)}$</p>
+### 4.4 显微镜：重缩放公式（第三步）——完整拆解
 
-同理，子块 2：  
-<p align="center">$\sum_{\text{子块 2}} e^{x_i - m} = e^{m^{(2)} - m}\cdot \ell^{(2)}$</p>
+#### 【场景】我们手里有什么？
+把整条向量  
+$x = [a^{(1)}, a^{(2)}]$  
+切成两块后，**在 SRAM 里只能先算局部信息**：
 
-于是全局分母  
-<p align="center">$\ell = e^{m^{(1)} - m}\,\ell^{(1)} + e^{m^{(2)} - m}\,\ell^{(2)}$</p>
+<table>
+  <thead>
+    <tr>
+      <th>子块</th>
+      <th>已知量</th>
+      <th>数学形式</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td rowspan="2"><code>a<sup>(1)</sup></code></td>
+      <td>局部最大值&nbsp;<em>m</em><sup>(1)</sup></td>
+      <td><em>m</em><sup>(1)</sup>&nbsp;=&nbsp;max<sub>i</sub>&nbsp;<em>a</em><sub>i</sub><sup>(1)</sup></td>
+    </tr>
+    <tr>
+      <td>局部指数和&nbsp;ℓ<sup>(1)</sup></td>
+      <td>ℓ<sup>(1)</sup>&nbsp;=&nbsp;∑<sub>i</sub>&nbsp;e<sup>a<sub>i</sub><sup>(1)</sup>&nbsp;-&nbsp;m<sup>(1)</sup></sup></td>
+    </tr>
+    <tr>
+      <td rowspan="2"><code>a<sup>(2)</sup></code></td>
+      <td>局部最大值&nbsp;<em>m</em><sup>(2)</sup></td>
+      <td><em>m</em><sup>(2)</sup>&nbsp;=&nbsp;max<sub>j</sub>&nbsp;<em>a</em><sub>j</sub><sup>(2)</sup></td>
+    </tr>
+    <tr>
+      <td>局部指数和&nbsp;ℓ<sup>(2)</sup></td>
+      <td>ℓ<sup>(2)</sup>&nbsp;=&nbsp;∑<sub>j</sub>&nbsp;e<sup>a<sub>j</sub><sup>(2)</sup>&nbsp;-&nbsp;m<sup>(2)</sup></sup></td>
+    </tr>
+  </tbody>
+</table>
 
+注意：$\ell^{(1)}$ 和 $\ell^{(2)}$ 已经减去了**各自的局部最大值**，因此它们的“零点”并不一致，不能直接把 $\ell^{(1)}+\ell^{(2)}$ 当成全局分母。
+
+---
+
+#### 【推导】如何把局部和搬到同一个“零点”？
+1. 先确定**全局零点**  
+   $m = \max(m^{(1)}, m^{(2)})$
+
+2. **逐块平移**  
+   对子块 $a^{(1)}$：  
+   我们希望计算  
+   $\sum_i e^{\,a^{(1)}_i - m}$  
+   但现有的是  
+   $\ell^{(1)} = \sum_i e^{\,a^{(1)}_i - m^{(1)}}$  
+
+   把指数拆开：  
+   $a^{(1)}_i - m = \bigl(a^{(1)}_i - m^{(1)}\bigr) + \bigl(m^{(1)} - m\bigr)$  
+
+   于是  
+   $\sum_i e^{\,a^{(1)}_i - m}
+   = e^{\,m^{(1)} - m} \sum_i e^{\,a^{(1)}_i - m^{(1)}}
+   = e^{\,m^{(1)} - m} \cdot \ell^{(1)}$
+
+   同理子块 $a^{(2)}$：  
+   $\sum_j e^{\,a^{(2)}_j - m}
+   = e^{\,m^{(2)} - m} \cdot \ell^{(2)}$
+
+3. **合并成全局分母**  
+   $\ell = e^{\,m^{(1)} - m}\,\ell^{(1)} + e^{\,m^{(2)} - m}\,\ell^{(2)}$
+
+---
+
+#### 【数值直觉】
+- 若 $m^{(1)} = m$，则 $e^{0}=1$，该子块无需再缩；  
+- 若 $m^{(1)} < m$，则 $e^{m^{(1)}-m}<1$，所有指数项再向下压一次，防止溢出。
+
+---
+
+#### 【总结】
+拿到全局最大值后，把每个子块先前按 **局部最大值** 算出的指数和 **整体平移** 到统一尺度，再相加，从而得到 **全局、数值稳定的 Softmax 分母**。
 
 
 ## 5. 复杂度与内存访问对比
