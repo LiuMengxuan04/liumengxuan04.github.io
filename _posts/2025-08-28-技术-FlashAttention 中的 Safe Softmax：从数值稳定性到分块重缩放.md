@@ -10,7 +10,7 @@ categories: [技术]
 tags: [技术, FlashAttention, Softmax, 数值稳定性, CUDA]
 ---
 
-> 本文面向**仅熟悉标准 Softmax**的读者，用逐行推导的方式拆解 FlashAttention 为解决数值溢出与显存爆炸而引入的 Safe Softmax 及其分块实现。附可直接落地的 PyTorch 伪码。
+> 本文面向**仅熟悉标准 Softmax**的读者，用逐行推导的方式拆解 FlashAttention 为解决数值溢出与显存爆炸而引入的 Safe Softmax 及其分块实现。
 
 ---
 
