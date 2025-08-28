@@ -12,7 +12,7 @@ tags: [技术, FlashAttention, Softmax, 数值稳定性, CUDA]
 
 > 本文面向**仅熟悉标准 Softmax**的读者，用逐行推导的方式拆解 FlashAttention 为解决数值溢出与显存爆炸而引入的 Safe Softmax 及其分块实现。
 
----
+
 
 ## 1. 标准 Softmax 的数值陷阱
 给定向量 $x=[x_1,x_2,\dots,x_N]$，标准 Softmax 为  
@@ -24,21 +24,23 @@ FP16 最大 ≈ 6.55×10⁴，而 $e^{11}\approx 6\times10^4$ 已逼近极限；
 **问题 2：下溢**  
 若所有 $x_j$ 负且绝对值很大，分母先变成 0，出现除零错误。
 
----
+
 
 ## 2. Safe Softmax：减最大值的三步公式
-在分子、分母同乘 $e^{-c}$ 不改变结果：  
-$\frac{e^{x_i}}{\sum_j e^{x_j}} = \frac{e^{x_i - c}}{\sum_j e^{x_j - c}}$。  
+在分子、分母同乘 $e^{-c}$ 不改变结果：
+
+<p align="center">
+$\displaystyle \frac{e^{x_i}}{\sum_j e^{x_j}} = \frac{e^{x_i - c}}{\sum_j e^{x_j - c}}$
+</p>
+
 取 $c = \max_j x_j$ 后：
 
 1. 全局最大值  
-   $m = \max_{1\le j\le N} x_j$  
+   <p align="center">$m = \max_{1\le j\le N} x_j$</p>
 2. 指数和  
-   $\ell = \sum_{j=1}^{N} e^{x_j - m}$  
+   <p align="center">$\ell = \sum_{j=1}^{N} e^{x_j - m}$</p>
 3. 归一化  
-   $y_i = \frac{e^{x_i - m}}{\ell}$
-
----
+   <p align="center">$y_i = \frac{e^{x_i - m}}{\ell}$</p>
 
 ## 3. 分块动机：SRAM 容不下整条向量
 GPU 存储对比：
@@ -50,7 +52,7 @@ GPU 存储对比：
 
 当 $N$ 达到 8 k、16 k 时，向量本身也放不进 SRAM。FlashAttention 将输入切成 **tile**，每块大小 $B \ll N$，在 SRAM 中完成计算。
 
----
+
 
 ## 4. 分块 Safe Softmax：重缩放公式逐行推导
 
@@ -101,7 +103,7 @@ $\sum_{\text{子块 2}} e^{x_i - m} = e^{m^{(2)} - m}\cdot \ell^{(2)}$
 于是全局分母  
 $\ell = e^{m^{(1)} - m}\,\ell^{(1)} + e^{m^{(2)} - m}\,\ell^{(2)}$
 
----
+
 
 ## 5. 复杂度与内存访问对比
 
@@ -112,7 +114,6 @@ $\ell = e^{m^{(1)} - m}\,\ell^{(1)} + e^{m^{(2)} - m}\,\ell^{(2)}$
 | 数值稳定 | ❌ 易溢出 | ✅ 远离溢出 |
 | 数学精度 | — | bit-wise 一致 |
 
----
 
 ## 6. 参考实现（PyTorch 伪码）
 
