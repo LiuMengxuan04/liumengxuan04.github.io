@@ -16,7 +16,7 @@ tags: [技术, FlashAttention, Softmax, 数值稳定性, CUDA]
 
 ## 1. 标准 Softmax 的数值陷阱
 给定向量 $x=[x_1,x_2,\dots,x_N]$，标准 Softmax 为  
-$\displaystyle \frac{e^{x_i}}{\sum_{j=1}^{N} e^{x_j}}$
+<p align="center">$\displaystyle \frac{e^{x_i}}{\sum_{j=1}^{N} e^{x_j}}$</p>
 
 **问题 1：上溢**  
 FP16 最大 ≈ 6.55×10⁴，而 $e^{11}\approx 6\times10^4$ 已逼近极限；FP32 临界值约 88。一旦分量先达到 `Inf`，后续全部变 `NaN`。
@@ -85,23 +85,23 @@ GPU 存储对比：
 </table>
 
 ### 4.3 全局最大值
-$m = \max(m^{(1)}, m^{(2)})$
+<p align="center">$m = \max(m^{(1)}, m^{(2)})$</p>
 
 ### 4.4 显微镜：重缩放公式（第三步）
 目标：  
-$\sum_{\text{子块 1}} e^{x_i - m}$  
+<p align="center">$\sum_{\text{子块 1}} e^{x_i - m}$  </p>
 现有：  
-$\ell^{(1)} = \sum_{\text{子块 1}} e^{x_i - m^{(1)}}$
+<p align="center">$\ell^{(1)} = \sum_{\text{子块 1}} e^{x_i - m^{(1)}}$</p>
 
 整体平移量 $m^{(1)} - m$：
 
-$\sum_{\text{子块 1}} e^{x_i - m} = e^{m^{(1)} - m}\cdot \ell^{(1)}$
+<p align="center">$\sum_{\text{子块 1}} e^{x_i - m} = e^{m^{(1)} - m}\cdot \ell^{(1)}$</p>
 
 同理，子块 2：  
-$\sum_{\text{子块 2}} e^{x_i - m} = e^{m^{(2)} - m}\cdot \ell^{(2)}$
+<p align="center">$\sum_{\text{子块 2}} e^{x_i - m} = e^{m^{(2)} - m}\cdot \ell^{(2)}$</p>
 
 于是全局分母  
-$\ell = e^{m^{(1)} - m}\,\ell^{(1)} + e^{m^{(2)} - m}\,\ell^{(2)}$
+<p align="center">$\ell = e^{m^{(1)} - m}\,\ell^{(1)} + e^{m^{(2)} - m}\,\ell^{(2)}$</p>
 
 
 
