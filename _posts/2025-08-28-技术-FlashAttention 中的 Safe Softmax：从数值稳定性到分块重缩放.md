@@ -42,6 +42,8 @@ $\displaystyle \frac{e^{x_i}}{\sum_j e^{x_j}} = \frac{e^{x_i - c}}{\sum_j e^{x_j
 3. 归一化  
    <p align="center">$y_i = \frac{e^{x_i - m}}{\ell}$</p>
 
+> 数学的角度上，Safe Softmax与标准Softmax的结果是完全等价的。
+
 ## 3. 分块动机：SRAM 容不下整条向量
 GPU 存储对比：
 
