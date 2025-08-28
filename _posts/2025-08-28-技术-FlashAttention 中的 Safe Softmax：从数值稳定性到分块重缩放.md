@@ -15,8 +15,8 @@ tags: [技术, FlashAttention, Softmax, 数值稳定性, CUDA]
 ---
 
 ## 1. 标准 Softmax 的数值陷阱
-给定向量 $x = [x_1, x_2, \dots, x_N]$，标准 Softmax 为  
-$\operatorname{Softmax}(x_i) = \frac{e^{x_i}}{\sum_{j=1}^{N} e^{x_j}}$。
+给定向量 $x=[x_1,x_2,\dots,x_N]$，标准 Softmax 为  
+$\displaystyle \frac{e^{x_i}}{\sum_{j=1}^{N} e^{x_j}}$
 
 **问题 1：上溢**  
 FP16 最大 ≈ 6.55×10⁴，而 $e^{11}\approx 6\times10^4$ 已逼近极限；FP32 临界值约 88。一旦分量先达到 `Inf`，后续全部变 `NaN`。
