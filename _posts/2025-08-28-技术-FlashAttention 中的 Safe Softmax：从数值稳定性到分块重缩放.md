@@ -1,13 +1,13 @@
 ---
 layout:     post
-title:      "FlashAttention 中的 Safe Softmax"
-subtitle:   "从数值稳定性到分块重缩放"
-date:       2025-08-28 12:00:00 +0800
+title:      "技术示例文章"
+subtitle:   "这是一个用于占位的技术类博文示例"
+date:       2025-08-11 12:00:00 +0800
 author:     "Liu Mengxuan"
 mathjax: true
 header-img: "img/post-bg-miui6.jpg"
 categories: [技术]
-tags: [技术, FlashAttention, Softmax, 数值稳定性, CUDA]
+tags: [技术, 示例]
 ---
 
 > 本文面向**仅熟悉标准 Softmax**的读者，用逐行推导的方式拆解 FlashAttention 为解决数值溢出与显存爆炸而引入的 Safe Softmax 及其分块实现。附可直接落地的 PyTorch 伪码。
