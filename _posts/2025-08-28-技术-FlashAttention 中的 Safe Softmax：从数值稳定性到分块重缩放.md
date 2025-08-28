@@ -4,7 +4,7 @@ title:      "FlashAttention 中的 Safe Softmax"
 subtitle:   "从数值稳定性到分块重缩放"
 date:       2025-08-28 12:00:00 +0800
 author:     "Liu Mengxuan"
-math: mathjax
+mathjax:true
 header-img: "img/post-bg-miui6.jpg"
 categories: [技术]
 tags: [技术, FlashAttention, Softmax, 数值稳定性, CUDA]
