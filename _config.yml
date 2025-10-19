@@ -86,7 +86,7 @@ service-worker: true
 page-mathjax: true
 
 # Friends
-# friends:
+friends:
   [
     { title: "苗哥（Yijie Miao）", href: "https://yijiemiao.github.io/" }
   ]
