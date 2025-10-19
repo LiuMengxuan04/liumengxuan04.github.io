@@ -65,7 +65,6 @@ ns-3期望开发人员在面向对象的编程意义上专门化Application类�
 
 ---
 
-## 概念与代码的对应关系
 
 现在，我们来逐行分析代码，看看 `Node`、`Channel`、`NetDevice` 和 `Application` 是如何体现在代码中的。
 
