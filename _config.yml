@@ -88,5 +88,5 @@ page-mathjax: true
 # Friends
 # friends:
   [
-    { title: "苗哥（Yijie Miao）", href: "https://yijiemiao.github.io/" },
+    { title: "苗哥（Yijie Miao）", href: "https://yijiemiao.github.io/" }
   ]
