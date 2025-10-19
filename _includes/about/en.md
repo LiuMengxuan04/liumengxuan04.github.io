@@ -15,4 +15,4 @@
 Passionate about technology exploration and knowledge sharing, with strong interest in machine learning platform development. Looking forward to exchanging ideas and growing together!
 
 ---
-**📫 Let's Connect!**
+**📫 Let's Connect!** · 📮 `liumengxuan@seu.edu.cn`
