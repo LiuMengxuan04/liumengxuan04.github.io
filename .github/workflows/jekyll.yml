@@ -1,5 +1,3 @@
-# This workflow builds and deploys a Jekyll site to GitHub Pages
-
 name: Deploy Jekyll site to Pages
 
 on:
@@ -17,10 +15,8 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  # Build job
   build:
-    # ✅ 固定为 Ubuntu 22.04，避免 sass-embedded 安装失败
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-22.04  # ✅ 固定版本，避免 sass-embedded 报错
 
     steps:
       - name: Checkout
@@ -31,7 +27,6 @@ jobs:
         with:
           ruby-version: '3.1'
           bundler-cache: true
-          cache-version: 0
 
       - name: Setup Pages
         id: pages
@@ -45,13 +40,11 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
 
-  # Deployment job
   deploy:
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
-    # ✅ 同样固定为 Ubuntu 22.04
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-22.04  # ✅ 同样固定
     needs: build
     steps:
       - name: Deploy to GitHub Pages
