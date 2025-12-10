@@ -1,0 +1,1767 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>RoCE网络协议全面调研报告</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&amp;family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'serif': ['Playfair Display', 'serif'],
+                        'sans': ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        'primary': '#1e3a8a',
+                        'secondary': '#1f2937',
+                        'accent': '#3b82f6',
+                        'muted': '#6b7280',
+                        'background': '#f8fafc',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            overflow-x: hidden;
+        }
+        .hero-gradient {
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+        }
+        .text-shadow {
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .glass-effect {
+            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.9);
+        }
+        .toc-fixed {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 280px;
+            height: 100vh;
+            overflow-y: auto;
+            z-index: 1000;
+            background: white;
+            border-right: 1px solid #e5e7eb;
+        }
+        .main-content {
+            margin-left: 280px;
+        }
+        @media (max-width: 1024px) {
+            .toc-fixed {
+                display: none;
+            }
+            .main-content {
+                margin-left: 0;
+            }
+        }
+        .section-anchor {
+            scroll-margin-top: 2rem;
+        }
+        /* Prevent images from overflowing */
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+    </style>
+  <base target="_blank">
+</head>
+
+  <body class="bg-background text-secondary font-sans leading-relaxed">
+    <!-- Fixed Table of Contents -->
+    <nav class="toc-fixed p-6">
+      <div class="mb-8">
+        <h3 class="font-serif text-lg font-bold text-primary mb-4">目录导航</h3>
+        <ul class="space-y-2 text-sm">
+          <li>
+            <a href="#section-1" class="block py-1 text-muted hover:text-primary transition-colors">1. RDMA技术基础</a>
+          </li>
+          <li>
+            <a href="#section-2" class="block py-1 text-muted hover:text-primary transition-colors">2. RoCE技术原理与协议细节</a>
+          </li>
+          <li>
+            <a href="#section-3" class="block py-1 text-muted hover:text-primary transition-colors">3. 性能优化与拥塞控制</a>
+          </li>
+          <li>
+            <a href="#section-4" class="block py-1 text-muted hover:text-primary transition-colors">4. 应用场景与部署案例</a>
+          </li>
+          <li>
+            <a href="#section-5" class="block py-1 text-muted hover:text-primary transition-colors">5. 技术对比分析</a>
+          </li>
+          <li>
+            <a href="#section-6" class="block py-1 text-muted hover:text-primary transition-colors">6. 市场趋势与厂商方案</a>
+          </li>
+        </ul>
+      </div>
+
+      <div class="border-t pt-4">
+        <h4 class="font-semibold text-sm text-secondary mb-3">关键指标</h4>
+        <div class="space-y-3 text-xs">
+          <div class="flex justify-between">
+            <span class="text-muted">端到端延迟</span>
+            <span class="font-medium">1-5μs</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-muted">带宽支持</span>
+            <span class="font-medium">100-800GbE</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-muted">CPU卸载率</span>
+            <span class="font-medium">95%+</span>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="main-content">
+      <!-- Hero Section -->
+      <section class="relative min-h-screen flex items-center">
+        <div class="hero-gradient absolute inset-0"></div>
+        <div class="relative z-10 container mx-auto px-4 sm:px-8 py-16">
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+            <!-- Main Title -->
+            <div class="lg:col-span-7">
+              <div class="space-y-6">
+                <div class="inline-block px-4 py-2 bg-white/20 rounded-full text-white/90 text-sm font-medium">
+                  高性能网络协议深度解析
+                </div>
+                <h1 class="font-serif text-4xl sm:text-5xl lg:text-7xl font-bold text-white leading-tight text-shadow">
+                  <span class="italic">RoCE</span> 网络协议
+                  <br/>
+                  <span class="text-2xl sm:text-3xl lg:text-4xl font-normal opacity-90">全面调研报告</span>
+                </h1>
+                <p class="text-lg sm:text-xl text-white/80 max-w-2xl leading-relaxed">
+                  深度解析RDMA over Converged Ethernet技术原理、性能优化策略、应用场景及市场发展趋势
+                </p>
+              </div>
+            </div>
+
+            <!-- Visual Element -->
+            <div class="lg:col-span-5">
+              <div class="glass-effect rounded-2xl p-8 backdrop-blur-lg">
+                <img src="https://kimi-web-img.moonshot.cn/img/developer.qcloudimg.com/d205fcfa6f9d3f1e1951b9387252a80c80cd442b.jpg" alt="数据中心内服务器通过高速以太网交换机连接的网络架构示意图" class="w-full h-64 object-cover rounded-lg mb-6" size="medium" aspect="wide" style="photo" query="数据中心网络架构" referrerpolicy="no-referrer" data-modified="1" data-score="0.00"/>
+                <div class="grid grid-cols-2 gap-4 text-center">
+                  <div class="bg-white/10 rounded-lg p-4">
+                    <div class="text-2xl font-bold text-white">1μs</div>
+                    <div class="text-sm text-white/80">超低延迟</div>
+                  </div>
+                  <div class="bg-white/10 rounded-lg p-4">
+                    <div class="text-2xl font-bold text-white">800GbE</div>
+                    <div class="text-sm text-white/80">最大带宽</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Executive Summary -->
+      <section class="py-16 bg-white">
+        <div class="container mx-auto px-8">
+          <div class="max-w-4xl mx-auto">
+            <div class="bg-primary/5 rounded-2xl p-8 mb-12">
+              <h2 class="font-serif text-3xl font-bold text-primary mb-6">执行摘要</h2>
+              <div class="prose prose-lg max-w-none">
+                <p class="text-lg leading-relaxed text-secondary mb-6">
+                  RoCE（RDMA over Converged Ethernet）是一种革命性的网络协议，它允许在标准以太网基础设施上实现远程直接内存访问（RDMA）功能。通过绕过操作系统内核和CPU，RoCE实现了服务器间内存到内存的超低延迟、高带宽数据传输。
+                </p>
+                <div class="grid md:grid-cols-3 gap-6 mt-8">
+                  <div class="text-center p-4 bg-white rounded-lg">
+                    <div class="w-12 h-12 bg-accent/10 rounded-full flex items-center justify-center mx-auto mb-3">
+                      <i class="fas fa-bolt text-accent text-xl"></i>
+                    </div>
+                    <h4 class="font-semibold text-secondary mb-2">性能优势</h4>
+                    <p class="text-sm text-muted">端到端延迟低至1微秒，CPU卸载率达95%以上</p>
+                  </div>
+                  <div class="text-center p-4 bg-white rounded-lg">
+                    <div class="w-12 h-12 bg-accent/10 rounded-full flex items-center justify-center mx-auto mb-3">
+                      <i class="fas fa-network-wired text-accent text-xl"></i>
+                    </div>
+                    <h4 class="font-semibold text-secondary mb-2">部署灵活</h4>
+                    <p class="text-sm text-muted">兼容现有以太网基础设施，支持三层路由</p>
+                  </div>
+                  <div class="text-center p-4 bg-white rounded-lg">
+                    <div class="w-12 h-12 bg-accent/10 rounded-full flex items-center justify-center mx-auto mb-3">
+                      <i class="fas fa-chart-line text-accent text-xl"></i>
+                    </div>
+                    <h4 class="font-semibold text-secondary mb-2">市场趋势</h4>
+                    <p class="text-sm text-muted">预计2027年将成为AI网络主流技术</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 1: RDMA技术基础 -->
+      <section id="section-1" class="section-anchor py-16 bg-gray-50">
+        <div class="container mx-auto px-8">
+          <div class="max-w-6xl mx-auto">
+            <header class="text-center mb-12">
+              <h2 class="font-serif text-4xl font-bold text-primary mb-4">1. RDMA技术基础</h2>
+              <p class="text-xl text-muted max-w-3xl mx-auto">
+                远程直接内存访问技术的核心概念、优势及分类
+              </p>
+            </header>
+
+            <div class="grid lg:grid-cols-2 gap-12 items-start mb-12">
+              <div>
+                <h3 class="font-serif text-2xl font-bold text-secondary mb-6">RDMA核心概念</h3>
+                <div class="prose prose-lg max-w-none">
+                  <p class="mb-4">
+                    远程直接内存访问（RDMA）是一种革命性的网络通信技术，允许一台计算机直接访问另一台计算机的内存，无需经过操作系统内核干预或CPU参与<a href="#ref-398" class="text-accent text-sm">[1]</a>。
+                  </p>
+                  <p class="mb-4">
+                    这种&#34;内核旁路&#34;和&#34;零拷贝&#34;特性，使得数据可以直接从发送端的用户空间内存传输到接收端的用户空间内存，极大地降低了数据传输延迟和CPU开销<a href="#ref-353" class="text-accent text-sm">[2]</a>。
+                  </p>
+                  <div class="bg-white p-6 rounded-lg border-l-4 border-accent">
+                    <h4 class="font-semibold text-secondary mb-3">队列对（Queue Pair）模型</h4>
+                    <p class="text-sm text-muted">
+                      通信双方通过创建&#34;队列对&#34;（QP）来建立连接，每个QP由发送队列和接收队列组成，用于存放工作请求（WR）。
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <img src="https://kimi-web-img.moonshot.cn/imagegen/20251207/0217650889938799c7be37f40fcd84b878ae804fefb809e734179_0.jpeg" alt="RDMA技术数据传输过程" class="w-full h-64 object-cover rounded-lg mb-6" size="medium" aspect="wide" style="linedrawing" query="RDMA数据传输原理" referrerpolicy="no-referrer" data-modified="1" data-score="0.00"/>
+
+                <div class="bg-white p-6 rounded-lg">
+                  <h4 class="font-semibold text-secondary mb-4">RDMA三大技术优势</h4>
+                  <div class="space-y-3">
+                    <div class="flex items-center">
+                      <div class="w-3 h-3 bg-accent rounded-full mr-3"></div>
+                      <span class="text-sm"><strong>超低延迟：</strong>微秒级端到端延迟</span>
+                    </div>
+                    <div class="flex items-center">
+                      <div class="w-3 h-3 bg-accent rounded-full mr-3"></div>
+                      <span class="text-sm"><strong>高带宽利用率：</strong>充分利用高速网络带宽</span>
+                    </div>
+                    <div class="flex items-center">
+                      <div class="w-3 h-3 bg-accent rounded-full mr-3"></div>
+                      <span class="text-sm"><strong>低CPU占用：</strong>释放CPU资源，专注于计算任务</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- RDMA技术分类对比 -->
+            <div class="bg-white rounded-2xl p-8 shadow-sm">
+              <h3 class="font-serif text-2xl font-bold text-secondary mb-6">RDMA技术分类对比</h3>
+              <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                  <thead>
+                    <tr class="border-b-2 border-gray-200">
+                      <th class="text-left py-3 px-4 font-semibold text-secondary">特性</th>
+                      <th class="text-left py-3 px-4 font-semibold text-secondary">InfiniBand</th>
+                      <th class="text-left py-3 px-4 font-semibold text-secondary">iWARP</th>
+                      <th class="text-left py-3 px-4 font-semibold text-secondary">RoCE</th>
+                    </tr>
+                  </thead>
+                  <tbody class="divide-y divide-gray-100">
+                    <tr>
+                      <td class="py-3 px-4 font-medium">协议栈</td>
+                      <td class="py-3 px-4 text-muted">专有协议栈</td>
+                      <td class="py-3 px-4 text-muted">基于TCP/IP</td>
+                      <td class="py-3 px-4 text-muted">基于以太网</td>
+                    </tr>
+                    <tr>
+                      <td class="py-3 px-4 font-medium">性能</td>
+                      <td class="py-3 px-4 text-green-600">最优</td>
+                      <td class="py-3 px-4 text-yellow-600">稍差</td>
+                      <td class="py-3 px-4 text-blue-600">优秀</td>
+                    </tr>
+                    <tr>
+                      <td class="py-3 px-4 font-medium">成本</td>
+                      <td class="py-3 px-4 text-red-600">高</td>
+                      <td class="py-3 px-4 text-yellow-600">中</td>
+                      <td class="py-3 px-4 text-green-600">低</td>
+                    </tr>
+                    <tr>
+                      <td class="py-3 px-4 font-medium">主要应用</td>
+                      <td class="py-3 px-4 text-muted">传统HPC、超算中心</td>
+                      <td class="py-3 px-4 text-muted">广域网RDMA</td>
+                      <td class="py-3 px-4 text-muted">数据中心、AI、存储</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <p class="text-xs text-muted mt-4">
+                数据来源：<a href="#ref-317" class="text-accent">[3]</a>
+                <a href="#ref-319" class="text-accent">[4]</a>
+                <a href="#ref-343" class="text-accent">[5]</a>
+                <a href="#ref-345" class="text-accent">[6]</a>
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 2: RoCE技术原理 -->
+      <section id="section-2" class="section-anchor py-16 bg-white">
+        <div class="container mx-auto px-8">
+          <div class="max-w-6xl mx-auto">
+            <header class="text-center mb-12">
+              <h2 class="font-serif text-4xl font-bold text-primary mb-4">2. RoCE技术原理与协议细节</h2>
+              <p class="text-xl text-muted max-w-3xl mx-auto">
+                深入解析RoCE协议架构、版本演进及数据包格式
+              </p>
+            </header>
+
+            <!-- RoCE v1 vs v2 -->
+            <div class="grid lg:grid-cols-2 gap-8 mb-12">
+              <div class="bg-gray-50 p-8 rounded-xl">
+                <h3 class="font-serif text-xl font-bold text-secondary mb-4">RoCE v1：链路层实现</h3>
+                <div class="space-y-4">
+                  <div class="flex items-start">
+                    <div class="w-2 h-2 bg-blue-500 rounded-full mt-2 mr-3 flex-shrink-0"></div>
+                    <div>
+                      <p class="font-medium text-sm">基于以太网链路层 (Layer 2)</p>
+                      <p class="text-xs text-muted mt-1">只能在同一广播域内通信</p>
+                    </div>
+                  </div>
+                  <div class="flex items-start">
+                    <div class="w-2 h-2 bg-blue-500 rounded-full mt-2 mr-3 flex-shrink-0"></div>
+                    <div>
+                      <p class="font-medium text-sm">Ethertype标识：0x8915</p>
+                      <p class="text-xs text-muted mt-1">特定以太网类型标识RoCE流量</p>
+                    </div>
+                  </div>
+                  <div class="flex items-start">
+                    <div class="w-2 h-2 bg-blue-500 rounded-full mt-2 mr-3 flex-shrink-0"></div>
+                    <div>
+                      <p class="font-medium text-sm">协议栈简单，延迟极低</p>
+                      <p class="text-xs text-muted mt-1">无需IP和UDP层处理</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="bg-primary/5 p-8 rounded-xl">
+                <h3 class="font-serif text-xl font-bold text-secondary mb-4">RoCE v2：网络层实现</h3>
+                <div class="space-y-4">
+                  <div class="flex items-start">
+                    <div class="w-2 h-2 bg-primary rounded-full mt-2 mr-3 flex-shrink-0"></div>
+                    <div>
+                      <p class="font-medium text-sm">基于UDP/IP协议栈 (Layer 3)</p>
+                      <p class="text-xs text-muted mt-1">支持三层路由和跨子网通信</p>
+                    </div>
+                  </div>
+                  <div class="flex items-start">
+                    <div class="w-2 h-2 bg-primary rounded-full mt-2 mr-3 flex-shrink-0"></div>
+                    <div>
+                      <p class="font-medium text-sm">UDP目的端口：4791</p>
+                      <p class="text-xs text-muted mt-1">固定端口标识RoCE v2流量</p>
+                    </div>
+                  </div>
+                  <div class="flex items-start">
+                    <div class="w-2 h-2 bg-primary rounded-full mt-2 mr-3 flex-shrink-0"></div>
+                    <div>
+                      <p class="font-medium text-sm">支持ECMP负载分担</p>
+                      <p class="text-xs text-muted mt-1">基于UDP源端口号进行哈希</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- RoCE v2数据包结构 -->
+            <div class="bg-gray-50 rounded-2xl p-8 mb-12">
+              <h3 class="font-serif text-2xl font-bold text-secondary mb-6">RoCE v2数据包结构解析</h3>
+
+              <div class="grid lg:grid-cols-3 gap-8">
+                <div class="lg:col-span-2">
+                  <div class="space-y-4">
+                    <div class="bg-white p-4 rounded-lg border-l-4 border-blue-400">
+                      <h4 class="font-semibold text-sm text-secondary mb-2">1. 以太网头部</h4>
+                      <p class="text-xs text-muted">包含源MAC地址和目的MAC地址，用于二层网络寻址</p>
+                    </div>
+                    <div class="bg-white p-4 rounded-lg border-l-4 border-green-400">
+                      <h4 class="font-semibold text-sm text-secondary mb-2">2. IP头部</h4>
+                      <p class="text-xs text-muted">包含源IP地址和目的IP地址，用于三层网络路由</p>
+                    </div>
+                    <div class="bg-white p-4 rounded-lg border-l-4 border-yellow-400">
+                      <h4 class="font-semibold text-sm text-secondary mb-2">3. UDP头部</h4>
+                      <p class="text-xs text-muted">目的端口固定为4791，源端口用于ECMP负载分担</p>
+                    </div>
+                    <div class="bg-white p-4 rounded-lg border-l-4 border-red-400">
+                      <h4 class="font-semibold text-sm text-secondary mb-2">4. InfiniBand基础传输头 (BTH)</h4>
+                      <p class="text-xs text-muted">包含操作码、目的队列对号(Dest QP)和包序列号(PSN)</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <img src="https://resource.h3c.com/cn/202510/28/20251028_14966939_x_Img_x_png_29_2682385_30005_0.png" alt="RoCEv2网络数据包结构示意图" class="w-full h-48 object-cover rounded-lg mb-4" size="medium" aspect="wide" style="linedrawing" query="RoCEv2数据包格式" referrerpolicy="no-referrer" data-modified="1" data-score="0.00"/>
+
+                  <div class="bg-white p-4 rounded-lg">
+                    <h4 class="font-semibold text-secondary mb-3">关键标识符</h4>
+                    <div class="space-y-2 text-sm">
+                      <div class="flex justify-between">
+                        <span class="text-muted">Ethertype</span>
+                        <span class="font-mono">0x8915</span>
+                      </div>
+                      <div class="flex justify-between">
+                        <span class="text-muted">UDP端口</span>
+                        <span class="font-mono">4791</span>
+                      </div>
+                      <div class="flex justify-between">
+                        <span class="text-muted">协议层次</span>
+                        <span class="font-mono">Layer 3</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <p class="text-xs text-muted mt-4">
+                数据来源：<a href="#ref-352" class="text-accent">[7]</a>
+                <a href="#ref-398" class="text-accent">[8]</a>
+              </p>
+            </div>
+
+            <!-- BTH详解 -->
+            <div class="bg-white border rounded-xl p-8">
+              <h3 class="font-serif text-2xl font-bold text-secondary mb-6">InfiniBand基础传输头（BTH）详解</h3>
+
+              <div class="grid md:grid-cols-2 gap-8">
+                <div>
+                  <h4 class="font-semibold text-secondary mb-4">核心字段</h4>
+                  <div class="space-y-3">
+                    <div class="flex items-start">
+                      <div class="w-8 h-8 bg-accent/10 rounded flex items-center justify-center mr-3 flex-shrink-0">
+                        <span class="text-xs font-bold text-accent">OP</span>
+                      </div>
+                      <div>
+                        <p class="font-medium text-sm">操作码 (Opcode)</p>
+                        <p class="text-xs text-muted">8位字段，标识RDMA操作类型</p>
+                      </div>
+                    </div>
+                    <div class="flex items-start">
+                      <div class="w-8 h-8 bg-accent/10 rounded flex items-center justify-center mr-3 flex-shrink-0">
+                        <span class="text-xs font-bold text-accent">QP</span>
+                      </div>
+                      <div>
+                        <p class="font-medium text-sm">目的队列对号 (Dest QP)</p>
+                        <p class="text-xs text-muted">24位字段，标识接收端队列对</p>
+                      </div>
+                    </div>
+                    <div class="flex items-start">
+                      <div class="w-8 h-8 bg-accent/10 rounded flex items-center justify-center mr-3 flex-shrink-0">
+                        <span class="text-xs font-bold text-accent">PSN</span>
+                      </div>
+                      <div>
+                        <p class="font-medium text-sm">包序列号 (PSN)</p>
+                        <p class="text-xs text-muted">24位字段，用于检测丢包和重传</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <div class="bg-gray-50 p-6 rounded-lg">
+                    <h4 class="font-semibold text-secondary mb-3">操作码分类</h4>
+                    <div class="space-y-2 text-sm">
+                      <div class="flex justify-between">
+                        <span class="text-muted">SEND操作</span>
+                        <span class="font-mono">0x01</span>
+                      </div>
+                      <div class="flex justify-between">
+                        <span class="text-muted">RDMA WRITE</span>
+                        <span class="font-mono">0x08</span>
+                      </div>
+                      <div class="flex justify-between">
+                        <span class="text-muted">RDMA READ</span>
+                        <span class="font-mono">0x10</span>
+                      </div>
+                      <div class="flex justify-between">
+                        <span class="text-muted">ACK确认</span>
+                        <span class="font-mono">0x81</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <p class="text-xs text-muted mt-4">
+                数据来源：<a href="#ref-354" class="text-accent">[9]</a>
+                <a href="#ref-363" class="text-accent">[10]</a>
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 3: 性能优化 -->
+      <section id="section-3" class="section-anchor py-16 bg-gray-50">
+        <div class="container mx-auto px-8">
+          <div class="max-w-6xl mx-auto">
+            <header class="text-center mb-12">
+              <h2 class="font-serif text-4xl font-bold text-primary mb-4">3. RoCE性能优化与拥塞控制机制</h2>
+              <p class="text-xl text-muted max-w-3xl mx-auto">
+                构建无损以太网环境，实现高效拥塞控制
+              </p>
+            </header>
+
+            <!-- 无损以太网构建 -->
+            <div class="bg-white rounded-2xl p-8 mb-12 shadow-sm">
+              <h3 class="font-serif text-2xl font-bold text-secondary mb-6">无损以太网构建</h3>
+
+              <div class="grid lg:grid-cols-3 gap-8 mb-8">
+                <div class="text-center">
+                  <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-exclamation-triangle text-red-600 text-xl"></i>
+                  </div>
+                  <h4 class="font-semibold text-secondary mb-2">问题</h4>
+                  <p class="text-sm text-muted">RDMA对丢包极为敏感，极低丢包率导致性能急剧下降</p>
+                </div>
+                <div class="text-center">
+                  <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-shield-alt text-blue-600 text-xl"></i>
+                  </div>
+                  <h4 class="font-semibold text-secondary mb-2">解决方案</h4>
+                  <p class="text-sm text-muted">通过DCB技术构建无损以太网，避免数据包丢失</p>
+                </div>
+                <div class="text-center">
+                  <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-check-circle text-green-600 text-xl"></i>
+                  </div>
+                  <h4 class="font-semibold text-secondary mb-2">目标</h4>
+                  <p class="text-sm text-muted">在网络拥塞时通过流量控制避免丢包，而非简单丢弃</p>
+                </div>
+              </div>
+
+              <div class="grid md:grid-cols-3 gap-6">
+                <div class="bg-gray-50 p-6 rounded-lg">
+                  <h4 class="font-semibold text-secondary mb-3 flex items-center">
+                    <i class="fas fa-pause-circle text-blue-500 mr-2"></i>
+                    PFC流量控制
+                  </h4>
+                  <p class="text-sm text-muted mb-3">基于优先级的流量控制，实现精细化拥塞管理</p>
+                  <ul class="text-xs text-muted space-y-1">
+                    <li>• 8个优先级队列</li>
+                    <li>• XON/XOFF阈值控制</li>
+                    <li>• 逐跳流量控制</li>
+                  </ul>
+                </div>
+
+                <div class="bg-gray-50 p-6 rounded-lg">
+                  <h4 class="font-semibold text-secondary mb-3 flex items-center">
+                    <i class="fas fa-balance-scale text-green-500 mr-2"></i>
+                    ETS带宽管理
+                  </h4>
+                  <p class="text-sm text-muted mb-3">增强传输选择，保证带宽公平分配</p>
+                  <ul class="text-xs text-muted space-y-1">
+                    <li>• 带宽保证机制</li>
+                    <li>• 优先级调度</li>
+                    <li>• 防止流量饥饿</li>
+                  </ul>
+                </div>
+
+                <div class="bg-gray-50 p-6 rounded-lg">
+                  <h4 class="font-semibold text-secondary mb-3 flex items-center">
+                    <i class="fas fa-handshake text-purple-500 mr-2"></i>
+                    DCBX自动协商
+                  </h4>
+                  <p class="text-sm text-muted mb-3">数据中心桥接交换，实现配置同步</p>
+                  <ul class="text-xs text-muted space-y-1">
+                    <li>• 自动配置发现</li>
+                    <li>• 端到端同步</li>
+                    <li>• 简化部署管理</li>
+                  </ul>
+                </div>
+              </div>
+
+              <p class="text-xs text-muted mt-4">
+                数据来源：<a href="#ref-378" class="text-accent">[11]</a>
+                <a href="#ref-414" class="text-accent">[12]</a>
+              </p>
+            </div>
+
+            <!-- 拥塞控制机制 -->
+            <div class="grid lg:grid-cols-2 gap-8 mb-12">
+              <div class="bg-white p-8 rounded-xl shadow-sm">
+                <h3 class="font-serif text-xl font-bold text-secondary mb-6">显式拥塞通知（ECN）</h3>
+                <div class="space-y-4">
+                  <div class="flex items-start">
+                    <div class="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center mr-3 flex-shrink-0">
+                      <span class="text-xs font-bold text-yellow-600">1</span>
+                    </div>
+                    <div>
+                      <p class="font-medium text-sm">ECN能力协商</p>
+                      <p class="text-xs text-muted">通信双方协商启用ECN功能</p>
+                    </div>
+                  </div>
+                  <div class="flex items-start">
+                    <div class="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center mr-3 flex-shrink-0">
+                      <span class="text-xs font-bold text-yellow-600">2</span>
+                    </div>
+                    <div>
+                      <p class="font-medium text-sm">拥塞标记</p>
+                      <p class="text-xs text-muted">交换机将ECN字段修改为&#34;11&#34;</p>
+                    </div>
+                  </div>
+                  <div class="flex items-start">
+                    <div class="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center mr-3 flex-shrink-0">
+                      <span class="text-xs font-bold text-yellow-600">3</span>
+                    </div>
+                    <div>
+                      <p class="font-medium text-sm">CNP通知</p>
+                      <p class="text-xs text-muted">接收端向发送端发送拥塞通知包</p>
+                    </div>
+                  </div>
+                  <div class="flex items-start">
+                    <div class="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center mr-3 flex-shrink-0">
+                      <span class="text-xs font-bold text-yellow-600">4</span>
+                    </div>
+                    <div>
+                      <p class="font-medium text-sm">速率调整</p>
+                      <p class="text-xs text-muted">发送端启动拥塞控制算法降低速率</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="mt-6 p-4 bg-gray-50 rounded-lg">
+                  <h4 class="font-semibold text-secondary mb-2">ECN标记状态</h4>
+                  <div class="space-y-1 text-sm">
+                    <div class="flex justify-between">
+                      <span class="text-muted">00 - 不支持ECN</span>
+                      <span class="font-mono">00</span>
+                    </div>
+                    <div class="flex justify-between">
+                      <span class="text-muted">10 - 支持ECN</span>
+                      <span class="font-mono">10</span>
+                    </div>
+                    <div class="flex justify-between">
+                      <span class="text-muted">11 - 拥塞经历</span>
+                      <span class="font-mono">11</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="bg-primary/5 p-8 rounded-xl">
+                <h3 class="font-serif text-xl font-bold text-secondary mb-6">DCQCN算法</h3>
+                <div class="space-y-4">
+                  <div class="bg-white p-4 rounded-lg">
+                    <h4 class="font-semibold text-secondary mb-2">三大状态</h4>
+                    <div class="space-y-2 text-sm">
+                      <div class="flex items-center">
+                        <div class="w-3 h-3 bg-red-500 rounded-full mr-2"></div>
+                        <span>快速恢复 (Fast Recovery)</span>
+                      </div>
+                      <div class="flex items-center">
+                        <div class="w-3 h-3 bg-green-500 rounded-full mr-2"></div>
+                        <span>主动增加 (Active Increase)</span>
+                      </div>
+                      <div class="flex items-center">
+                        <div class="w-3 h-3 bg-blue-500 rounded-full mr-2"></div>
+                        <span>超主动增加 (Hyper Active Increase)</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="bg-white p-4 rounded-lg">
+                    <h4 class="font-semibold text-secondary mb-2">速率调整机制</h4>
+                    <div class="space-y-2 text-xs text-muted">
+                      <p>• 收到CNP：速率降至5/6</p>
+                      <p>• 无CNP：逐步增加探测带宽</p>
+                      <p>• 空闲状态：快速增加利用率</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 性能优化技术 -->
+            <div class="bg-white rounded-2xl p-8 shadow-sm">
+              <h3 class="font-serif text-2xl font-bold text-secondary mb-6">其他性能优化技术</h3>
+
+              <div class="grid md:grid-cols-2 gap-8">
+                <div>
+                  <h4 class="font-semibold text-secondary mb-4 flex items-center">
+                    <i class="fas fa-magic text-purple-500 mr-2"></i>
+                    零接触路由（ZTR）
+                  </h4>
+                  <div class="space-y-3">
+                    <p class="text-sm text-muted">
+                      通过自动化和智能化手段，实现网络设备的即插即用。自动发现网络拓扑，协商并下发DCB配置，大大简化RoCE网络部署过程。
+                    </p>
+                    <div class="bg-gray-50 p-3 rounded">
+                      <h5 class="font-medium text-sm mb-2">核心优势</h5>
+                      <ul class="text-xs text-muted space-y-1">
+                        <li>• 自动拓扑发现</li>
+                        <li>• 配置自动协商</li>
+                        <li>• 降低部署风险</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <h4 class="font-semibold text-secondary mb-4 flex items-center">
+                    <i class="fas fa-server text-blue-500 mr-2"></i>
+                    SR-IOV虚拟化支持
+                  </h4>
+                  <div class="space-y-3">
+                    <p class="text-sm text-muted">
+                      单根I/O虚拟化技术允许物理网卡虚拟化为多个独立的虚拟功能（VF），使虚拟机能够直接访问物理网卡的RDMA功能。
+                    </p>
+                    <div class="bg-gray-50 p-3 rounded">
+                      <h5 class="font-medium text-sm mb-2">技术特点</h5>
+                      <ul class="text-xs text-muted space-y-1">
+                        <li>• 绕过Hypervisor瓶颈</li>
+                        <li>• 虚拟机直接RDMA访问</li>
+                        <li>• 提升虚拟化网络性能</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <p class="text-xs text-muted mt-4">
+                数据来源：<a href="#ref-377" class="text-accent">[13]</a>
+                <a href="#ref-406" class="text-accent">[14]</a>
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 4: 应用场景 -->
+      <section id="section-4" class="section-anchor py-16 bg-white">
+        <div class="container mx-auto px-8">
+          <div class="max-w-6xl mx-auto">
+            <header class="text-center mb-12">
+              <h2 class="font-serif text-4xl font-bold text-primary mb-4">4. RoCE应用场景与部署案例</h2>
+              <p class="text-xl text-muted max-w-3xl mx-auto">
+                从高性能计算到金融交易，RoCE在各行业的实际应用
+              </p>
+            </header>
+
+            <!-- 主要应用领域 -->
+            <div class="grid lg:grid-cols-2 gap-8 mb-12">
+              <div class="bg-gradient-to-br from-blue-50 to-indigo-50 p-8 rounded-xl">
+                <div class="flex items-center mb-6">
+                  <div class="w-12 h-12 bg-blue-500 rounded-lg flex items-center justify-center mr-4">
+                    <i class="fas fa-microchip text-white text-xl"></i>
+                  </div>
+                  <h3 class="font-serif text-xl font-bold text-secondary">高性能计算（HPC）</h3>
+                </div>
+                <p class="text-sm text-muted mb-4">
+                  在HPC领域，RoCE技术被广泛应用于加速并行计算任务。气候模拟、分子动力学建模等应用通过RDMA实现节点间内存直接读写，将通信延迟降低至微秒级别。
+                </p>
+                <div class="space-y-2 text-sm">
+                  <div class="flex items-center">
+                    <i class="fas fa-check text-green-500 mr-2"></i>
+                    <span>WRF天气研究预报加速</span>
+                  </div>
+                  <div class="flex items-center">
+                    <i class="fas fa-check text-green-500 mr-2"></i>
+                    <span>LAMMPS分子动力学优化</span>
+                  </div>
+                  <div class="flex items-center">
+                    <i class="fas fa-check text-green-500 mr-2"></i>
+                    <span>并行计算时间显著缩短</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="bg-gradient-to-br from-green-50 to-emerald-50 p-8 rounded-xl">
+                <div class="flex items-center mb-6">
+                  <div class="w-12 h-12 bg-green-500 rounded-lg flex items-center justify-center mr-4">
+                    <i class="fas fa-cloud text-white text-xl"></i>
+                  </div>
+                  <h3 class="font-serif text-xl font-bold text-secondary">数据中心与云计算</h3>
+                </div>
+                <p class="text-sm text-muted mb-4">
+                  在现代数据中心，RoCE成为构建高性能低延迟网络的核心技术。AI大模型训练、分布式存储等场景下，RoCE将GPU集群间通信延迟压缩至2-5微秒。
+                </p>
+                <div class="space-y-2 text-sm">
+                  <div class="flex items-center">
+                    <i class="fas fa-check text-green-500 mr-2"></i>
+                    <span>AI大模型训练加速</span>
+                  </div>
+                  <div class="flex items-center">
+                    <i class="fas fa-check text-green-500 mr-2"></i>
+                    <span>NVMe over RoCE存储网络</span>
+                  </div>
+                  <div class="flex items-center">
+                    <i class="fas fa-check text-green-500 mr-2"></i>
+                    <span>容器化应用网络优化</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="bg-gradient-to-br from-red-50 to-pink-50 p-8 rounded-xl">
+                <div class="flex items-center mb-6">
+                  <div class="w-12 h-12 bg-red-500 rounded-lg flex items-center justify-center mr-4">
+                    <i class="fas fa-chart-line text-white text-xl"></i>
+                  </div>
+                  <h3 class="font-serif text-xl font-bold text-secondary">金融行业高频交易</h3>
+                </div>
+                <p class="text-sm text-muted mb-4">
+                  金融行业对网络延迟要求达到极致。RoCE凭借超低延迟特性，成为构建高频交易系统的理想选择，交易指令和市场数据以最快速度传输。
+                </p>
+                <div class="space-y-2 text-sm">
+                  <div class="flex items-center">
+                    <i class="fas fa-check text-green-500 mr-2"></i>
+                    <span>中国工商银行存储网络</span>
+                  </div>
+                  <div class="flex items-center">
+                    <i class="fas fa-check text-green-500 mr-2"></i>
+                    <span>中国银行核心系统</span>
+                  </div>
+                  <div class="flex items-center">
+                    <i class="fas fa-check text-green-500 mr-2"></i>
+                    <span>微秒级交易延迟</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="bg-gradient-to-br from-purple-50 to-violet-50 p-8 rounded-xl">
+                <div class="flex items-center mb-6">
+                  <div class="w-12 h-12 bg-purple-500 rounded-lg flex items-center justify-center mr-4">
+                    <i class="fas fa-database text-white text-xl"></i>
+                  </div>
+                  <h3 class="font-serif text-xl font-bold text-secondary">存储网络（NVMe over RoCE）</h3>
+                </div>
+                <p class="text-sm text-muted mb-4">
+                  NVMe over RoCE通过标准以太网基础设施，实现对远程NVMe SSD的低延迟、高带宽访问，为数据中心提供高性价比存储网络方案。
+                </p>
+                <div class="space-y-2 text-sm">
+                  <div class="flex items-center">
+                    <i class="fas fa-check text-green-500 mr-2"></i>
+                    <span>华为OceanStor存储支持</span>
+                  </div>
+                  <div class="flex items-center">
+                    <i class="fas fa-check text-green-500 mr-2"></i>
+                    <span>宏杉科技全闪存方案</span>
+                  </div>
+                  <div class="flex items-center">
+                    <i class="fas fa-check text-green-500 mr-2"></i>
+                    <span>FC SAN国产化替代</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 实际部署案例 -->
+            <div class="bg-gray-50 rounded-2xl p-8">
+              <h3 class="font-serif text-2xl font-bold text-secondary mb-8 text-center">实际部署案例分析</h3>
+
+              <div class="space-y-8">
+                <!-- 工商银行案例 -->
+                <div class="bg-white p-6 rounded-xl shadow-sm">
+                  <div class="flex items-start mb-4">
+                    <div class="w-12 h-12 bg-red-500 rounded-lg flex items-center justify-center mr-4 flex-shrink-0">
+                      <i class="fas fa-university text-white text-xl"></i>
+                    </div>
+                    <div>
+                      <h4 class="font-semibold text-secondary text-lg mb-2">中国工商银行高性能存储网络转型</h4>
+                      <p class="text-sm text-muted mb-4">
+                        工商银行率先启动高性能存储网络转型，选定NVMe over RoCE技术作为新一代存储网络技术路线，构建&#34;多地多中心&#34;高可用架构。
+                      </p>
+                    </div>
+                  </div>
+
+                  <div class="grid md:grid-cols-3 gap-4">
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                      <h5 class="font-medium text-sm text-secondary mb-2">技术收益</h5>
+                      <ul class="text-xs text-muted space-y-1">
+                        <li>• 摆脱专有FC网络依赖</li>
+                        <li>• 实现硬件解耦</li>
+                        <li>• 供应链多样化</li>
+                      </ul>
+                    </div>
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                      <h5 class="font-medium text-sm text-secondary mb-2">性能提升</h5>
+                      <ul class="text-xs text-muted space-y-1">
+                        <li>• 存储I/O性能大幅提升</li>
+                        <li>• 满足核心业务需求</li>
+                        <li>• 骨干网压力缓解</li>
+                      </ul>
+                    </div>
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                      <h5 class="font-medium text-sm text-secondary mb-2">成本效益</h5>
+                      <ul class="text-xs text-muted space-y-1">
+                        <li>• 总体拥有成本降低</li>
+                        <li>• 开源标准优势</li>
+                        <li>• 运维成本优化</li>
+                      </ul>
+                    </div>
+                  </div>
+
+                  <p class="text-xs text-muted mt-4">
+                    数据来源：<a href="#ref-295" class="text-accent">[15]</a>
+                  </p>
+                </div>
+
+                <!-- 中国移动案例 -->
+                <div class="bg-white p-6 rounded-xl shadow-sm">
+                  <div class="flex items-start mb-4">
+                    <div class="w-12 h-12 bg-blue-500 rounded-lg flex items-center justify-center mr-4 flex-shrink-0">
+                      <i class="fas fa-broadcast-tower text-white text-xl"></i>
+                    </div>
+                    <div>
+                      <h4 class="font-semibold text-secondary text-lg mb-2">中国移动数据中心应用</h4>
+                      <p class="text-sm text-muted mb-4">
+                        中国移动积极推进RoCE技术在数据中心和云计算基础设施中的应用，与合作伙伴共同推进以太无损网络测试方案的标准化工作。
+                      </p>
+                    </div>
+                  </div>
+
+                  <div class="grid md:grid-cols-2 gap-4">
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                      <h5 class="font-medium text-sm text-secondary mb-2">合作推进</h5>
+                      <ul class="text-xs text-muted space-y-1">
+                        <li>• 与是德科技合作测试</li>
+                        <li>• 提高测试效率和可靠性</li>
+                        <li>• 标准化测试方案</li>
+                      </ul>
+                    </div>
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                      <h5 class="font-medium text-sm text-secondary mb-2">技术目标</h5>
+                      <ul class="text-xs text-muted space-y-1">
+                        <li>• 400G端到端高性能网络</li>
+                        <li>• 智算中心网络建设</li>
+                        <li>• AI算力网络引擎</li>
+                      </ul>
+                    </div>
+                  </div>
+
+                  <p class="text-xs text-muted mt-4">
+                    数据来源：<a href="#ref-296" class="text-accent">[16]</a>
+                    <a href="#ref-297" class="text-accent">[17]</a>
+                  </p>
+                </div>
+
+                <!-- 信创应用案例 -->
+                <div class="bg-white p-6 rounded-xl shadow-sm">
+                  <div class="flex items-start mb-4">
+                    <div class="w-12 h-12 bg-green-500 rounded-lg flex items-center justify-center mr-4 flex-shrink-0">
+                      <i class="fas fa-flag text-white text-xl"></i>
+                    </div>
+                    <div>
+                      <h4 class="font-semibold text-secondary text-lg mb-2">信创领域的应用实践</h4>
+                      <p class="text-sm text-muted mb-4">
+                        在信创背景下，RoCE技术凭借开放性和标准以太网优势，成为实现网络基础设施国产化替代的重要技术路径。
+                      </p>
+                    </div>
+                  </div>
+
+                  <div class="grid md:grid-cols-3 gap-4">
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                      <h5 class="font-medium text-sm text-secondary mb-2">交换机层面</h5>
+                      <ul class="text-xs text-muted space-y-1">
+                        <li>• 华为、新华三成熟方案</li>
+                        <li>• 锐捷网络产品支持</li>
+                        <li>• 国产替代方案</li>
+                      </ul>
+                    </div>
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                      <h5 class="font-medium text-sm text-secondary mb-2">网卡层面</h5>
+                      <ul class="text-xs text-muted space-y-1">
+                        <li>• 华为自研网卡产品</li>
+                        <li>• 国际主流网卡接受</li>
+                        <li>• 信创场景应用</li>
+                      </ul>
+                    </div>
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                      <h5 class="font-medium text-sm text-secondary mb-2">存储层面</h5>
+                      <ul class="text-xs text-muted space-y-1">
+                        <li>• 华为OceanStor支持</li>
+                        <li>• 宏杉科技高端产品</li>
+                        <li>• NVMe over RoCE方案</li>
+                      </ul>
+                    </div>
+                  </div>
+
+                  <p class="text-xs text-muted mt-4">
+                    数据来源：<a href="#ref-304" class="text-accent">[18]</a>
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 5: 技术对比 -->
+      <section id="section-5" class="section-anchor py-16 bg-gray-50">
+        <div class="container mx-auto px-8">
+          <div class="max-w-6xl mx-auto">
+            <header class="text-center mb-12">
+              <h2 class="font-serif text-4xl font-bold text-primary mb-4">5. RoCE与其他RDMA技术对比</h2>
+              <p class="text-xl text-muted max-w-3xl mx-auto">
+                深度分析InfiniBand、RoCE、iWARP的技术差异与选型考量
+              </p>
+            </header>
+
+            <!-- RoCE vs InfiniBand -->
+            <div class="bg-white rounded-2xl p-8 mb-12 shadow-sm">
+              <h3 class="font-serif text-2xl font-bold text-secondary mb-8 flex items-center">
+                <i class="fas fa-balance-scale text-accent mr-3"></i>
+                RoCE vs InfiniBand
+              </h3>
+
+              <div class="grid lg:grid-cols-3 gap-8">
+                <div class="space-y-6">
+                  <div>
+                    <h4 class="font-semibold text-secondary mb-3 flex items-center">
+                      <i class="fas fa-layer-group text-blue-500 mr-2"></i>
+                      协议栈层级
+                    </h4>
+                    <div class="space-y-2 text-sm">
+                      <div class="flex items-center">
+                        <div class="w-3 h-3 bg-blue-500 rounded-full mr-2"></div>
+                        <span><strong>RoCE：</strong>基于标准以太网，融合InfiniBand传输层</span>
+                      </div>
+                      <div class="flex items-center">
+                        <div class="w-3 h-3 bg-green-500 rounded-full mr-2"></div>
+                        <span><strong>InfiniBand：</strong>专有协议栈，从物理层到传输层</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <h4 class="font-semibold text-secondary mb-3 flex items-center">
+                      <i class="fas fa-tachometer-alt text-red-500 mr-2"></i>
+                      性能差异
+                    </h4>
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                      <ul class="text-sm text-muted space-y-1">
+                        <li>• InfiniBand延迟和带宽略优于RoCE</li>
+                        <li>• RoCE v2性能已接近InfiniBand水平</li>
+                        <li>• 随着以太网技术进步，差距不断缩小</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="space-y-6">
+                  <div>
+                    <h4 class="font-semibold text-secondary mb-3 flex items-center">
+                      <i class="fas fa-dollar-sign text-yellow-500 mr-2"></i>
+                      成本与部署
+                    </h4>
+                    <div class="space-y-3">
+                      <div class="bg-red-50 p-3 rounded-lg">
+                        <h5 class="font-medium text-sm text-red-700 mb-1">InfiniBand</h5>
+                        <p class="text-xs text-red-600">专用硬件昂贵，运维成本高，需要独立建网</p>
+                      </div>
+                      <div class="bg-green-50 p-3 rounded-lg">
+                        <h5 class="font-medium text-sm text-green-700 mb-1">RoCE</h5>
+                        <p class="text-xs text-green-600">复用现有以太网，硬件成本低，部署简单</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <h4 class="font-semibold text-secondary mb-3 flex items-center">
+                      <i class="fas fa-network-wired text-purple-500 mr-2"></i>
+                      可扩展性
+                    </h4>
+                    <div class="text-sm text-muted">
+                      <p>RoCE v2支持三层路由，适用于大规模数据中心网络部署，而InfiniBand在超大规模HPC集群中具有优势。</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <img src="https://kimi-web-img.moonshot.cn/img/www.nvidia.cn/c86badaa124ee1b79104c972103a99d63a22a4a8.jpg" alt="InfiniBand与以太网设备实物对比照片" class="w-full h-48 object-cover rounded-lg mb-4" size="medium" aspect="wide" style="photo" query="InfiniBand 以太网 设备对比" referrerpolicy="no-referrer" data-modified="1" data-score="0.00"/>
+
+                  <div class="bg-gray-50 p-4 rounded-lg">
+                    <h4 class="font-semibold text-secondary mb-2">生态系统</h4>
+                    <div class="space-y-2 text-sm">
+                      <div class="flex justify-between">
+                        <span class="text-muted">InfiniBand</span>
+                        <span class="text-red-600 font-medium">相对封闭</span>
+                      </div>
+                      <div class="flex justify-between">
+                        <span class="text-muted">RoCE</span>
+                        <span class="text-green-600 font-medium">开放生态</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <p class="text-xs text-muted mt-4">
+                数据来源：<a href="#ref-289" class="text-accent">[19]</a>
+                <a href="#ref-302" class="text-accent">[20]</a>
+              </p>
+            </div>
+
+            <!-- RoCE vs iWARP -->
+            <div class="bg-white rounded-2xl p-8 mb-12 shadow-sm">
+              <h3 class="font-serif text-2xl font-bold text-secondary mb-8 flex items-center">
+                <i class="fas fa-exchange-alt text-accent mr-3"></i>
+                RoCE vs iWARP
+              </h3>
+
+              <div class="grid lg:grid-cols-2 gap-8">
+                <div>
+                  <h4 class="font-semibold text-secondary mb-4">协议栈与实现方式</h4>
+                  <div class="space-y-4">
+                    <div class="bg-blue-50 p-4 rounded-lg">
+                      <h5 class="font-medium text-blue-700 mb-2">RoCE v2</h5>
+                      <p class="text-sm text-blue-600 mb-2">基于UDP/IP协议栈</p>
+                      <ul class="text-xs text-blue-600 space-y-1">
+                        <li>• 绕过复杂TCP协议栈</li>
+                        <li>• 更低延迟和协议开销</li>
+                        <li>• 需要PFC/ECN保证无损</li>
+                      </ul>
+                    </div>
+
+                    <div class="bg-green-50 p-4 rounded-lg">
+                      <h5 class="font-medium text-green-700 mb-2">iWARP</h5>
+                      <p class="text-sm text-green-600 mb-2">基于TCP/IP协议栈</p>
+                      <ul class="text-xs text-green-600 space-y-1">
+                        <li>• 利用TCP可靠传输机制</li>
+                        <li>• 兼容现有IP网络</li>
+                        <li>• 适合广域网环境</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <h4 class="font-semibold text-secondary mb-4">性能与兼容性对比</h4>
+                  <div class="bg-gray-50 p-6 rounded-lg">
+                    <div class="space-y-4">
+                      <div>
+                        <h5 class="font-medium text-secondary mb-2">性能表现</h5>
+                        <div class="space-y-2 text-sm">
+                          <div class="flex items-center justify-between">
+                            <span class="text-muted">数据中心环境</span>
+                            <div class="flex items-center">
+                              <span class="text-blue-600 font-medium mr-2">RoCE优势</span>
+                              <div class="w-20 h-2 bg-gray-200 rounded-full overflow-hidden">
+                                <div class="w-4/5 h-full bg-blue-500"></div>
+                              </div>
+                            </div>
+                          </div>
+                          <div class="flex items-center justify-between">
+                            <span class="text-muted">广域网环境</span>
+                            <div class="flex items-center">
+                              <span class="text-green-600 font-medium mr-2">iWARP优势</span>
+                              <div class="w-20 h-2 bg-gray-200 rounded-full overflow-hidden">
+                                <div class="w-3/5 h-full bg-green-500"></div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div>
+                        <h5 class="font-medium text-secondary mb-2">兼容性</h5>
+                        <div class="text-sm text-muted">
+                          <p>iWARP基于标准TCP/IP，理论可部署在任何IP网络中。RoCE需要交换机支持DCB功能，但随着现代数据中心交换机对DCB的普遍支持，这一限制正在减弱。</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <p class="text-xs text-muted mt-4">
+                数据来源：<a href="#ref-142" class="text-accent">[21]</a>
+                <a href="#ref-133" class="text-accent">[22]</a>
+              </p>
+            </div>
+
+            <!-- 技术选型表 -->
+            <div class="bg-white rounded-2xl p-8 shadow-sm">
+              <h3 class="font-serif text-2xl font-bold text-secondary mb-8 text-center">RDMA技术选型决策矩阵</h3>
+
+              <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                  <thead>
+                    <tr class="border-b-2 border-gray-200">
+                      <th class="text-left py-3 px-4 font-semibold text-secondary">考量维度</th>
+                      <th class="text-center py-3 px-4 font-semibold text-secondary">InfiniBand</th>
+                      <th class="text-center py-3 px-4 font-semibold text-secondary">RoCE v2</th>
+                      <th class="text-center py-3 px-4 font-semibold text-secondary">iWARP</th>
+                    </tr>
+                  </thead>
+                  <tbody class="divide-y divide-gray-100">
+                    <tr>
+                      <td class="py-3 px-4 font-medium">性能</td>
+                      <td class="py-3 px-4 text-center">
+                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">最优</span>
+                      </td>
+                      <td class="py-3 px-4 text-center">
+                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">优秀</span>
+                      </td>
+                      <td class="py-3 px-4 text-center">
+                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">良好</span>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td class="py-3 px-4 font-medium">成本</td>
+                      <td class="py-3 px-4 text-center">
+                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">最高</span>
+                      </td>
+                      <td class="py-3 px-4 text-center">
+                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">中等</span>
+                      </td>
+                      <td class="py-3 px-4 text-center">
+                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">中等</span>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td class="py-3 px-4 font-medium">部署复杂度</td>
+                      <td class="py-3 px-4 text-center text-muted">高</td>
+                      <td class="py-3 px-4 text-center text-muted">中</td>
+                      <td class="py-3 px-4 text-center text-muted">低</td>
+                    </tr>
+                    <tr>
+                      <td class="py-3 px-4 font-medium">可扩展性</td>
+                      <td class="py-3 px-4 text-center text-muted">高</td>
+                      <td class="py-3 px-4 text-center text-muted">高</td>
+                      <td class="py-3 px-4 text-center text-muted">中</td>
+                    </tr>
+                    <tr>
+                      <td class="py-3 px-4 font-medium">生态系统</td>
+                      <td class="py-3 px-4 text-center text-muted">封闭</td>
+                      <td class="py-3 px-4 text-center text-muted">开放</td>
+                      <td class="py-3 px-4 text-center text-muted">较小</td>
+                    </tr>
+                    <tr>
+                      <td class="py-3 px-4 font-medium">适用场景</td>
+                      <td class="py-3 px-4 text-sm text-muted">超算中心、大型AI训练</td>
+                      <td class="py-3 px-4 text-sm text-muted">云数据中心、AI、存储</td>
+                      <td class="py-3 px-4 text-sm text-muted">广域网RDMA、企业应用</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <div class="mt-8 bg-gray-50 p-6 rounded-lg">
+                <h4 class="font-semibold text-secondary mb-4">技术选型建议</h4>
+                <div class="grid md:grid-cols-3 gap-4 text-sm">
+                  <div class="bg-green-50 p-4 rounded">
+                    <h5 class="font-medium text-green-700 mb-2">选择InfiniBand</h5>
+                    <p class="text-xs text-green-600">追求极致性能，预算充足，大型HPC或AI集群场景</p>
+                  </div>
+                  <div class="bg-blue-50 p-4 rounded">
+                    <h5 class="font-medium text-blue-700 mb-2">选择RoCE v2</h5>
+                    <p class="text-xs text-blue-600">希望在性能和成本间取得平衡，基于以太网的数据中心</p>
+                  </div>
+                  <div class="bg-yellow-50 p-4 rounded">
+                    <h5 class="font-medium text-yellow-700 mb-2">选择iWARP</h5>
+                    <p class="text-xs text-yellow-600">需要利用现有IP网络长距离通信，部署简单性要求高</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 6: 市场趋势 -->
+      <section id="section-6" class="section-anchor py-16 bg-white">
+        <div class="container mx-auto px-8">
+          <div class="max-w-6xl mx-auto">
+            <header class="text-center mb-12">
+              <h2 class="font-serif text-4xl font-bold text-primary mb-4">6. RoCE市场趋势与主要厂商方案</h2>
+              <p class="text-xl text-muted max-w-3xl mx-auto">
+                全球市场增长预测、中国本土发展及生态系统建设
+              </p>
+            </header>
+
+            <!-- 全球市场趋势 -->
+            <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-8 mb-12">
+              <h3 class="font-serif text-2xl font-bold text-secondary mb-6">全球市场增长预测</h3>
+
+              <div class="grid lg:grid-cols-3 gap-8">
+                <div class="bg-white p-6 rounded-xl shadow-sm">
+                  <div class="flex items-center mb-4">
+                    <div class="w-12 h-12 bg-blue-500 rounded-lg flex items-center justify-center mr-4">
+                      <i class="fas fa-chart-line text-white text-xl"></i>
+                    </div>
+                    <h4 class="font-semibold text-secondary">市场规模</h4>
+                  </div>
+                  <div class="text-3xl font-bold text-blue-600 mb-2">1000亿美元+</div>
+                  <p class="text-sm text-muted">2025-2029年AI后端网络交换机支出预测</p>
+                  <p class="text-xs text-muted mt-2">数据来源：<a href="#ref-289" class="text-accent">[19]</a>
+                  </p>
+                </div>
+
+                <div class="bg-white p-6 rounded-xl shadow-sm">
+                  <div class="flex items-center mb-4">
+                    <div class="w-12 h-12 bg-green-500 rounded-lg flex items-center justify-center mr-4">
+                      <i class="fas fa-trophy text-white text-xl"></i>
+                    </div>
+                    <h4 class="font-semibold text-secondary">技术趋势</h4>
+                  </div>
+                  <div class="text-2xl font-bold text-green-600 mb-2">2027年</div>
+                  <p class="text-sm text-muted">以太网将超越InfiniBand成为AI网络主流</p>
+                  <p class="text-xs text-muted mt-2">数据来源：<a href="#ref-289" class="text-accent">[19]</a>
+                  </p>
+                </div>
+
+                <div class="bg-white p-6 rounded-xl shadow-sm">
+                  <div class="flex items-center mb-4">
+                    <div class="w-12 h-12 bg-purple-500 rounded-lg flex items-center justify-center mr-4">
+                      <i class="fas fa-users text-white text-xl"></i>
+                    </div>
+                    <h4 class="font-semibold text-secondary">生态联盟</h4>
+                  </div>
+                  <div class="text-lg font-bold text-purple-600 mb-2">UEC</div>
+                  <p class="text-sm text-muted">超以太网联盟推动高性能以太网解决方案</p>
+                  <p class="text-xs text-muted mt-2">数据来源：<a href="#ref-315" class="text-accent">[23]</a>
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <!-- 中国市场发展 -->
+            <div class="bg-gray-50 rounded-2xl p-8 mb-12">
+              <h3 class="font-serif text-2xl font-bold text-secondary mb-6">中国市场发展动态</h3>
+
+              <div class="grid lg:grid-cols-2 gap-8">
+                <div>
+                  <h4 class="font-semibold text-secondary mb-4">市场需求驱动因素</h4>
+                  <div class="space-y-4">
+                    <div class="flex items-start">
+                      <div class="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center mr-3 flex-shrink-0">
+                        <i class="fas fa-brain text-red-600 text-sm"></i>
+                      </div>
+                      <div>
+                        <p class="font-medium text-sm">AI大模型发展</p>
+                        <p class="text-xs text-muted">高性能计算集群需求激增</p>
+                      </div>
+                    </div>
+                    <div class="flex items-start">
+                      <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center mr-3 flex-shrink-0">
+                        <i class="fas fa-cloud text-blue-600 text-sm"></i>
+                      </div>
+                      <div>
+                        <p class="font-medium text-sm">云基础设施投资</p>
+                        <p class="text-xs text-muted">BAT持续加大AI基础设施投入</p>
+                      </div>
+                    </div>
+                    <div class="flex items-start">
+                      <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center mr-3 flex-shrink-0">
+                        <i class="fas fa-shield-alt text-green-600 text-sm"></i>
+                      </div>
+                      <div>
+                        <p class="font-medium text-sm">信创政策推动</p>
+                        <p class="text-xs text-muted">国产化替代需求强烈</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <h4 class="font-semibold text-secondary mb-4">运营商集采情况</h4>
+                  <div class="bg-white p-6 rounded-lg shadow-sm">
+                    <div class="mb-4">
+                      <div class="flex items-center mb-2">
+                        <div class="w-3 h-3 bg-red-500 rounded-full mr-2"></div>
+                        <span class="font-medium text-sm">中国联通2024年集采</span>
+                      </div>
+                      <div class="flex justify-between items-center text-sm">
+                        <span class="text-muted">688台RoCE交换机</span>
+                        <span class="font-bold text-red-600">20亿元</span>
+                      </div>
+                    </div>
+
+                    <div class="space-y-2">
+                      <div class="flex justify-between text-sm">
+                        <span class="text-muted">中国移动</span>
+                        <span class="text-green-600 font-medium">大规模AI服务器集采</span>
+                      </div>
+                      <div class="flex justify-between text-sm">
+                        <span class="text-muted">中国电信</span>
+                        <span class="text-green-600 font-medium">AI基础设施投资</span>
+                      </div>
+                    </div>
+
+                    <p class="text-xs text-muted mt-4">
+                      数据来源：<a href="#ref-290" class="text-accent">[24]</a>
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 主要厂商方案 -->
+            <div class="space-y-8 mb-12">
+              <!-- 全球厂商 -->
+              <div class="bg-white rounded-2xl p-8 shadow-sm">
+                <h3 class="font-serif text-2xl font-bold text-secondary mb-6">全球主要厂商</h3>
+
+                <div class="grid lg:grid-cols-3 gap-6">
+                  <!-- NVIDIA -->
+                  <div class="border rounded-lg p-6 hover:shadow-md transition-shadow">
+                    <div class="flex items-center mb-4">
+                      <div class="w-12 h-12 bg-green-500 rounded-lg flex items-center justify-center mr-4">
+                        <i class="fas fa-microchip text-white text-xl"></i>
+                      </div>
+                      <div>
+                        <h4 class="font-semibold text-secondary">NVIDIA (Mellanox)</h4>
+                        <p class="text-xs text-muted">市场领导者</p>
+                      </div>
+                    </div>
+                    <div class="space-y-2 text-sm">
+                      <p class="text-muted">• ConnectX系列网卡</p>
+                      <p class="text-muted">• Spectrum交换机系列</p>
+                      <p class="text-muted">• DOCA软件框架</p>
+                      <p class="text-muted">• 25G-400G全覆盖</p>
+                    </div>
+                  </div>
+
+                  <!-- Intel -->
+                  <div class="border rounded-lg p-6 hover:shadow-md transition-shadow">
+                    <div class="flex items-center mb-4">
+                      <div class="w-12 h-12 bg-blue-500 rounded-lg flex items-center justify-center mr-4">
+                        <i class="fas fa-cpu text-white text-xl"></i>
+                      </div>
+                      <div>
+                        <h4 class="font-semibold text-secondary">Intel</h4>
+                        <p class="text-xs text-muted">生态整合专家</p>
+                      </div>
+                    </div>
+                    <div class="space-y-2 text-sm">
+                      <p class="text-muted">• E810系列网卡</p>
+                      <p class="text-muted">• 原生RoCE v2支持</p>
+                      <p class="text-muted">• CPU/芯片组深度集成</p>
+                      <p class="text-muted">• DPDK/SPDK支持</p>
+                    </div>
+                  </div>
+
+                  <!-- Broadcom -->
+                  <div class="border rounded-lg p-6 hover:shadow-md transition-shadow">
+                    <div class="flex items-center mb-4">
+                      <div class="w-12 h-12 bg-purple-500 rounded-lg flex items-center justify-center mr-4">
+                        <i class="fas fa-network-wired text-white text-xl"></i>
+                      </div>
+                      <div>
+                        <h4 class="font-semibold text-secondary">Broadcom</h4>
+                        <p class="text-xs text-muted">芯片设计专家</p>
+                      </div>
+                    </div>
+                    <div class="space-y-2 text-sm">
+                      <p class="text-muted">• 400GbE单端口方案</p>
+                      <p class="text-muted">• N1400GD适配器</p>
+                      <p class="text-muted">• P1400GD网卡</p>
+                      <p class="text-muted">• 第四代RoCE技术</p>
+                    </div>
+                  </div>
+                </div>
+
+                <p class="text-xs text-muted mt-4">
+                  数据来源：<a href="#ref-315" class="text-accent">[23]</a>
+                </p>
+              </div>
+
+              <!-- 中国厂商 -->
+              <div class="bg-gray-50 rounded-2xl p-8">
+                <h3 class="font-serif text-2xl font-bold text-secondary mb-6">中国主要厂商</h3>
+
+                <div class="grid lg:grid-cols-3 gap-6">
+                  <!-- 华为 -->
+                  <div class="bg-white p-6 rounded-lg shadow-sm">
+                    <div class="flex items-center mb-4">
+                      <div class="w-12 h-12 bg-red-600 rounded-lg flex items-center justify-center mr-4">
+                        <i class="fas fa-network-wired text-white text-xl"></i>
+                      </div>
+                      <div>
+                        <h4 class="font-semibold text-secondary">华为</h4>
+                        <p class="text-xs text-muted">中国RoCE市场领导者</p>
+                      </div>
+                    </div>
+                    <div class="space-y-2 text-sm">
+                      <p class="text-muted">• CloudEngine交换机</p>
+                      <p class="text-muted">• 智能无损网络解决方案</p>
+                      <p class="text-muted">• 昇腾AI芯片集成</p>
+                      <p class="text-muted">• OceanStor存储支持</p>
+                    </div>
+                  </div>
+
+                  <!-- 新华三 -->
+                  <div class="bg-white p-6 rounded-lg shadow-sm">
+                    <div class="flex items-center mb-4">
+                      <div class="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center mr-4">
+                        <i class="fas fa-server text-white text-xl"></i>
+                      </div>
+                      <div>
+                        <h4 class="font-semibold text-secondary">新华三(H3C)</h4>
+                        <p class="text-xs text-muted">传统网络设备巨头</p>
+                      </div>
+                    </div>
+                    <div class="space-y-2 text-sm">
+                      <p class="text-muted">• S12500核心交换机</p>
+                      <p class="text-muted">• S6800接入交换机</p>
+                      <p class="text-muted">• 智能无损网络方案</p>
+                      <p class="text-muted">• 广泛行业应用</p>
+                    </div>
+                  </div>
+
+                  <!-- 新兴厂商 -->
+                  <div class="bg-white p-6 rounded-lg shadow-sm">
+                    <div class="flex items-center mb-4">
+                      <div class="w-12 h-12 bg-green-600 rounded-lg flex items-center justify-center mr-4">
+                        <i class="fas fa-rocket text-white text-xl"></i>
+                      </div>
+                      <div>
+                        <h4 class="font-semibold text-secondary">云脉芯联</h4>
+                        <p class="text-xs text-muted">新兴RDMA专业厂商</p>
+                      </div>
+                    </div>
+                    <div class="space-y-2 text-sm">
+                      <p class="text-muted">• metaConnect智能网卡</p>
+                      <p class="text-muted">• metaScale系列方案</p>
+                      <p class="text-muted">• 多路径负载均衡</p>
+                      <p class="text-muted">• 可编程拥塞控制</p>
+                    </div>
+                  </div>
+                </div>
+
+                <p class="text-xs text-muted mt-4">
+                  数据来源：<a href="#ref-292" class="text-accent">[25]</a>
+                  <a href="#ref-308" class="text-accent">[26]</a>
+                </p>
+              </div>
+            </div>
+
+            <!-- 生态系统与标准化 -->
+            <div class="bg-white rounded-2xl p-8 shadow-sm">
+              <h3 class="font-serif text-2xl font-bold text-secondary mb-6">生态系统与标准化进展</h3>
+
+              <div class="grid lg:grid-cols-3 gap-8">
+                <div class="text-center">
+                  <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-certificate text-blue-600 text-xl"></i>
+                  </div>
+                  <h4 class="font-semibold text-secondary mb-3">标准组织</h4>
+                  <div class="text-sm text-muted space-y-1">
+                    <p>• IBTA定义RoCE标准</p>
+                    <p>• IEEE推动PFC/ECN</p>
+                    <p>• IETF相关协议标准</p>
+                  </div>
+                </div>
+
+                <div class="text-center">
+                  <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-code text-green-600 text-xl"></i>
+                  </div>
+                  <h4 class="font-semibold text-secondary mb-3">开源社区</h4>
+                  <div class="text-sm text-muted space-y-1">
+                    <p>• Linux原生支持</p>
+                    <p>• DPDK/SPDK支持</p>
+                    <p>• 丰富驱动和工具</p>
+                  </div>
+                </div>
+
+                <div class="text-center">
+                  <div class="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-industry text-purple-600 text-xl"></i>
+                  </div>
+                  <h4 class="font-semibold text-secondary mb-3">产业链</h4>
+                  <div class="text-sm text-muted space-y-1">
+                    <p>• 芯片到软件全覆盖</p>
+                    <p>• 厂商紧密合作</p>
+                    <p>• 完整产业生态</p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="mt-8 bg-gray-50 p-6 rounded-lg">
+                <h4 class="font-semibold text-secondary mb-4">超以太网联盟（UEC）作用</h4>
+                <p class="text-sm text-muted mb-4">
+                  UEC汇聚了全球顶尖科技公司，致力于构建面向HPC和AI计算的高性能传输层协议，RoCE是其重要技术基础。NVIDIA、Broadcom、Intel等巨头共同参与，加速了RoCE生态系统的发展。
+                </p>
+                <div class="flex flex-wrap gap-2">
+                  <span class="px-3 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">NVIDIA</span>
+                  <span class="px-3 py-1 bg-green-100 text-green-800 text-xs rounded-full">Broadcom</span>
+                  <span class="px-3 py-1 bg-purple-100 text-purple-800 text-xs rounded-full">Intel</span>
+                  <span class="px-3 py-1 bg-red-100 text-red-800 text-xs rounded-full">Meta</span>
+                  <span class="px-3 py-1 bg-yellow-100 text-yellow-800 text-xs rounded-full">Microsoft</span>
+                </div>
+              </div>
+
+              <p class="text-xs text-muted mt-4">
+                数据来源：<a href="#ref-315" class="text-accent">[23]</a>
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Footer with References -->
+      <footer class="bg-secondary text-white py-16">
+        <div class="container mx-auto px-8">
+          <div class="max-w-4xl mx-auto">
+            <h3 class="font-serif text-2xl font-bold mb-8">参考文献</h3>
+            <div class="grid md:grid-cols-2 gap-6 text-sm">
+              <div class="space-y-3">
+                <div id="ref-398" class="flex">
+                  <span class="font-mono text-accent mr-3">[1]</span>
+                  <a href="https://support.huawei.com/enterprise/en/doc/EDOC1100468604/5d4312fb/intelligent-traffic-analysis-for-rocev2-flows" class="hover:text-accent transition-colors">Intelligent Traffic Analysis for RoCEv2 Flows - Huawei</a>
+                </div>
+                <div id="ref-353" class="flex">
+                  <span class="font-mono text-accent mr-3">[2]</span>
+                  <a href="https://www.dyxnet.com/hk/wp-content/uploads/sites/2/2025/08/2025AI%E7%BD%91%E7%BB%9C%E6%8A%80%E6%9C%AF%E7%99%BD%E7%9A%AE%E4%B9%A6.pdf" class="hover:text-accent transition-colors">2025 AI Network Technology White Paper - DYXnet</a>
+                </div>
+                <div id="ref-317" class="flex">
+                  <span class="font-mono text-accent mr-3">[3]</span>
+                  <a href="https://www.cnblogs.com/sddai/p/19062846" class="hover:text-accent transition-colors">Technical Comparison of RDMA Technologies - CNBlogs</a>
+                </div>
+                <div id="ref-319" class="flex">
+                  <span class="font-mono text-accent mr-3">[4]</span>
+                  <a href="https://www.h3c.com/cn/Service/Document_Software/Document_Center/Home/Public/00-Public/Learn_Technologies/Technical_Topics/H3C_RoCE-19790/" class="hover:text-accent transition-colors">H3C RoCE Technical Topics</a>
+                </div>
+                <div id="ref-345" class="flex">
+                  <span class="font-mono text-accent mr-3">[5]</span>
+                  <a href="https://support.huawei.com/enterprise/zh/doc/EDOC1100203347" class="hover:text-accent transition-colors">Huawei Technical Documentation</a>
+                </div>
+                <div id="ref-343" class="flex">
+                  <span class="font-mono text-accent mr-3">[6]</span>
+                  <a href="https://crad.ict.ac.cn/article/doi/10.7544/issn1000-1239.202331036?viewType=HTML" class="hover:text-accent transition-colors">Computer Research and Development Journal</a>
+                </div>
+                <div id="ref-352" class="flex">
+                  <span class="font-mono text-accent mr-3">[7]</span>
+                  <a href="https://patents.google.com/patent/CN107113298A/zh" class="hover:text-accent transition-colors">CN107113298A - Google Patents</a>
+                </div>
+                <div id="ref-398-ref" class="flex">
+                  <span class="font-mono text-accent mr-3">[8]</span>
+                  <a href="https://support.huawei.com/enterprise/en/doc/EDOC1100468604" class="hover:text-accent transition-colors">Huawei Enterprise Support</a>
+                </div>
+                <div id="ref-354" class="flex">
+                  <span class="font-mono text-accent mr-3">[9]</span>
+                  <a href="https://www.h3c.com/cn/Service/Document_Software/Document_Center/Home/Public/00-Public/Learn_Technologies/Technical_Topics/H3C_RoCE-19790/" class="hover:text-accent transition-colors">H3C Technical Documentation</a>
+                </div>
+                <div id="ref-363" class="flex">
+                  <span class="font-mono text-accent mr-3">[10]</span>
+                  <a href="https://asterfusion.com/a20241107-roce1/" class="hover:text-accent transition-colors">Asterfusion Technical Blog</a>
+                </div>
+                <div id="ref-378" class="flex">
+                  <span class="font-mono text-accent mr-3">[11]</span>
+                  <a href="https://zhuanlan.zhihu.com/p/1941586444188639621" class="hover:text-accent transition-colors">DCB Technology Analysis - Zhihu</a>
+                </div>
+                <div id="ref-414" class="flex">
+                  <span class="font-mono text-accent mr-3">[12]</span>
+                  <a href="https://higherlogicdownload.s3.amazonaws.com/HPE/MigratedAttachments/B7D5EBDE-1C7F-4F78-84E7-9C0D19DE9E95-2-HPE%20FlexFabric%20RDMA%20VRD.pdf" class="hover:text-accent transition-colors">HPE FlexFabric RDMA VRD</a>
+                </div>
+                <div id="ref-377" class="flex">
+                  <span class="font-mono text-accent mr-3">[13]</span>
+                  <a href="https://crad.ict.ac.cn/article/cstr/32373.14.issn1000-1239.202440623" class="hover:text-accent transition-colors">Computer Research and Development</a>
+                </div>
+                <div id="ref-406" class="flex">
+                  <span class="font-mono text-accent mr-3">[14]</span>
+                  <a href="https://cloudswit.ch/blogs/roce-or-infiniband-technical-comparison-2/" class="hover:text-accent transition-colors">CloudSwitch Technical Comparison</a>
+                </div>
+              </div>
+              <div class="space-y-3">
+                <div id="ref-295" class="flex">
+                  <span class="font-mono text-accent mr-3">[15]</span>
+                  <a href="https://zhuanlan.zhihu.com/p/673038994" class="hover:text-accent transition-colors">Industrial Bank Storage Network Transformation - Zhihu</a>
+                </div>
+                <div id="ref-296" class="flex">
+                  <span class="font-mono text-accent mr-3">[16]</span>
+                  <a href="http://www.iccsz.com/4g/news.Asp?ID=e473d239ce2f4550a6dc72249b217832" class="hover:text-accent transition-colors">China Mobile RoCE Testing - ICCSZ</a>
+                </div>
+                <div id="ref-297" class="flex">
+                  <span class="font-mono text-accent mr-3">[17]</span>
+                  <a href="https://www.zte.com.cn/china/solutions_latest/computing_infrastructure/cloudnetwork.html" class="hover:text-accent transition-colors">ZTE Intelligent Computing Network</a>
+                </div>
+                <div id="ref-304" class="flex">
+                  <span class="font-mono text-accent mr-3">[18]</span>
+                  <a href="https://m.c114.com.cn/w212-1228642.html" class="hover:text-accent transition-colors">China Mobile Storage Solution - C114</a>
+                </div>
+                <div id="ref-289" class="flex">
+                  <span class="font-mono text-accent mr-3">[19]</span>
+                  <a href="https://www.eet-china.com/mp/a416915.html" class="hover:text-accent transition-colors">EET China Market Analysis</a>
+                </div>
+                <div id="ref-302" class="flex">
+                  <span class="font-mono text-accent mr-3">[20]</span>
+                  <a href="https://www.eet-china.com/mp/a241223.html" class="hover:text-accent transition-colors">EET China Technical Comparison</a>
+                </div>
+                <div id="ref-142" class="flex">
+                  <span class="font-mono text-accent mr-3">[21]</span>
+                  <a href="https://www.fs.com/blog/a-quick-look-at-the-differences-rdma-vs-tcpip-2945.html" class="hover:text-accent transition-colors">FS.com RDMA vs TCP/IP</a>
+                </div>
+                <div id="ref-133" class="flex">
+                  <span class="font-mono text-accent mr-3">[22]</span>
+                  <a href="https://techdocs.broadcom.com/us/en/storage-and-ethernet-connectivity/ethernet-nic-controllers/bcm957xxx/adapters/RDMA-over-Converged-Ethernet/rdma-over-converged-ethernet--roce--in-linux/advanced-network-configuration/congestion-control1.html" class="hover:text-accent transition-colors">Broadcom Congestion Control</a>
+                </div>
+                <div id="ref-315" class="flex">
+                  <span class="font-mono text-accent mr-3">[23]</span>
+                  <a href="https://pdf.dfcfw.com/pdf/H3_AP202406201636703137_1.pdf" class="hover:text-accent transition-colors">UEC Alliance Document</a>
+                </div>
+                <div id="ref-292" class="flex">
+                  <span class="font-mono text-accent mr-3">[24]</span>
+                  <a href="https://view.inews.qq.com/a/20230911A01UQ000" class="hover:text-accent transition-colors">Huawei AI Chip Report</a>
+                </div>
+                <div id="ref-290" class="flex">
+                  <span class="font-mono text-accent mr-3">[25]</span>
+                  <a href="https://finance.sina.com.cn/roll/2024-12-23/doc-ineamaiy9617505.shtml" class="hover:text-accent transition-colors">China Unicom Procurement News</a>
+                </div>
+                <div id="ref-308" class="flex">
+                  <span class="font-mono text-accent mr-3">[26]</span>
+                  <a href="https://www.eet-china.com/news/202508139075.html" class="hover:text-accent transition-colors">EET China YunMaiXinLian</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </footer>
+    </div>
+
+    <!-- Smooth Scrolling Script -->
+    <script>
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    const tocHeight = document.querySelector('.toc-fixed').offsetHeight;
+                    const targetPosition = target.offsetTop - 20;
+                    window.scrollTo({
+                        top: targetPosition,
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+
+        // Highlight active section in TOC
+        window.addEventListener('scroll', () => {
+            const sections = document.querySelectorAll('.section-anchor');
+            const navLinks = document.querySelectorAll('.toc-fixed a[href^="#"]');
+            
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop - 100;
+                if (window.pageYOffset >= sectionTop) {
+                    current = section.getAttribute('id');
+                }
+            });
+
+            navLinks.forEach(link => {
+                link.classList.remove('text-primary', 'font-semibold');
+                link.classList.add('text-muted');
+                if (link.getAttribute('href') === `#${current}`) {
+                    link.classList.remove('text-muted');
+                    link.classList.add('text-primary', 'font-semibold');
+                }
+            });
+        });
+    </script>
+  
+
+</body></html>
