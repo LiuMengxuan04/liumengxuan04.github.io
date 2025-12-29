@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RoCE v1 NS-3 仿真改造实战指南</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-cpp.min.js"></script>
+    <style>
+        body { font-family: 'Inter', system-ui, -apple-system, sans-serif; }
+        .code-block { position: relative; }
+        .step-number { 
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800">
+
+    <!-- Navigation -->
+    <nav class="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-200 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16 items-center">
+                <div class="flex items-center gap-2">
+                    <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.384-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path></svg>
+                    <span class="font-bold text-xl text-slate-900">RoCE v1 仿真实验室</span>
+                </div>
+                <div class="hidden md:flex space-x-8 text-sm font-medium">
+                    <a href="#architecture" class="text-slate-600 hover:text-blue-600 transition">架构剖析</a>
+                    <a href="#implementation" class="text-slate-600 hover:text-blue-600 transition">改造实战</a>
+                    <a href="#mapping" class="text-slate-600 hover:text-blue-600 transition">协议映射</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Header -->
+    <header class="bg-white border-b border-slate-200 py-16">
+        <div class="max-w-4xl mx-auto px-4 text-center">
+            <h1 class="text-4xl font-extrabold tracking-tight text-slate-900 sm:text-5xl mb-4">
+                从 UDP 到 Raw Ethernet
+            </h1>
+            <p class="text-xl text-slate-500 mb-8">
+                基于 <code class="bg-slate-100 px-2 py-1 rounded text-sm font-mono text-pink-600">ns3-rdma</code> 开源项目的 RoCE v1 版本改造全景指南
+            </p>
+            <div class="flex justify-center gap-4">
+                <a href="#implementation" class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700">
+                    开始代码改造
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-24">
+
+        <!-- Part 3: Architecture Analysis -->
+        <section id="architecture" class="scroll-mt-24">
+            <div class="border-l-4 border-blue-600 pl-6 mb-10">
+                <h2 class="text-3xl font-bold text-slate-900">1. 架构深度剖析</h2>
+                <p class="mt-2 text-lg text-slate-600">理解 v2 (现有代码) 与 v1 (目标代码) 在协议栈层面的本质区别。</p>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-12">
+                <!-- V2 Current State -->
+                <div class="bg-white rounded-2xl shadow-lg border border-slate-100 overflow-hidden">
+                    <div class="bg-slate-50 px-6 py-4 border-b border-slate-100 flex justify-between items-center">
+                        <h3 class="font-semibold text-slate-700">现状: ns3-rdma (v2)</h3>
+                        <span class="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs font-bold rounded-full">基于 IP 路由</span>
+                    </div>
+                    <div class="p-6 space-y-4">
+                        <div class="space-y-2">
+                            <div class="flex items-center p-3 bg-indigo-50 rounded-lg border border-indigo-100">
+                                <span class="w-20 font-mono text-xs text-indigo-600 font-bold">L4 Trans</span>
+                                <span class="text-sm font-medium text-slate-700">UDP Header (Port 4791)</span>
+                            </div>
+                            <div class="flex items-center p-3 bg-indigo-50 rounded-lg border border-indigo-100">
+                                <span class="w-20 font-mono text-xs text-indigo-600 font-bold">L3 Network</span>
+                                <span class="text-sm font-medium text-slate-700">IP Header (ECN, DSCP)</span>
+                            </div>
+                            <div class="flex items-center p-3 bg-gray-50 rounded-lg border border-gray-200">
+                                <span class="w-20 font-mono text-xs text-gray-500 font-bold">L2 Link</span>
+                                <span class="text-sm font-medium text-slate-600">Ethernet (Type 0x0800 IPv4)</span>
+                            </div>
+                        </div>
+                        <div class="mt-4 p-4 bg-red-50 text-red-700 text-sm rounded-lg border border-red-100">
+                            <strong>问题点：</strong> RoCE v1 不应该有 UDP 和 IP 头部。现有代码依赖 IP 头中的 DSCP 做流控，依赖 ECN 做拥塞控制。
+                        </div>
+                    </div>
+                </div>
+
+                <!-- V1 Target State -->
+                <div class="bg-white rounded-2xl shadow-lg border border-slate-100 overflow-hidden">
+                    <div class="bg-slate-50 px-6 py-4 border-b border-slate-100 flex justify-between items-center">
+                        <h3 class="font-semibold text-slate-700">目标: RoCE v1 改造版</h3>
+                        <span class="px-2 py-1 bg-green-100 text-green-800 text-xs font-bold rounded-full">纯以太网</span>
+                    </div>
+                    <div class="p-6 space-y-4">
+                        <div class="space-y-2">
+                            <!-- Custom Headers -->
+                            <div class="flex items-center p-3 bg-green-50 rounded-lg border border-green-100 ring-2 ring-green-400 ring-offset-2">
+                                <span class="w-20 font-mono text-xs text-green-600 font-bold">Custom</span>
+                                <span class="text-sm font-medium text-slate-700">IB BTH Header</span>
+                            </div>
+                            <div class="flex items-center p-3 bg-green-50 rounded-lg border border-green-100 ring-2 ring-green-400 ring-offset-2">
+                                <span class="w-20 font-mono text-xs text-green-600 font-bold">Custom</span>
+                                <span class="text-sm font-medium text-slate-700">IB GRH Header</span>
+                            </div>
+                            <!-- L2 Link -->
+                            <div class="flex items-center p-3 bg-gray-50 rounded-lg border border-gray-200">
+                                <span class="w-20 font-mono text-xs text-gray-500 font-bold">L2 Link</span>
+                                <span class="text-sm font-medium text-slate-600">Ethernet (Type <strong class="text-blue-600">0x8915</strong>)</span>
+                            </div>
+                        </div>
+                        <div class="mt-4 p-4 bg-blue-50 text-blue-700 text-sm rounded-lg border border-blue-100">
+                            <strong>改造核心：</strong> 移除 IP/UDP 层，手动构建 GRH/BTH，直接操作 MAC 层。
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Part 4: Implementation Guide -->
+        <section id="implementation" class="scroll-mt-24">
+            <div class="border-l-4 border-purple-600 pl-6 mb-10">
+                <h2 class="text-3xl font-bold text-slate-900">2. 改造实战指南 (大致方案，未校验)</h2>
+                <p class="mt-2 text-lg text-slate-600">从应用层到物理层的具体 C++ 代码修改步骤。</p>
+            </div>
+
+            <!-- Step 1: Socket -->
+            <div class="mb-16">
+                <div class="flex items-center mb-6">
+                    <div class="flex-shrink-0 h-10 w-10 flex items-center justify-center rounded-full bg-purple-100 text-purple-600 font-bold text-xl mr-4">1</div>
+                    <h3 class="text-2xl font-bold text-slate-800">重构 Socket 通信机制</h3>
+                </div>
+                <p class="mb-4 text-slate-600">RoCE v1 不使用 IP 寻址，因此必须放弃 <code class="text-sm bg-slate-100 px-1 py-0.5 rounded">UdpSocketFactory</code>，转而使用 ns-3 提供的 <code class="text-sm bg-slate-100 px-1 py-0.5 rounded">PacketSocketFactory</code> 直接操作链路层。</p>
+
+                <div class="grid lg:grid-cols-2 gap-6">
+                    <div>
+                        <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">原始代码 (v2 - udp-echo-client.cc)</div>
+                        <pre><code class="language-cpp">// 典型的 UDP Socket
+TypeId tid = TypeId::LookupByName ("ns3::UdpSocketFactory");
+m_socket = Socket::CreateSocket (GetNode (), tid);
+m_socket->Bind ();
+// 使用 IP 地址连接
+m_socket->Connect (InetSocketAddress (m_peerAddress, m_peerPort));</code></pre>
+                    </div>
+                    <div>
+                        <div class="text-xs font-semibold text-purple-600 uppercase tracking-wider mb-2">修改后 (v1 - roce-client.cc)</div>
+                        <pre><code class="language-cpp">#include "ns3/packet-socket-factory.h"
+
+// 1. 切换到 PacketSocket
+TypeId tid = TypeId::LookupByName ("ns3::PacketSocketFactory");
+m_socket = Socket::CreateSocket (GetNode (), tid);
+
+// 2. 准备物理地址与协议类型
+PacketSocketAddress socketAddr;
+socketAddr.SetSingleDevice (m_netDevice->GetIfIndex());
+socketAddr.SetPhysicalAddress (m_destMacAddress); // 必须预先获知 MAC
+socketAddr.SetProtocol (0x8915); // 关键：RoCE v1 EtherType
+
+// 3. 绑定
+m_socket->Bind (socketAddr);
+m_socket->Connect (socketAddr);</code></pre>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 2: Headers -->
+            <div class="mb-16">
+                <div class="flex items-center mb-6">
+                    <div class="flex-shrink-0 h-10 w-10 flex items-center justify-center rounded-full bg-purple-100 text-purple-600 font-bold text-xl mr-4">2</div>
+                    <h3 class="text-2xl font-bold text-slate-800">实现 RoCE 专用头部 (GRH & BTH)</h3>
+                </div>
+                <p class="mb-4 text-slate-600">由于移除了 UDP/IP，我们需要手动实现 <code class="text-sm bg-slate-100 px-1 py-0.5 rounded">ns3::Header</code> 子类来构建物理线路上的字节流。</p>
+
+                <div class="bg-slate-900 rounded-lg overflow-hidden shadow-xl">
+                    <div class="bg-slate-800 px-4 py-2 flex items-center justify-between">
+                        <span class="text-gray-300 font-mono text-sm">src/internet/model/roce-grh-header.cc</span>
+                        <div class="flex space-x-1.5">
+                            <div class="w-3 h-3 rounded-full bg-red-500"></div>
+                            <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
+                            <div class="w-3 h-3 rounded-full bg-green-500"></div>
+                        </div>
+                    </div>
+                    <div class="p-4 overflow-x-auto">
+<pre><code class="language-cpp">class RoceGrhHeader : public Header {
+    // ... 成员变量定义 ...
+    uint32_t m_flowLabel; // 20 bits
+    uint8_t m_tclass;     // 8 bits (重要：用于 QoS/PFC 映射)
+    Ipv6Address m_sGid;   // 128 bits GID
+    Ipv6Address m_dGid;
+    
+    // 序列化逻辑：必须符合 Big Endian 网络序
+    void Serialize (Buffer::Iterator start) const override {
+        Buffer::Iterator i = start;
+        
+        // 对应 IPv6 头部的第一个 32位字：Version(6) + TClass + FlowLabel
+        // 注意位操作拼接
+        uint32_t vtf = (6 << 28) | (m_tclass << 20) | (m_flowLabel & 0xFFFFF);
+        i.WriteHtonU32 (vtf); 
+        
+        i.WriteHtonU16 (m_payloadLen);
+        i.WriteU8 (m_nextHeader); // 通常指向 0x1B (BTH)
+        i.WriteU8 (m_hopLimit);
+        
+        // 写入 128位 GID
+        WriteTo (i, m_sGid);
+        WriteTo (i, m_dGid);
+    }
+};</code></pre>
+                    </div>
+                </div>
+            </div>
+
+             <!-- Step 3: Switch Logic -->
+             <div class="mb-16">
+                <div class="flex items-center mb-6">
+                    <div class="flex-shrink-0 h-10 w-10 flex items-center justify-center rounded-full bg-purple-100 text-purple-600 font-bold text-xl mr-4">3</div>
+                    <h3 class="text-2xl font-bold text-slate-800">修改交换机与流控逻辑</h3>
+                </div>
+                <div class="bg-orange-50 border-l-4 border-orange-400 p-4 mb-6">
+                    <p class="text-orange-800 text-sm">
+                        <strong>注意：</strong> v1 极其依赖 PFC (Priority Flow Control)。必须确保交换机不再查看 IP 头的 DSCP 字段，而是查看 GRH 中的 Traffic Class。
+                    </p>
+                </div>
+                <ul class="list-disc pl-6 space-y-2 text-slate-700">
+                    <li><strong>禁用 ECN：</strong> 在 <code>broadcom-node.cc</code> 中，移除或注释掉所有涉及 <code>PeekHeader&lt;Ipv4Header&gt;</code> 的代码。v1 包里没有 IP 头，强行读取会导致错误。</li>
+                    <li><strong>流控映射：</strong> 修改 <code>qbb-net-device.cc</code> 的入队逻辑。使用 <code>Packet::PeekHeader&lt;RoceGrhHeader&gt;</code> 读取 TClass，将其映射到硬件优先级队列，从而触发正确的 PAUSE 帧。</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Part 5: Mapping Table -->
+        <section id="mapping" class="scroll-mt-24 pb-24">
+            <div class="border-l-4 border-emerald-600 pl-6 mb-10">
+                <h2 class="text-3xl font-bold text-slate-900">3. 协议内容与仿真代码映射表</h2>
+                <p class="mt-2 text-lg text-slate-600">速查表：RoCE v1 协议规范中的字段在 C++ 代码中是如何实现的。</p>
+            </div>
+
+            <div class="overflow-hidden shadow ring-1 ring-black ring-opacity-5 rounded-lg">
+                <table class="min-w-full divide-y divide-gray-300">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">协议层级</th>
+                            <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">协议字段 (RoCE v1)</th>
+                            <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">ns-3 代码实现 (C++)</th>
+                            <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">作用说明</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-200 bg-white">
+                        <!-- Row 1 -->
+                        <tr class="bg-green-50/50">
+                            <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-bold text-gray-900 sm:pl-6">链路层 (L2)</td>
+                            <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-700">EtherType</td>
+                            <td class="px-3 py-4 text-sm font-mono text-pink-600">SetProtocol(0x8915)</td>
+                            <td class="px-3 py-4 text-sm text-gray-500">核心标识。指示 NetDevice 封装帧时写入 0x8915。</td>
+                        </tr>
+                        <!-- Row 2 -->
+                        <tr>
+                            <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-bold text-gray-900 sm:pl-6">链路层 (L2)</td>
+                            <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-700">Dest MAC</td>
+                            <td class="px-3 py-4 text-sm font-mono text-pink-600">SetPhysicalAddress(mac)</td>
+                            <td class="px-3 py-4 text-sm text-gray-500">替代 ARP，直接指定物理地址。</td>
+                        </tr>
+                        <!-- Row 3 -->
+                        <tr class="bg-blue-50/50">
+                            <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-bold text-gray-900 sm:pl-6">网络层 (GRH)</td>
+                            <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-700">Traffic Class</td>
+                            <td class="px-3 py-4 text-sm font-mono text-pink-600">RoceGrhHeader::m_tclass</td>
+                            <td class="px-3 py-4 text-sm text-gray-500"><strong>流控关键</strong>。决定进入交换机的哪个优先级队列，触发 PFC。</td>
+                        </tr>
+                        <!-- Row 4 -->
+                        <tr>
+                            <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-bold text-gray-900 sm:pl-6">网络层 (GRH)</td>
+                            <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-700">GID</td>
+                            <td class="px-3 py-4 text-sm font-mono text-pink-600">Ipv6Address 类型</td>
+                            <td class="px-3 py-4 text-sm text-gray-500">仅用于应用层连接验证，不用于路由。</td>
+                        </tr>
+                        <!-- Row 5 -->
+                        <tr class="bg-purple-50/50">
+                            <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-bold text-gray-900 sm:pl-6">传输层 (BTH)</td>
+                            <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-700">Dest QP</td>
+                            <td class="px-3 py-4 text-sm font-mono text-pink-600">RoceBthHeader::m_destQp</td>
+                            <td class="px-3 py-4 text-sm text-gray-500">接收端根据此 ID 将数据送入正确的内存区域。</td>
+                        </tr>
+                         <!-- Row 6 -->
+                         <tr>
+                            <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-bold text-gray-900 sm:pl-6">流控机制</td>
+                            <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-700">PAUSE Frame</td>
+                            <td class="px-3 py-4 text-sm font-mono text-pink-600">qbb-net-device::SendPfc()</td>
+                            <td class="px-3 py-4 text-sm text-gray-500">802.1Qbb 标准实现，发送 EtherType 0x8808 控制帧。</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-slate-900 text-slate-400 py-12">
+        <div class="max-w-7xl mx-auto px-4 text-center">
+            <p>© 2024 RoCE v1 Simulation Guide. Based on NS-3 & Microsoft RDMA Project.</p>
+        </div>
+    </footer>
+
+</body>
+</html>

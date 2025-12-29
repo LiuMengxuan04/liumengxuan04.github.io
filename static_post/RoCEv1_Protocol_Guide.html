@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RoCEv1 协议深度解析</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+    <style>
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background-color: #f8fafc;
+            color: #334155;
+        }
+        .code-font {
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .section-title {
+            position: relative;
+            padding-left: 1rem;
+        }
+        .section-title::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 10%;
+            height: 80%;
+            width: 4px;
+            background-color: #2563eb;
+            border-radius: 2px;
+        }
+        .packet-block {
+            transition: all 0.3s ease;
+        }
+        .packet-block:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        /* Smooth scrolling */
+        html {
+            scroll-behavior: smooth;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <!-- Navigation -->
+    <nav class="fixed top-0 w-full bg-white/90 backdrop-blur-md border-b border-slate-200 z-50 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16 items-center">
+                <div class="flex items-center space-x-3">
+                    <div class="bg-blue-600 text-white p-1.5 rounded-lg">
+                        <i class="fa-solid fa-network-wired"></i>
+                    </div>
+                    <span class="font-bold text-xl text-slate-800 tracking-tight">RoCEv1 <span class="text-blue-600 font-light">Deep Dive</span></span>
+                </div>
+                <div class="hidden md:flex space-x-8 text-sm font-medium text-slate-600">
+                    <a href="#intro" class="hover:text-blue-600 transition-colors">1. 引言</a>
+                    <a href="#architecture" class="hover:text-blue-600 transition-colors">2. 协议架构</a>
+                    <a href="#pfc" class="hover:text-blue-600 transition-colors">3. PFC 流控</a>
+                    <a href="#advantages" class="hover:text-blue-600 transition-colors">4. 核心优势</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <header class="pt-32 pb-20 bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900 text-white">
+        <div class="max-w-4xl mx-auto px-6 text-center">
+            <h1 class="text-4xl md:text-5xl font-bold mb-6 leading-tight">
+                RDMA over Converged Ethernet (v1)
+            </h1>
+            <p class="text-xl text-blue-100 max-w-2xl mx-auto leading-relaxed">
+                探索基于以太网链路层的高性能网络协议，解锁亚微秒级延迟与零拷贝传输的核心机制。
+            </p>
+        </div>
+    </header>
+
+    <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-24">
+
+        <!-- PART 1: Introduction -->
+        <section id="intro" class="scroll-mt-24">
+            <div class="flex items-center mb-8">
+                <span class="bg-blue-100 text-blue-800 text-xs font-bold px-3 py-1 rounded-full mr-3">Part 1</span>
+                <h2 class="text-3xl font-bold text-slate-900 section-title">背景与引言</h2>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
+                <div class="prose prose-slate">
+                    <p class="text-lg leading-relaxed text-slate-600">
+                        在高性能计算（HPC）与现代数据中心网络（DCN）中，通信延迟是核心瓶颈。传统的 TCP/IP 协议栈因其内核上下文切换和内存拷贝，在高并发场景下显得力不心。
+                    </p>
+                    <p class="mt-4 text-slate-600">
+                        <strong>RDMA (Remote Direct Memory Access)</strong> 技术应运而生，允许直接读写远程内存，绕过操作系统内核。
+                    </p>
+                    <div class="mt-6 bg-slate-50 border-l-4 border-blue-500 p-4 rounded-r-lg">
+                        <h4 class="font-bold text-slate-800 mb-2">RoCE 的演进</h4>
+                        <ul class="space-y-2 text-sm text-slate-600">
+                            <li class="flex items-start">
+                                <i class="fa-solid fa-layer-group mt-1 mr-2 text-blue-500"></i>
+                                <span><strong>RoCEv1:</strong> 基于以太网链路层 (L2)，不可路由，低开销。</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fa-solid fa-globe mt-1 mr-2 text-slate-400"></i>
+                                <span><strong>RoCEv2:</strong> 基于 UDP/IP (L3)，可路由，目前主流。</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-xl shadow-lg border border-slate-100 p-6 flex flex-col justify-center">
+                    <h3 class="text-sm font-bold text-slate-500 uppercase tracking-wider mb-4 text-center">Protocol Stack Comparison</h3>
+                    <div class="flex justify-center space-x-4 h-64 items-end">
+                        <!-- TCP/IP Stack -->
+                        <div class="w-1/3 flex flex-col space-y-1 group cursor-default">
+                            <div class="bg-red-500 text-white text-xs p-2 rounded text-center h-16 flex items-center justify-center">App</div>
+                            <div class="bg-slate-400 text-white text-xs p-2 rounded text-center h-12 flex items-center justify-center group-hover:bg-red-400 transition">Socket</div>
+                            <div class="bg-slate-500 text-white text-xs p-2 rounded text-center h-16 flex items-center justify-center group-hover:bg-red-500 transition">TCP (Transport)</div>
+                            <div class="bg-slate-600 text-white text-xs p-2 rounded text-center h-12 flex items-center justify-center group-hover:bg-red-600 transition">IP (Network)</div>
+                            <div class="bg-slate-700 text-white text-xs p-2 rounded text-center h-8 flex items-center justify-center">Ethernet</div>
+                            <p class="text-center text-xs font-bold mt-2 text-red-600">High CPU</p>
+                        </div>
+                        
+                        <!-- RoCEv1 Stack -->
+                        <div class="w-1/3 flex flex-col space-y-1 group cursor-default relative">
+                            <div class="absolute -top-8 left-1/2 transform -translate-x-1/2 text-emerald-600 font-bold text-sm animate-bounce">Zero Copy</div>
+                            <div class="bg-emerald-500 text-white text-xs p-2 rounded text-center h-32 flex items-center justify-center shadow-lg z-10">Application (Verbs)</div>
+                            <div class="bg-emerald-600 text-white text-xs p-2 rounded text-center h-12 flex items-center justify-center opacity-50 border-2 border-dashed border-white" title="Bypassed">Kernel Bypassed</div>
+                            <div class="bg-emerald-700 text-white text-xs p-2 rounded text-center h-12 flex items-center justify-center font-bold">IB Transport</div>
+                            <div class="bg-slate-700 text-white text-xs p-2 rounded text-center h-8 flex items-center justify-center">Ethernet (0x8915)</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <hr class="border-slate-200">
+
+        <!-- PART 2: Architecture -->
+        <section id="architecture" class="scroll-mt-24">
+            <div class="flex items-center mb-8">
+                <span class="bg-indigo-100 text-indigo-800 text-xs font-bold px-3 py-1 rounded-full mr-3">Part 2</span>
+                <h2 class="text-3xl font-bold text-slate-900 section-title">协议架构与数据包格式</h2>
+            </div>
+
+            <div class="mb-10 text-slate-600 leading-relaxed">
+                <p>RoCEv1 的核心是将 InfiniBand 的传输层和网络层头部直接封装在以太网帧中。它是一个严格的<strong>二层 (Layer 2) 协议</strong>，其“身份证”是 IEEE 分配的 EtherType 值 <span class="code-font bg-slate-100 px-1 rounded text-blue-600 font-bold">0x8915</span>。</p>
+            </div>
+
+            <!-- Packet Visualization -->
+            <div class="bg-slate-900 rounded-2xl p-8 shadow-2xl overflow-hidden mb-12">
+                <h3 class="text-white text-center font-bold mb-8">RoCEv1 数据包结构解剖</h3>
+                
+                <div class="flex flex-col max-w-4xl mx-auto space-y-2 text-sm font-mono">
+                    
+                    <!-- L2 Header -->
+                    <div class="packet-block bg-slate-700 border-l-4 border-emerald-400 p-4 rounded flex justify-between items-center text-slate-200">
+                        <div class="w-1/6 font-bold text-emerald-400">L2 Link Layer</div>
+                        <div class="flex-1 grid grid-cols-4 gap-2 text-center">
+                            <div class="bg-slate-800 p-2 rounded border border-slate-600">Dst MAC (6B)</div>
+                            <div class="bg-slate-800 p-2 rounded border border-slate-600">Src MAC (6B)</div>
+                            <div class="bg-slate-800 p-2 rounded border border-yellow-500 text-yellow-400 font-bold" title="关键字段：用于 PFC 流控">VLAN/PCP (4B)</div>
+                            <div class="bg-blue-600 p-2 rounded border border-blue-400 font-bold text-white">Type: 0x8915</div>
+                        </div>
+                    </div>
+
+                    <!-- GRH -->
+                    <div class="packet-block bg-slate-700 border-l-4 border-blue-400 p-4 rounded flex justify-between items-center text-slate-200">
+                        <div class="w-1/6 font-bold text-blue-400">IB Network</div>
+                        <div class="flex-1 bg-blue-900/50 p-3 rounded border border-blue-800 text-center relative group">
+                            <span class="font-bold block mb-1">Global Route Header (GRH) - 40 Bytes</span>
+                            <div class="text-xs text-blue-300 grid grid-cols-2 gap-4 mt-2">
+                                <div>Source GID (128 bits)</div>
+                                <div>Dest GID (128 bits)</div>
+                            </div>
+                            <div class="absolute inset-0 bg-blue-900/90 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity rounded">
+                                <span class="text-white text-xs px-4">即便不路由，硬件(Verbs)仍强制要求 GRH 以保持 IB 兼容性</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- BTH -->
+                    <div class="packet-block bg-slate-700 border-l-4 border-purple-400 p-4 rounded flex justify-between items-center text-slate-200">
+                        <div class="w-1/6 font-bold text-purple-400">IB Transport</div>
+                        <div class="flex-1 bg-purple-900/50 p-3 rounded border border-purple-800 grid grid-cols-3 gap-2 text-center">
+                            <div class="col-span-3 font-bold mb-1 border-b border-purple-700 pb-1">Base Transport Header (BTH) - 12 Bytes</div>
+                            <div class="bg-purple-800 rounded p-1">OpCode</div>
+                            <div class="bg-purple-600 rounded p-1 border border-white font-bold shadow shadow-purple-500/50">Dest QP (24b)</div>
+                            <div class="bg-purple-800 rounded p-1">PSN</div>
+                        </div>
+                    </div>
+
+                    <!-- Payload -->
+                    <div class="packet-block bg-slate-800 border-l-4 border-slate-500 p-6 rounded text-center text-slate-400">
+                        Payload (Data)
+                    </div>
+
+                    <!-- Checksum -->
+                    <div class="packet-block bg-slate-700 border-l-4 border-red-400 p-3 rounded flex justify-between items-center text-slate-200">
+                        <div class="w-1/6 font-bold text-red-400">Trailer</div>
+                        <div class="flex-1 flex space-x-2">
+                            <div class="w-1/2 bg-red-900/50 p-2 rounded text-center border border-red-800" title="Invariant CRC: 端到端校验">ICRC (4B)</div>
+                            <div class="w-1/2 bg-slate-600 p-2 rounded text-center" title="Frame Check Sequence">FCS (4B)</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Detailed Explanation Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="bg-white p-6 rounded-lg shadow-sm border border-slate-200">
+                    <h4 class="font-bold text-slate-800 mb-4 flex items-center">
+                        <i class="fa-solid fa-passport text-blue-500 mr-2"></i> GRH 的必要性与 GID
+                    </h4>
+                    <p class="text-sm text-slate-600 mb-3">
+                        虽然 RoCEv1 处于二层，但 <strong>Verbs Consumer</strong>（硬件逻辑）预期在 BTH 之前必须有一个网络层头部。
+                    </p>
+                    <ul class="text-sm text-slate-600 list-disc list-inside space-y-1">
+                        <li><strong>Next Header:</strong> 0x1B (指向 BTH)</li>
+                        <li><strong>GID 生成:</strong> 通常基于 MAC 地址通过 EUI-64 规则生成，类似于 IPv6 Link-Local 地址。</li>
+                    </ul>
+                </div>
+
+                <div class="bg-white p-6 rounded-lg shadow-sm border border-slate-200">
+                    <h4 class="font-bold text-slate-800 mb-4 flex items-center">
+                        <i class="fa-solid fa-route text-purple-500 mr-2"></i> Dest QP (Queue Pair)
+                    </h4>
+                    <p class="text-sm text-slate-600 mb-3">
+                        这是 RoCE 的<strong>核心多路复用字段</strong>。
+                    </p>
+                    <ul class="text-sm text-slate-600 list-disc list-inside space-y-1">
+                        <li>硬件解析 EtherType 0x8915 后，直接读取 Dest QP。</li>
+                        <li>根据 QP 编号，DMA 引擎将数据直接写入对应的用户态内存区域。</li>
+                        <li>相比 RoCEv2 的 UDP 端口 (4791)，这种路径更为直接。</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <hr class="border-slate-200">
+
+        <!-- PART 3: PFC -->
+        <section id="pfc" class="scroll-mt-24">
+            <div class="flex items-center mb-8">
+                <span class="bg-amber-100 text-amber-800 text-xs font-bold px-3 py-1 rounded-full mr-3">Part 3</span>
+                <h2 class="text-3xl font-bold text-slate-900 section-title">PFC 优先级流控 (IEEE 802.1Qbb)</h2>
+            </div>
+
+            <div class="bg-amber-50 border-l-4 border-amber-500 p-6 mb-8 rounded-r-lg">
+                <h3 class="font-bold text-amber-900 mb-2">为什么需要无损网络？</h3>
+                <p class="text-amber-800 text-sm">
+                    RDMA 追求极致吞吐，使用 Go-Back-N 重传策略。一旦丢包，将导致严重的吞吐量崩塌 (Throughput Collapse)。PFC 是实现“无损以太网”的基石。
+                </p>
+            </div>
+
+            <!-- PFC Logic Visual -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-10">
+                <!-- Traditional PAUSE -->
+                <div class="relative group">
+                    <div class="absolute inset-0 bg-red-100 rounded-xl transform rotate-1 group-hover:rotate-2 transition-transform"></div>
+                    <div class="relative bg-white border border-red-200 p-6 rounded-xl shadow-sm">
+                        <div class="flex items-center justify-between mb-4">
+                            <h4 class="font-bold text-red-600">传统 PAUSE (802.3x)</h4>
+                            <i class="fa-solid fa-hand-paper text-red-400 text-xl"></i>
+                        </div>
+                        <p class="text-sm text-slate-600 mb-4">
+                            一旦拥塞，暂停<strong>整条链路</strong>的所有流量。
+                        </p>
+                        <div class="bg-slate-100 p-3 rounded text-center text-xs font-mono text-slate-500">
+                            STOP ALL traffic -> HOL Blocking
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PFC -->
+                <div class="relative group">
+                    <div class="absolute inset-0 bg-emerald-100 rounded-xl transform -rotate-1 group-hover:-rotate-2 transition-transform"></div>
+                    <div class="relative bg-white border border-emerald-200 p-6 rounded-xl shadow-sm">
+                        <div class="flex items-center justify-between mb-4">
+                            <h4 class="font-bold text-emerald-600">PFC (802.1Qbb)</h4>
+                            <i class="fa-solid fa-traffic-light text-emerald-400 text-xl"></i>
+                        </div>
+                        <p class="text-sm text-slate-600 mb-4">
+                            将流量分为 8 个优先级 (CoS 0-7)，<strong>独立暂停</strong>。
+                        </p>
+                        <div class="flex space-x-1 justify-center bg-slate-100 p-3 rounded">
+                            <div class="w-8 h-8 bg-green-500 rounded flex items-center justify-center text-white text-xs" title="Web Traffic (Running)">0</div>
+                            <div class="w-8 h-8 bg-slate-300 rounded flex items-center justify-center text-xs">...</div>
+                            <div class="w-8 h-8 bg-red-500 rounded flex items-center justify-center text-white text-xs animate-pulse" title="RoCE Traffic (Paused)">3</div>
+                            <div class="w-8 h-8 bg-slate-300 rounded flex items-center justify-center text-xs">...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Technical Details Table -->
+            <div class="overflow-hidden rounded-lg border border-slate-200 mb-8">
+                <table class="min-w-full divide-y divide-slate-200 bg-white">
+                    <thead class="bg-slate-50">
+                        <tr>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">字段</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">关键值</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">说明</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-200">
+                        <tr>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-900">EtherType</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-blue-600 font-mono">0x8808</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500">MAC Control 帧类型</td>
+                        </tr>
+                        <tr class="bg-slate-50">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-900">OpCode</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-red-600 font-bold font-mono">0x0101</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500">PFC 专用操作码 (区别于 0x0001)</td>
+                        </tr>
+                        <tr>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-900">Time Vector</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-mono">Quanta (512 bits)</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500">10Gbps 下 1 Quanta = 51.2ns</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Headroom Formula -->
+            <div class="bg-slate-800 text-slate-200 p-6 rounded-lg text-center font-mono text-sm md:text-base">
+                <p class="text-slate-400 text-xs uppercase mb-2">Headroom Buffer Requirement</p>
+                Headroom &ge; (RTT + Processing_Delay) &times; Link_Bandwidth
+                <p class="mt-4 text-xs text-slate-400 max-w-xl mx-auto font-sans">
+                    必须预留足够的 Headroom 来容纳 PAUSE 帧生效前仍在传输的 "Skid" 流量，否则会发生溢出丢包。
+                </p>
+            </div>
+        </section>
+
+        <hr class="border-slate-200">
+
+        <!-- PART 4: Advantages -->
+        <section id="advantages" class="scroll-mt-24 mb-20">
+            <div class="flex items-center mb-8">
+                <span class="bg-emerald-100 text-emerald-800 text-xs font-bold px-3 py-1 rounded-full mr-3">Part 4</span>
+                <h2 class="text-3xl font-bold text-slate-900 section-title">RoCEv1 的多维比较优势</h2>
+            </div>
+
+            <!-- Tabs for Comparison -->
+            <div class="space-y-12">
+                
+                <!-- Dimension 1: vs Traditional -->
+                <div>
+                    <h3 class="text-xl font-bold text-slate-800 mb-6 border-l-4 border-blue-600 pl-3">1. 相较于传统以太网 (TCP/IP)</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100">
+                            <div class="text-blue-500 text-2xl mb-3"><i class="fa-solid fa-bolt"></i></div>
+                            <h4 class="font-bold text-slate-900 mb-2">极低延迟</h4>
+                            <p class="text-sm text-slate-600">内核旁路 (Kernel Bypass) 消除了系统调用和上下文切换，延迟从 ~20µs 降至 ~1µs。</p>
+                        </div>
+                        <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100">
+                            <div class="text-blue-500 text-2xl mb-3"><i class="fa-solid fa-copy"></i></div>
+                            <h4 class="font-bold text-slate-900 mb-2">零拷贝 (Zero Copy)</h4>
+                            <p class="text-sm text-slate-600">DMA 直接在应用内存和网卡间传输数据，无需 CPU 搬运，吞吐量接近线速。</p>
+                        </div>
+                        <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100">
+                            <div class="text-blue-500 text-2xl mb-3"><i class="fa-solid fa-microchip"></i></div>
+                            <h4 class="font-bold text-slate-900 mb-2">CPU 卸载</h4>
+                            <p class="text-sm text-slate-600">网卡硬件处理所有传输逻辑，CPU 占用率接近 0%，释放算力给计算任务。</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dimension 2: vs Native IB -->
+                <div>
+                    <h3 class="text-xl font-bold text-slate-800 mb-6 border-l-4 border-purple-600 pl-3">2. 相较于原生 InfiniBand</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="flex items-start bg-purple-50 p-5 rounded-lg">
+                            <i class="fa-solid fa-coins text-purple-600 mt-1 mr-4"></i>
+                            <div>
+                                <h4 class="font-bold text-purple-900">成本效益 (TCO)</h4>
+                                <p class="text-sm text-purple-800 mt-1">无需昂贵的 IB 专用交换机，复用标准以太网交换机，采购渠道更广。</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start bg-purple-50 p-5 rounded-lg">
+                            <i class="fa-solid fa-network-wired text-purple-600 mt-1 mr-4"></i>
+                            <div>
+                                <h4 class="font-bold text-purple-900">网络融合</h4>
+                                <p class="text-sm text-purple-800 mt-1">计算与管理流量运行在同一物理网络（通过 VLAN 隔离），简化布线与运维。</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dimension 3: vs RoCEv2 -->
+                <div>
+                    <h3 class="text-xl font-bold text-slate-800 mb-6 border-l-4 border-emerald-600 pl-3">3. 相较于 RoCEv2 (同门对比)</h3>
+                    <div class="bg-white border border-slate-200 rounded-lg overflow-hidden">
+                        <div class="p-4 bg-emerald-50 border-b border-emerald-100 flex items-center justify-between">
+                            <span class="font-bold text-emerald-800">特定场景下的优势</span>
+                            <span class="text-xs bg-emerald-200 text-emerald-800 px-2 py-1 rounded">单一子网 / 存储背板</span>
+                        </div>
+                        <ul class="divide-y divide-slate-100 text-sm text-slate-600">
+                            <li class="p-4 hover:bg-slate-50 transition">
+                                <span class="font-bold text-slate-800 mr-2">更低的头部开销:</span>
+                                节省 IP(20B) + UDP(8B) = <strong>28 字节</strong>。在小包密集型场景（心跳、锁服务）效率略高。
+                            </li>
+                            <li class="p-4 hover:bg-slate-50 transition">
+                                <span class="font-bold text-slate-800 mr-2">安全性:</span>
+                                不可路由 (Non-routable) 特性天然隔离了远程攻击，适合高安全需求的存储网络。
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-slate-900 text-slate-400 py-12 text-center">
+        <div class="max-w-4xl mx-auto px-6">
+            <p class="mb-4 text-slate-500 text-sm">基于 RoCEv1 协议深度解析讲稿生成</p>
+            <div class="text-xs text-slate-600">
+                <p>&copy; RoCE Protocol Study Group. All rights reserved.</p>
+                <p class="mt-2">Sections 1-4 Covered. Implementation details (Section 5-6) excluded as requested.</p>
+            </div>
+        </div>
+    </footer>
+
+</body>
+</html>
