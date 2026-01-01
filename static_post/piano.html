@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Aurora 88 - 交互式虚拟钢琴</title>
+    <!-- 引入 Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* 自定义滚动条样式 */
+        .scrollbar-hide::-webkit-scrollbar {
+            display: none;
+        }
+        .scrollbar-hide {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        
+        /* 自定义细滚动条 */
+        .custom-scrollbar::-webkit-scrollbar {
+            height: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background-color: rgba(75, 85, 99, 0.4);
+            border-radius: 3px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background-color: rgba(75, 85, 99, 0.6);
+        }
+
+        /* 禁止选中文本 */
+        body {
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        /* 按键激活状态的样式类 (JS动态切换) */
+        .key-active-white {
+            background: #fff !important;
+            transform: translateY(2px);
+        }
+        
+        .key-active-black {
+            background-color: #374151 !important; /* gray-700 */
+            box-shadow: 0 0 15px rgba(255,255,255,0.5) !important;
+            transform: scaleY(0.96) translateY(4px);
+        }
+    </style>
+</head>
+<body class="bg-gray-900 h-screen w-screen overflow-hidden flex flex-col font-sans text-gray-200">
+
+    <!-- 1. 背景 Canvas (粒子与网格) -->
+    <canvas id="main-canvas" class="absolute inset-0 z-0 pointer-events-none"></canvas>
+
+    <!-- 2. 顶部标题 UI -->
+    <div class="absolute top-6 w-full text-center z-10 pointer-events-none">
+        <h1 class="text-5xl md:text-7xl font-black italic tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-blue-200 via-purple-300 to-pink-300 opacity-30 transform -skew-x-12 select-none">
+            AURORA 88
+        </h1>
+        <div class="flex justify-center flex-wrap gap-2 md:gap-4 mt-2 text-[10px] md:text-xs text-cyan-100/60 font-mono select-none">
+            <span class="bg-black/40 px-2 py-1 rounded border border-white/10"><span class="text-red-400">Ctrl</span> + 键 = 低音</span>
+            <span class="bg-black/40 px-2 py-1 rounded border border-white/10">直接按 = 中音</span>
+            <span class="bg-black/40 px-2 py-1 rounded border border-white/10"><span class="text-blue-400">Shift</span> + 键 = 高音</span>
+            <span class="bg-black/40 px-2 py-1 rounded border border-white/10"><span class="text-yellow-400">Alt</span> + 键 = 扩展</span>
+        </div>
+    </div>
+
+    <!-- 全屏按钮 (新增) -->
+    <button onclick="toggleFullScreen()" id="fullscreen-btn" class="absolute top-6 right-6 z-50 bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 text-white p-2 md:p-3 rounded-lg transition-all group cursor-pointer" title="切换全屏">
+        <!-- Enter Fullscreen Icon -->
+        <svg id="icon-enter-fullscreen" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 md:h-6 md:w-6 group-hover:text-cyan-300 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
+        </svg>
+        <!-- Exit Fullscreen Icon (Hidden by default) -->
+        <svg id="icon-exit-fullscreen" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 md:h-6 md:w-6 group-hover:text-cyan-300 transition-colors hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14H4m0 0v6m0-6l5 5m5-5h6m0 0v6m0-6l-5 5M10 3v6m0 0H4m6 0l-5-5m11 5l5-5m-5 5v-6m0 6h6" />
+        </svg>
+    </button>
+
+    <!-- 3. 钢琴主体容器 -->
+    <div class="mt-auto w-full z-20 flex justify-center pb-6 px-0 md:px-4 h-[35vh] min-h-[280px]">
+        <!-- 钢琴外壳 -->
+        <div class="w-full max-w-[95%] h-full bg-gray-900/60 backdrop-blur-xl rounded-xl p-1 pb-1 shadow-[0_0_80px_rgba(0,0,0,0.6)] ring-1 ring-white/10 flex relative overflow-hidden">
+            
+            <!-- 键盘滚动区域 -->
+            <div id="scroll-container" class="w-full h-full flex items-end pt-4 overflow-x-auto overflow-y-hidden custom-scrollbar scroll-smooth">
+                <!-- 键盘渲染区域 (JS 生成) -->
+                <div id="keys-wrapper" class="flex h-full min-w-max px-[50vw]">
+                    <!-- Keys will be injected here -->
+                </div>
+            </div>
+
+            <!-- 左右渐变遮罩 -->
+            <div class="absolute top-0 left-0 w-8 h-full bg-gradient-to-r from-gray-900/80 to-transparent pointer-events-none"></div>
+            <div class="absolute top-0 right-0 w-8 h-full bg-gradient-to-l from-gray-900/80 to-transparent pointer-events-none"></div>
+        </div>
+    </div>
+
+    <script>
+        // --- 新增：全屏控制逻辑 ---
+        function toggleFullScreen() {
+            const doc = window.document;
+            const docEl = doc.documentElement;
+
+            const requestFullScreen = docEl.requestFullscreen || docEl.mozRequestFullScreen || docEl.webkitRequestFullScreen || docEl.msRequestFullscreen;
+            const cancelFullScreen = doc.exitFullscreen || doc.mozCancelFullScreen || doc.webkitExitFullscreen || doc.msExitFullscreen;
+
+            if (!doc.fullscreenElement && !doc.mozFullScreenElement && !doc.webkitFullscreenElement && !doc.msFullscreenElement) {
+                requestFullScreen.call(docEl);
+            } else {
+                cancelFullScreen.call(doc);
+            }
+        }
+
+        // 监听全屏变化更新图标
+        function updateFullScreenIcon() {
+            const enterIcon = document.getElementById('icon-enter-fullscreen');
+            const exitIcon = document.getElementById('icon-exit-fullscreen');
+            const isFullScreen = document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement;
+
+            if (isFullScreen) {
+                enterIcon.classList.add('hidden');
+                exitIcon.classList.remove('hidden');
+            } else {
+                enterIcon.classList.remove('hidden');
+                exitIcon.classList.add('hidden');
+            }
+        }
+        
+        document.addEventListener('fullscreenchange', updateFullScreenIcon);
+        document.addEventListener('webkitfullscreenchange', updateFullScreenIcon);
+        document.addEventListener('mozfullscreenchange', updateFullScreenIcon);
+        document.addEventListener('MSFullscreenChange', updateFullScreenIcon);
+
+
+        /**
+         * ------------------------------------------------------------------
+         * 1. 音频引擎 (Audio Engine)
+         * ------------------------------------------------------------------
+         */
+        class SoundEngine {
+            constructor() {
+                this.ctx = null;
+                this.masterGain = null;
+            }
+
+            init() {
+                if (!this.ctx) {
+                    const AudioContext = window.AudioContext || window.webkitAudioContext;
+                    this.ctx = new AudioContext();
+                    this.masterGain = this.ctx.createGain();
+                    this.masterGain.gain.value = 0.3;
+                    this.masterGain.connect(this.ctx.destination);
+                }
+                if (this.ctx.state === 'suspended') {
+                    this.ctx.resume();
+                }
+            }
+
+            playTone(freq) {
+                if (!this.ctx) this.init();
+                const t = this.ctx.currentTime;
+
+                const osc1 = this.ctx.createOscillator();
+                osc1.type = 'triangle';
+                osc1.frequency.setValueAtTime(freq, t);
+
+                const osc2 = this.ctx.createOscillator();
+                osc2.type = 'sine';
+                osc2.frequency.setValueAtTime(freq * 2, t);
+                osc2.detune.value = 5;
+
+                const gainNode = this.ctx.createGain();
+                gainNode.connect(this.masterGain);
+
+                gainNode.gain.setValueAtTime(0, t);
+                gainNode.gain.linearRampToValueAtTime(0.8, t + 0.015);
+                gainNode.gain.exponentialRampToValueAtTime(0.5, t + 0.15);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, t + 2.0);
+
+                osc1.connect(gainNode);
+
+                const gainOsc2 = this.ctx.createGain();
+                gainOsc2.gain.value = 0.25;
+                osc2.connect(gainOsc2);
+                gainOsc2.connect(gainNode);
+
+                osc1.start(t);
+                osc2.start(t);
+                osc1.stop(t + 2.5);
+                osc2.stop(t + 2.5);
+            }
+        }
+
+        const audioEngine = new SoundEngine();
+
+        /**
+         * ------------------------------------------------------------------
+         * 2. 数据与配置
+         * ------------------------------------------------------------------
+         */
+        const getFreq = (noteNumber) => 440 * Math.pow(2, (noteNumber - 69) / 12);
+
+        const ROW_Z = ['z', 's', 'x', 'd', 'c', 'v', 'g', 'b', 'h', 'n', 'j', 'm'];
+        const ROW_Q = ['q', '2', 'w', '3', 'e', 'r', '5', 't', '6', 'y', '7', 'u'];
+
+        const generateOctave = (startNote, keyMapArray, modifier) => {
+            const octaveKeys = [];
+            keyMapArray.forEach((char, index) => {
+                const note = startNote + index;
+                const isSharp = [1, 3, 6, 8, 10].includes(index);
+                const noteName = "C C# D D# E F F# G G# A A# B".split(" ")[index];
+                
+                let label = char.toUpperCase();
+                if (modifier === 'Shift') label = `⇧${label}`;
+                else if (modifier === 'Ctrl') label = `^${label}`;
+                else if (modifier === 'Alt') label = `⌥${label}`;
+
+                octaveKeys.push({
+                    note,
+                    freq: getFreq(note),
+                    isSharp,
+                    noteName,
+                    keyboardChar: char,
+                    modifier,
+                    displayLabel: label,
+                    color: `hsl(${((note - 21) * 8 + 160) % 360}, 90%, 65%)`
+                });
+            });
+            return octaveKeys;
+        };
+
+        const generate88Keys = () => {
+            let keys = [];
+            
+            // 1. A0 - B0 (Alt 1-3)
+            const extraLow = [
+                { note: 21, char: '1', name: 'A', sharp: false },
+                { note: 22, char: '2', name: 'A#', sharp: true },
+                { note: 23, char: '3', name: 'B', sharp: false },
+            ];
+            extraLow.forEach(k => {
+                keys.push({
+                    note: k.note,
+                    freq: getFreq(k.note),
+                    isSharp: k.sharp,
+                    noteName: k.name,
+                    keyboardChar: k.char,
+                    modifier: 'Alt',
+                    displayLabel: `⌥${k.char}`,
+                    color: `hsl(160, 90%, 60%)`
+                });
+            });
+
+            // 2. Control Layers
+            keys = keys.concat(generateOctave(24, ROW_Z, 'Ctrl'));
+            keys = keys.concat(generateOctave(36, ROW_Q, 'Ctrl'));
+
+            // 3. Normal Layers
+            keys = keys.concat(generateOctave(48, ROW_Z, 'None'));
+            keys = keys.concat(generateOctave(60, ROW_Q, 'None'));
+
+            // 4. Shift Layers
+            keys = keys.concat(generateOctave(72, ROW_Z, 'Shift'));
+            keys = keys.concat(generateOctave(84, ROW_Q, 'Shift'));
+
+            // 5. Alt Layers
+            keys = keys.concat(generateOctave(96, ROW_Z, 'Alt'));
+            // C8
+            keys.push({
+                note: 108,
+                freq: getFreq(108),
+                isSharp: false,
+                noteName: 'C',
+                keyboardChar: 'q',
+                modifier: 'Alt',
+                displayLabel: '⌥Q',
+                color: `hsl(300, 100%, 70%)`
+            });
+
+            return keys.sort((a, b) => a.note - b.note);
+        };
+
+        const PIANO_KEYS = generate88Keys();
+
+        /**
+         * ------------------------------------------------------------------
+         * 3. 极光粒子系统 (优化版：回归轻量化设计，减少卡顿)
+         * ------------------------------------------------------------------
+         */
+        class AuroraBeam {
+            constructor(x, y, colorStr, width) {
+                this.x = x;
+                this.y = y;
+                this.bottomY = y;
+                this.width = width;
+                this.colorStr = colorStr;
+                
+                this.age = 0;
+                this.fadeInTime = 0.15;
+                this.riseTime = 1.0;
+                this.riseSpeed = 10;
+                this.height = 0; 
+                // 移除 wobble 和多层渐变计算，大幅降低 GPU 开销
+            }
+
+            update() {
+                this.age += 0.016;
+
+                if (this.age < this.fadeInTime) {
+                    this.y -= this.riseSpeed;
+                    this.height += this.riseSpeed * 1.5; 
+                    this.bottomY = this.y + this.height;
+                } else if (this.age < this.riseTime) {
+                    this.y -= this.riseSpeed;
+                    this.height += 0.5;
+                    this.bottomY = this.y + this.height;
+                } else {
+                    this.y -= this.riseSpeed * 2;
+                    this.bottomY -= this.riseSpeed * 2.5; 
+                    this.height = this.bottomY - this.y;
+                }
+            }
+
+            draw(ctx) {
+                if (this.height <= 0) return;
+
+                let alpha = 1.0;
+                if (this.age > this.riseTime) {
+                    alpha = Math.max(0, 1.0 - (this.age - this.riseTime) * 2);
+                }
+                if (alpha <= 0.01) return;
+
+                const finalAlpha = alpha * 0.7; 
+
+                // 简化渲染：单层渐变 + 核心高亮
+                const gradient = ctx.createLinearGradient(this.x, this.y, this.x, this.y + this.height);
+                gradient.addColorStop(0, 'rgba(0,0,0,0)'); 
+                gradient.addColorStop(0.1, this.colorStr);
+                gradient.addColorStop(0.8, this.colorStr);
+                gradient.addColorStop(1, 'rgba(0,0,0,0)');
+
+                ctx.save();
+                ctx.globalAlpha = finalAlpha;
+                ctx.fillStyle = gradient;
+                ctx.fillRect(this.x, this.y, this.width, this.height);
+                
+                // 简单的高亮核心，不再使用复杂的额外渐变
+                ctx.fillStyle = 'rgba(255,255,255,0.4)';
+                ctx.fillRect(this.x + this.width * 0.35, this.y, this.width * 0.3, this.height * 0.9);
+                
+                ctx.restore();
+            }
+        }
+
+        class Sparkle {
+            constructor(x, y, color) {
+                this.x = x;
+                this.y = y;
+                this.color = color; // 直接使用传入的颜色字符串，避免正则解析开销
+                this.size = Math.random() * 3 + 1;
+                this.speedY = Math.random() * 3 + 2;
+                this.speedX = (Math.random() - 0.5) * 2;
+                this.life = 1.0;
+                this.decay = Math.random() * 0.03 + 0.02;
+            }
+            update() {
+                this.y -= this.speedY;
+                this.x += this.speedX;
+                this.life -= this.decay;
+            }
+            draw(ctx) {
+                if (this.life <= 0) return;
+                
+                ctx.save();
+                ctx.globalAlpha = this.life;
+                ctx.fillStyle = '#fff';
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            }
+        }
+
+        /**
+         * ------------------------------------------------------------------
+         * 4. 渲染与交互逻辑
+         * ------------------------------------------------------------------
+         */
+        const canvas = document.getElementById('main-canvas');
+        const ctx = canvas.getContext('2d');
+        const particles = [];
+
+        const keysWrapper = document.getElementById('keys-wrapper');
+        const scrollContainer = document.getElementById('scroll-container');
+
+        // 生成键盘 DOM
+        function renderKeys() {
+            const whiteKeys = PIANO_KEYS.filter(k => !k.isSharp);
+
+            whiteKeys.forEach(keyData => {
+                const containerDiv = document.createElement('div');
+                containerDiv.className = "relative flex-1 h-full mx-[1px] select-none min-w-[28px] md:min-w-[36px]";
+
+                const whiteKeyDiv = document.createElement('div');
+                whiteKeyDiv.id = `key-${keyData.note}`;
+                whiteKeyDiv.className = `w-full h-full rounded-b-[6px] cursor-pointer transition-all duration-75 ease-out flex flex-col justify-end items-center pb-2 z-10 relative bg-white hover:bg-gray-50`;
+                whiteKeyDiv.style.boxShadow = "0 4px 5px rgba(0,0,0,0.3)";
+                whiteKeyDiv.style.background = "linear-gradient(to bottom, #fff 0%, #f0f0f0 100%)";
+                
+                let labelClass = 'text-gray-400';
+                if(keyData.modifier === 'Shift') labelClass = 'text-blue-400';
+                if(keyData.modifier === 'Ctrl') labelClass = 'text-red-400';
+                if(keyData.modifier === 'Alt') labelClass = 'text-yellow-400';
+
+                whiteKeyDiv.innerHTML = `
+                    <div class="flex flex-col items-center gap-0 pointer-events-none opacity-80 mb-1">
+                        <span class="text-[9px] text-gray-300 font-semibold">${keyData.noteName}${Math.floor(keyData.note/12)-1}</span>
+                        <span class="text-[9px] font-bold ${labelClass}">${keyData.displayLabel}</span>
+                    </div>
+                `;
+
+                const triggerPlay = (e) => { 
+                    e.preventDefault(); 
+                    playNote(keyData.note); 
+                };
+                whiteKeyDiv.addEventListener('mousedown', triggerPlay);
+                whiteKeyDiv.addEventListener('touchstart', triggerPlay);
+
+                containerDiv.appendChild(whiteKeyDiv);
+
+                const nextNote = PIANO_KEYS.find(k => k.note === keyData.note + 1);
+                if (nextNote && nextNote.isSharp) {
+                    const blackKeyWrapper = document.createElement('div');
+                    blackKeyWrapper.className = "absolute top-0 -right-[30%] w-[60%] h-[60%] z-30";
+                    
+                    const blackKeyDiv = document.createElement('div');
+                    blackKeyDiv.id = `key-${nextNote.note}`;
+                    blackKeyDiv.className = "w-full h-full rounded-b-[4px] cursor-pointer transition-all duration-75 ease-out flex flex-col justify-end items-center pb-2 z-20 relative overflow-hidden bg-black shadow-[2px_3px_8px_rgba(0,0,0,0.5)] bg-gradient-to-b from-gray-800 to-black";
+                    
+                    blackKeyDiv.innerHTML = `
+                        <span class="text-[7px] text-gray-500 font-bold pointer-events-none select-none z-10 mb-1 opacity-70">${nextNote.displayLabel}</span>
+                        <div class="absolute top-0 right-0 w-[2px] h-full bg-gray-700 opacity-50"></div>
+                    `;
+
+                    const triggerBlack = (e) => {
+                        e.stopPropagation();
+                        e.preventDefault();
+                        playNote(nextNote.note);
+                    };
+                    blackKeyDiv.addEventListener('mousedown', triggerBlack);
+                    blackKeyDiv.addEventListener('touchstart', triggerBlack);
+
+                    blackKeyWrapper.appendChild(blackKeyDiv);
+                    containerDiv.appendChild(blackKeyWrapper);
+                }
+
+                keysWrapper.appendChild(containerDiv);
+            });
+        }
+
+        // 播放逻辑
+        function playNote(noteId) {
+            const keyData = PIANO_KEYS.find(k => k.note === noteId);
+            if (!keyData) return;
+
+            audioEngine.playTone(keyData.freq);
+
+            const keyEl = document.getElementById(`key-${noteId}`);
+            if (keyEl) {
+                if (keyData.isSharp) {
+                    keyEl.classList.add('key-active-black');
+                } else {
+                    keyEl.classList.add('key-active-white');
+                    keyEl.style.boxShadow = `0 0 30px ${keyData.color}, inset 0 -5px 10px rgba(0,0,0,0.1)`;
+                    keyEl.style.background = '#fff';
+                }
+
+                setTimeout(() => {
+                    if (keyData.isSharp) {
+                        keyEl.classList.remove('key-active-black');
+                    } else {
+                        keyEl.classList.remove('key-active-white');
+                        keyEl.style.boxShadow = "0 4px 5px rgba(0,0,0,0.3)";
+                        keyEl.style.background = "linear-gradient(to bottom, #fff 0%, #f0f0f0 100%)";
+                    }
+                }, 150);
+
+                const rect = keyEl.getBoundingClientRect();
+                const beamWidth = rect.width * (keyData.isSharp ? 0.9 : 0.85); 
+                const beamX = rect.left + (rect.width - beamWidth) / 2;
+                
+                // 添加优化后的极光光柱
+                particles.push(new AuroraBeam(beamX, rect.top, keyData.color, beamWidth));
+
+                // 减少星尘数量，降低 CPU 计算压力
+                const sparkleCount = Math.floor(Math.random() * 3) + 2; 
+                for(let i=0; i<sparkleCount; i++) {
+                    const sx = rect.left + Math.random() * rect.width;
+                    particles.push(new Sparkle(sx, rect.top, keyData.color));
+                }
+            }
+        }
+
+        window.addEventListener('keydown', (e) => {
+            if (e.repeat) return;
+            
+            let modifier = 'None';
+            if (e.shiftKey) modifier = 'Shift';
+            else if (e.ctrlKey) modifier = 'Ctrl';
+            else if (e.altKey) modifier = 'Alt';
+
+            const k = PIANO_KEYS.find(pk => 
+                pk.keyboardChar.toLowerCase() === e.key.toLowerCase() && 
+                pk.modifier === modifier
+            );
+
+            if (k) {
+                playNote(k.note);
+                const keyEl = document.getElementById(`key-${k.note}`);
+                if (keyEl) {
+                     const rect = keyEl.getBoundingClientRect();
+                     const containerRect = scrollContainer.getBoundingClientRect();
+                     if (rect.left < containerRect.left || rect.right > containerRect.right) {
+                         keyEl.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+                     }
+                }
+            }
+        });
+
+        function drawCyberGrid(width, height, time) {
+            ctx.strokeStyle = 'rgba(60, 40, 100, 0.2)';
+            ctx.lineWidth = 1;
+            
+            const horizonY = height * 0.35;
+            const speed = (time * 15) % 40;
+            const cx = width / 2;
+
+            for (let i = -15; i <= 15; i++) {
+                ctx.beginPath();
+                ctx.moveTo(cx + i * 80, horizonY);
+                ctx.lineTo(cx + i * 350, height);
+                ctx.stroke();
+            }
+
+            for (let i = 0; i < 25; i++) {
+                let y = horizonY + Math.pow(i, 2.4) + speed; 
+                if (y > height) y -= (height - horizonY);
+                if (y < horizonY) y = height; 
+                
+                const alpha = 1 - (y - horizonY) / (height - horizonY);
+                ctx.strokeStyle = `rgba(80, 200, 255, ${alpha * 0.1})`;
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(width, y);
+                ctx.stroke();
+            }
+        }
+
+        let time = 0;
+        function animate() {
+            time += 0.01;
+            
+            // 保持此处的修复：强制重置透明度，防止背景清除不干净导致拖影
+            ctx.globalAlpha = 1.0; 
+            
+            ctx.fillStyle = '#020205'; 
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            drawCyberGrid(canvas.width, canvas.height, time);
+
+            ctx.globalCompositeOperation = 'screen'; 
+
+            for (let i = particles.length - 1; i >= 0; i--) {
+                const p = particles[i];
+                p.update();
+                p.draw(ctx);
+                
+                if (p.height <= 0 || p.y < -500 || (p.life && p.life <= 0)) {
+                    particles.splice(i, 1);
+                }
+            }
+            
+            ctx.globalCompositeOperation = 'source-over';
+            requestAnimationFrame(animate);
+        }
+
+        function init() {
+            renderKeys();
+            
+            const handleResize = () => {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            };
+            window.addEventListener('resize', handleResize);
+            handleResize();
+            
+            setTimeout(() => {
+                const middle = scrollContainer.scrollWidth * 0.4;
+                scrollContainer.scrollLeft = middle;
+            }, 100);
+
+            animate();
+        }
+
+        init();
+
+    </script>
+</body>
+</html>
