@@ -23,7 +23,11 @@
 * 🌐 [**东南大学计软智常用网址（seucseweb）**](https://seucseweb.github.io/)
   由我独立开发与维护。
 
-  * 子项目：[**CCF期刊会议集合**](https://seucseweb.github.io/ccf-website/)：提供 CCF 推荐学术会议与期刊的查询导航。
+* 🤖 [**MiniCode**](https://github.com/LiuMengxuan04/MiniCode)
+  轻量级终端编程助手，采用类似 Claude Code 的工作流、工具循环与 TUI 架构，面向学习与实验。
+
+* 📝 [**PerfectMD**](https://github.com/LiuMengxuan04/perfectmd)
+  结合 Typora 的简洁体验与 Word 级富文本能力的现代 Markdown 编辑器；我参与维护与贡献。
 
 * 🌐 [**711SEClub主页**](https://seu-711-seclub.github.io/)
   面向东南大学软件学院同学的社区网站。
