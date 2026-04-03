@@ -7,10 +7,10 @@
 
 ## Internship Experience
 
-* 💻 **Bilibili Inc.** — Machine Learning Platform Engineer (Current)
+* 💻 **Bilibili Inc.** — Machine Learning Platform Engineer 
   Supporting the company’s core recommendation system through large-scale distributed task scheduling and platform optimization.
 
-* ☁️ **Huawei Technologies Co., Ltd.** — Application Software Development Engineer (Former)
+* ☁️ **Huawei Technologies Co., Ltd.** — Application Software Development Engineer
   Selected member of the first **SEU–Huawei ICT Elite Program**, participated in production practice and enterprise-level software projects.
 
 
