@@ -9,11 +9,26 @@
 
 <!-- Provider logos via LobeHub icon set (same assets as @lobehub/icons-static-svg): https://lobehub.com/zh/icons/bilibili https://lobehub.com/zh/icons/huawei -->
 
-* <img class="about-company-logo" src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.84.0/icons/bilibili-color.svg" alt="" loading="lazy" decoding="async" /> **Bilibili Inc.** — Machine Learning Platform Engineer
-  Supporting the company’s core recommendation system through large-scale distributed task scheduling and platform optimization.
-
-* <img class="about-company-logo" src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.84.0/icons/huawei-color.svg" alt="" loading="lazy" decoding="async" /> **Huawei Technologies Co., Ltd.** — Application Software Development Engineer
-  Selected member of the first **SEU–Huawei ICT Elite Program**, participated in production practice and enterprise-level software projects.
+<ul class="about-internship-list">
+<li>
+<div class="about-internship-item">
+<img class="about-company-logo" src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.84.0/icons/bilibili-color.svg" alt="Bilibili" loading="lazy" decoding="async" />
+<div class="about-internship-body">
+<p><strong>Bilibili Inc.</strong> — Machine Learning Platform Engineer</p>
+<p>Supporting the company’s core recommendation system through large-scale distributed task scheduling and platform optimization.</p>
+</div>
+</div>
+</li>
+<li>
+<div class="about-internship-item">
+<img class="about-company-logo" src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.84.0/icons/huawei-color.svg" alt="Huawei" loading="lazy" decoding="async" />
+<div class="about-internship-body">
+<p><strong>Huawei Technologies Co., Ltd.</strong> — Application Software Development Engineer</p>
+<p>Selected member of the first <strong>SEU–Huawei ICT Elite Program</strong>, participated in production practice and enterprise-level software projects.</p>
+</div>
+</div>
+</li>
+</ul>
 
 
 ## Websites & Personal Projects
