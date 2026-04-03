@@ -9,10 +9,10 @@
 
 <!-- Provider logos via LobeHub icon set (same assets as @lobehub/icons-static-svg): https://lobehub.com/zh/icons/bilibili https://lobehub.com/zh/icons/huawei -->
 
-* <img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.84.0/icons/bilibili-color.svg" alt="" width="22" height="22" loading="lazy" decoding="async" style="height:1.15em;width:auto;vertical-align:-0.15em;margin-right:0.35em;" /> **Bilibili Inc.** — Machine Learning Platform Engineer
+* <img class="about-company-logo" src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.84.0/icons/bilibili-color.svg" alt="" loading="lazy" decoding="async" /> **Bilibili Inc.** — Machine Learning Platform Engineer
   Supporting the company’s core recommendation system through large-scale distributed task scheduling and platform optimization.
 
-* <img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.84.0/icons/huawei-color.svg" alt="" width="22" height="22" loading="lazy" decoding="async" style="height:1.15em;width:auto;vertical-align:-0.15em;margin-right:0.35em;" /> **Huawei Technologies Co., Ltd.** — Application Software Development Engineer
+* <img class="about-company-logo" src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.84.0/icons/huawei-color.svg" alt="" loading="lazy" decoding="async" /> **Huawei Technologies Co., Ltd.** — Application Software Development Engineer
   Selected member of the first **SEU–Huawei ICT Elite Program**, participated in production practice and enterprise-level software projects.
 
 

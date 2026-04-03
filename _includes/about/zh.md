@@ -11,10 +11,10 @@
 
 <!-- 品牌图标来源：LobeHub（与 @lobehub/icons-static-svg 一致） https://lobehub.com/zh/icons/bilibili https://lobehub.com/zh/icons/huawei -->
 
-* <img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.84.0/icons/bilibili-color.svg" alt="" width="22" height="22" loading="lazy" decoding="async" style="height:1.15em;width:auto;vertical-align:-0.15em;margin-right:0.35em;" /> **哔哩哔哩** — 机器学习平台开发工程师
+* <img class="about-company-logo" src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.84.0/icons/bilibili-color.svg" alt="" loading="lazy" decoding="async" /> **哔哩哔哩** — 机器学习平台开发工程师
 
   支撑核心推荐系统业务。
-* <img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.84.0/icons/huawei-color.svg" alt="" width="22" height="22" loading="lazy" decoding="async" style="height:1.15em;width:auto;vertical-align:-0.15em;margin-right:0.35em;" /> **华为技术有限公司** — 应用软件开发工程师
+* <img class="about-company-logo" src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.84.0/icons/huawei-color.svg" alt="" loading="lazy" decoding="async" /> **华为技术有限公司** — 应用软件开发工程师
 
   首届“**东南大学-华为ICT菁英班**”成员。
 
