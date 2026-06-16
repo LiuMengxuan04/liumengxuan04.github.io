@@ -58,5 +58,5 @@
 
 
 
-📫 **联系方式**：`liumengxuan@seu.edu.cn`
+📫 **联系方式**：`liumengxuan829@gmail.com`
 

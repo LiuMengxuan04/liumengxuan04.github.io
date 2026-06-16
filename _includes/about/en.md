@@ -53,5 +53,5 @@ During my undergraduate years, my focus was on **medical image analysis**, while
 I believe that **technology should serve humanity**, and I strive to combine engineering practice with real-world impact.
 Looking forward to learning and growing together!
 
-📫 **Contact**: `liumengxuan@seu.edu.cn`
+📫 **Contact**: `liumengxuan829@gmail.com`
 
