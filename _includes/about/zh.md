@@ -36,14 +36,14 @@
 
 ## 网站与个人项目
 
-* 🌐 [**东南大学计软智常用网址（seucseweb）**](https://seucseweb.github.io/)
-  由我独立开发与维护。
-
 * 🤖 [**MiniCode**](https://github.com/LiuMengxuan04/MiniCode)
   轻量级终端编程助手，采用类似 Claude Code 的工作流、工具循环与 TUI 架构，面向学习与实验。
 
-* 📝 [**PerfectMD**](https://github.com/LiuMengxuan04/perfectmd)
-  结合 Typora 的简洁体验与 Word 级富文本能力的现代 Markdown 编辑器；我参与维护与贡献。
+* 🛠️ [**鼠鼠实习妙妙工具（shushu-internship-tool）**](https://github.com/LiuMengxuan04/shushu-internship-tool)
+  AI 驱动的实习准备工具包：把岗位描述变项目，把项目变简历，把简历变面试。已获 1.4k+ Star。
+
+* 🌐 [**东南大学计软智常用网址（seucseweb）**](https://seucseweb.github.io/)
+  由我独立开发与维护。
 
 * 🌐 [**711SEClub主页**](https://seu-711-seclub.github.io/)
   面向东南大学软件学院同学的社区网站。

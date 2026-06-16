@@ -33,14 +33,14 @@
 
 ## Websites & Personal Projects
 
-* 🌐 [**SEU CS/SE Useful Links (seucseweb)**](https://seucseweb.github.io/)
-  Independently developed and maintained, with over **30,000+ visits** and indexed by Bing.
-
 * 🤖 [**MiniCode**](https://github.com/LiuMengxuan04/MiniCode)
   A lightweight terminal coding assistant with Claude Code–like workflow, tool loop, and TUI architecture, built for learning and experimentation.
 
-* 📝 [**PerfectMD**](https://github.com/LiuMengxuan04/perfectmd)
-  A modern Markdown editor that combines Typora-like simplicity with rich Word-like formatting; I contribute to its development and maintenance.
+* 🛠️ [**Shushu Internship Tool (SIT)**](https://github.com/LiuMengxuan04/shushu-internship-tool)
+  An AI-powered internship preparation toolkit: turn job descriptions into projects, projects into resumes, and resumes into interviews. 1.4k+ stars.
+
+* 🌐 [**SEU CS/SE Useful Links (seucseweb)**](https://seucseweb.github.io/)
+  Independently developed and maintained, with over **30,000+ visits** and indexed by Bing.
 
 * 🌐 [**711 SE Club Homepage**](https://seu-711-seclub.github.io/)
   A community website for SEU Software Engineering students, sharing lab updates, research resources, and student projects.
