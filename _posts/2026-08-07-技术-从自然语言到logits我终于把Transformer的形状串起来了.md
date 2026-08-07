@@ -12,11 +12,7 @@ tags:       [技术, AI Infra, Transformer, 数学基础, 线性代数, 深度�
 
 最近开始系统学习 AI Infra。我先从仓库里的前置知识开始看，到了数学基础这一章，遇到了一条看起来很短、但实际上包含了很多信息的公式：
 
-$$
-Y=XW,
-\qquad X\in\mathbb{R}^{(BS)\times H},
-\qquad W\in\mathbb{R}^{H\times V}
-$$
+<p align="center">$\displaystyle Y=XW,\qquad X\in\mathbb{R}^{(BS)\times H},\qquad W\in\mathbb{R}^{H\times V}$</p>
 
 一开始我对里面的 `B`、`S`、`H`、`V` 只有模糊印象，尤其不明白：为什么 batch size 会影响输出形状？`H` 是某一层的维度，还是整个网络的维度？
 
@@ -100,17 +96,13 @@ Tokenizer 会把文本切成模型词表中的 token。对于中文，token 不�
 
 如果词表大小是 $V$，那么 token ID 通常落在：
 
-$$
-0,1,2,\ldots,V-1
-$$
+<p align="center">$0,1,2,\ldots,V-1$</p>
 
 ## 3. Embedding：把 token ID 变成 H 维向量
 
 模型有一个 embedding 矩阵：
 
-$$
-E\in\mathbb{R}^{V\times H}
-$$
+<p align="center">$E\in\mathbb{R}^{V\times H}$</p>
 
 它有 $V$ 行，每一行是一个 token 的 $H$ 维向量。
 
@@ -125,17 +117,13 @@ token ID = 512  → 取 E 的第 512 行
 
 每取出一行，就得到一个 $H$ 维向量：
 
-$$
-x_{b,s}\in\mathbb{R}^{H}
-$$
+<p align="center">$x_{b,s}\in\mathbb{R}^{H}$</p>
 
 其中 $x_{b,s}$ 表示第 $b$ 条样本中第 $s$ 个 token 的向量。
 
 如果有 $B$ 条样本、每条样本有 $S$ 个 token，那么所有 token 的 embedding 组成：
 
-$$
-X\in\mathbb{R}^{B\times S\times H}
-$$
+<p align="center">$X\in\mathbb{R}^{B\times S\times H}$</p>
 
 这就是 Transformer 的输入 hidden states。
 
@@ -212,9 +200,7 @@ H = 4
 
 总共有：
 
-$$
-B\times S=2\times3=6
-$$
+<p align="center">$B\times S=2\times3=6$</p>
 
 个 token。
 
@@ -228,15 +214,11 @@ $$
 
 输入 hidden states 的形状是：
 
-$$
-[B,S,H]
-$$
+<p align="center">$[B,S,H]$</p>
 
 经过第 1 层、第 2 层，直到第 $L$ 层后，通常仍然是：
 
-$$
-[B,S,H]
-$$
+<p align="center">$[B,S,H]$</p>
 
 例如：
 
@@ -249,9 +231,7 @@ $$
 
 为什么每层通常保持相同的 $H$？因为 Transformer 中有残差连接：
 
-$$
-X_{l+1}=X_l+\operatorname{Block}(X_l)
-$$
+<p align="center">$X_{l+1}=X_l+\operatorname{Block}(X_l)$</p>
 
 要做加法，两边的形状必须一致。
 
@@ -261,19 +241,11 @@ $$
 
 Attention 内部会把 $H$ 拆成多个 head：
 
-$$
-[B,S,H]
-\rightarrow
-[B,S,N_h,D_h]
-\rightarrow
-[B,S,H]
-$$
+<p align="center">$[B,S,H]\rightarrow[B,S,N_h,D_h]\rightarrow[B,S,H]$</p>
 
 其中：
 
-$$
-D_h=\frac{H}{N_h}
-$$
+<p align="center">$D_h=\frac{H}{N_h}$</p>
 
 例如：
 
@@ -293,35 +265,25 @@ Dh = 4096 / 32 = 128
 
 经过最后一个 Transformer Block 后，得到最终 hidden states：
 
-$$
-X\in\mathbb{R}^{B\times S\times H}
-$$
+<p align="center">$X\in\mathbb{R}^{B\times S\times H}$</p>
 
 为了方便做矩阵乘法，通常把前两维展平：
 
-$$
-[B,S,H]\rightarrow[BS,H]
-$$
+<p align="center">$[B,S,H]\rightarrow[BS,H]$</p>
 
 此时，每一行代表一个 token 的 hidden vector。
 
 输出投影矩阵为：
 
-$$
-W\in\mathbb{R}^{H\times V}
-$$
+<p align="center">$W\in\mathbb{R}^{H\times V}$</p>
 
 于是：
 
-$$
-Y=XW
-$$
+<p align="center">$Y=XW$</p>
 
 维度计算是：
 
-$$
-[BS,H]\times[H,V]=[BS,V]
-$$
+<p align="center">$[BS,H]\times[H,V]=[BS,V]$</p>
 
 这里中间的两个 $H$ 必须匹配，输出保留两边的外部维度：
 
@@ -333,9 +295,7 @@ $$
 
 对于第 $i$ 个 token 和词表中第 $j$ 个 token：
 
-$$
-Y_{i,j}=\sum_{h=1}^{H}X_{i,h}W_{h,j}
-$$
+<p align="center">$Y_{i,j}=\sum_{h=1}^{H}X_{i,h}W_{h,j}$</p>
 
 也就是说，一个 token 的 $H$ 维 hidden vector，会和 $W$ 的每一列做点积，最终得到 $V$ 个分数。
 
@@ -345,9 +305,7 @@ $$
 
 矩阵乘法结束后，形状是：
 
-$$
-[BS,V]
-$$
+<p align="center">$[BS,V]$</p>
 
 但从语义上，我们仍然希望知道：
 
@@ -357,15 +315,11 @@ $$
 
 所以会把它 reshape 回：
 
-$$
-[BS,V]\rightarrow[B,S,V]
-$$
+<p align="center">$[BS,V]\rightarrow[B,S,V]$</p>
 
 最终：
 
-$$
-Y_{b,s,:}\in\mathbb{R}^{V}
-$$
+<p align="center">$Y_{b,s,:}\in\mathbb{R}^{V}$</p>
 
 表示第 $b$ 条样本、第 $s$ 个位置，对整个词表的 $V$ 维 logits。
 
@@ -404,9 +358,7 @@ V = 10
 
 ### 第一，形状是否匹配？
 
-$$
-[BS,H]\times[H,V]=[BS,V]
-$$
+<p align="center">$[BS,H]\times[H,V]=[BS,V]$</p>
 
 中间维度 $H$ 相同，因此可以做矩阵乘法。
 
@@ -414,9 +366,7 @@ $$
 
 输出一共有 $BSV$ 个元素，每个元素需要大约 $H$ 次乘加，所以计算量约为：
 
-$$
-2BSHV\quad\text{FLOPs}
-$$
+<p align="center">$2BSHV\quad\text{FLOPs}$</p>
 
 这也说明为什么 $B$、$S$、$H$、$V$ 任意一个变大，计算压力都可能明显增加。
 
@@ -424,9 +374,7 @@ $$
 
 最后的输出投影权重大小是：
 
-$$
-H\times V
-$$
+<p align="center">$H\times V$</p>
 
 当 hidden size 和词表都很大时，$W$ 本身就可能占用大量显存；输出 logits 的形状是 $[B,S,V]$，同样可能很大。
 
