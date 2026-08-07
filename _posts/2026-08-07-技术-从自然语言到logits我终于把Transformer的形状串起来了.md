@@ -127,6 +127,12 @@ token ID = 512  → 取 E 的第 512 行
 
 这就是 Transformer 的输入 hidden states。
 
+为了把“查表”这一步单独看清楚，可以把它拆成下面四步：自然语言先被切成 token，再映射成 token ID，最后从 embedding 矩阵中取出对应的行。
+
+<p align="center">
+  <img src="/img/in-post/transformer-raw-text-to-embedding.png" alt="从自然语言到 embedding 的过程" style="max-width: 100%;">
+</p>
+
 ## 4. 为什么需要 batch size？
 
 这里的 $B$ 表示：
@@ -173,6 +179,12 @@ batch 3：样本 65 ~ 96
 所以更准确的说法是：
 
 > $B$ 表示一次计算中包含多少条样本或序列，而不是专门表示用户请求数。
+
+下面这张图用 $B=2$、$S=3$ 展示了：batch size 增大时，增加的是 token 行数，而不是每个 token 的 hidden size $H$。
+
+<p align="center">
+  <img src="/img/in-post/transformer-batch-size-B.png" alt="batch size B 对张量形状的影响" style="max-width: 100%;">
+</p>
 
 ### 4.3 B 为什么影响输出形状？
 
@@ -261,6 +273,12 @@ Dh = 4096 / 32 = 128
 
 这里要注意：Attention 内部可能会出现不同的临时形状，但经过合并后，残差流仍然回到 $H$ 维。
 
+这张图把 $L$ 和 $H$ 的区别，以及 Attention 拆分和残差连接放在了一起：$L$ 是 Transformer 的深度，$H$ 是每个 token 表示的宽度。
+
+<p align="center">
+  <img src="/img/in-post/transformer-L-depth-H-width-attention.png" alt="Transformer 的层数 L、hidden size H 与 Attention head" style="max-width: 100%;">
+</p>
+
 ## 7. 最后的输出投影：从 H 维映射到 V 维
 
 经过最后一个 Transformer Block 后，得到最终 hidden states：
@@ -300,6 +318,12 @@ Dh = 4096 / 32 = 128
 也就是说，一个 token 的 $H$ 维 hidden vector，会和 $W$ 的每一列做点积，最终得到 $V$ 个分数。
 
 这 $V$ 个分数分别对应词表中的 $V$ 个候选 token，叫作 logits。它们还不是概率，后面通常还要经过 Softmax。
+
+最后的输出投影可以单独看成一次形状严格匹配的矩阵乘法：$[BS,H]\times[H,V]=[BS,V]$，再恢复成 $[B,S,V]$。
+
+<p align="center">
+  <img src="/img/in-post/transformer-final-projection-logits.png" alt="hidden states 经过输出投影得到词表 logits" style="max-width: 100%;">
+</p>
 
 ### 7.2 为什么最后恢复成 `[B, S, V]`？
 
