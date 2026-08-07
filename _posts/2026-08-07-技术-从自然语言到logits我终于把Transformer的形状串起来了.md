@@ -279,6 +279,34 @@ Dh = 4096 / 32 = 128
   <img src="/img/in-post/transformer-L-depth-H-width-attention.png" alt="Transformer 的层数 L、hidden size H 与 Attention head" style="max-width: 100%;">
 </p>
 
+### 6.1 多头注意力不是把 token 分组
+
+看到“拆成多个 head”时，我最开始的直觉是：是不是把一段序列切成几段，每个 head 负责一部分 token？其实不是。
+
+多头注意力拆分的是**特征维度**，不是序列维度。更准确的流程是：先用三个不同的线性层生成 $Q$、$K$、$V$，再把每个 $H$ 维向量 reshape 成 $N_h$ 个 $D_h$ 维 head：
+
+<p align="center">$X[B,S,H]\xrightarrow{W_Q,W_K,W_V}Q,K,V[B,S,H]\xrightarrow{\text{reshape/transpose}}[B,N_h,S,D_h]$</p>
+
+这里的线性投影很重要。它意味着 head 看到的不是原始 hidden vector 被机械切开的几段，而是经过不同参数变换后得到的不同特征子空间。
+
+每个 head 都会看到完整的 $S$ 个 token，只是每个 token 在这个 head 中只有 $D_h$ 个特征：
+
+<p align="center">$Q_h,K_h,V_h\in\mathbb{R}^{B\times S\times D_h}$</p>
+
+因此，head 1 不是负责前半段 token、head 2 负责后半段 token；更准确的说法是：
+
+> 所有 head 都看同一段序列，但使用不同的、由 $Q/K/V$ 投影得到的特征子空间。
+
+每个 head 独立完成注意力计算，输出形状仍然是 $[B,S,D_h]$。最后沿着特征维拼接：
+
+<p align="center">$\operatorname{Concat}(O_1,\ldots,O_{N_h})\in\mathbb{R}^{B\times S\times(N_hD_h)}=\mathbb{R}^{B\times S\times H}$</p>
+
+拼接之后通常还会经过输出投影 $W_O\in\mathbb{R}^{H\times H}$，再回到 Transformer Block 的残差流中。
+
+<p align="center">
+  <img src="/img/in-post/multi-head-attention-split-features-not-tokens.png" alt="多头注意力拆分特征维度而不是拆分 token 序列" style="max-width: 100%;">
+</p>
+
 ## 7. 最后的输出投影：从 H 维映射到 V 维
 
 经过最后一个 Transformer Block 后，得到最终 hidden states：
