@@ -1,7 +1,7 @@
 ---
 layout:     post
-title:      "AI Infra 线性代数基础：从 Shape 到 Attention、SVD 与 LoRA"
-subtitle:   "把抽象的 2.1—2.13 重新排成一条能走通的学习路线"
+title:      "AI Infra 线性代数基础"
+subtitle:   "从 Shape 到 Attention、SVD 与 LoRA"
 date:       2026-08-11 20:00:00 +0800
 author:     "Liu Mengxuan"
 mathjax:    true
@@ -10,9 +10,7 @@ categories: [技术]
 tags:       [技术, AI Infra, 线性代数, Transformer, Attention, SVD, LoRA]
 ---
 
-最近在学习 AI Infra 的数学基础时，我读到了从“标量、向量、矩阵和张量”一直讲到 LoRA 的一组内容。每个概念单独看都不算复杂，但原来的顺序更像一份概念索引：定义出现得很快，例子很少，张量 shape、矩阵运算、数值误差和模型压缩又混在同一层级里，读完很难建立一条连贯的主线。
-
-经过一轮逐项讨论，我发现更自然的学习方式不是机械地按照编号走，而是围绕几个逐渐深入的问题展开：
+AI Infra 中的线性代数可以沿着一条连续的计算主线来理解：先看数据如何表示，再看不同 shape 的张量如何参与计算，最后理解这些运算怎样进入 Attention、模型压缩和数值稳定性分析。
 
 ```text
 数据装在哪里？
