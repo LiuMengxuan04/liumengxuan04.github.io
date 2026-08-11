@@ -1,0 +1,129 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900">
+  <defs>
+    <marker id="arrow" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto">
+      <path d="M0,0 L9,4.5 L0,9 Z" fill="#2156c4"/>
+    </marker>
+    <marker id="arrowPurple" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto">
+      <path d="M0,0 L9,4.5 L0,9 Z" fill="#6d28d9"/>
+    </marker>
+    <style>
+      text { font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", Arial, sans-serif; }
+      .title { font-size: 46px; font-weight: 800; fill: #102a72; }
+      .h2 { font-size: 25px; font-weight: 750; fill: #174ea6; }
+      .label { font-size: 20px; font-weight: 700; fill: #17223b; }
+      .small { font-size: 17px; fill: #35415c; }
+      .formula { font-size: 23px; font-weight: 700; fill: #5b21b6; }
+      .grid { stroke: #4a72c8; stroke-width: 1.5; fill: #f5f9ff; }
+      .highlightA { fill: #9ed0ff; stroke: #1473e6; stroke-width: 2.5; }
+      .highlightB { fill: #c9b7ff; stroke: #6d28d9; stroke-width: 2.5; }
+      .highlightC { fill: #a8e6ce; stroke: #059669; stroke-width: 2.5; }
+      .flowBox { rx: 18; stroke-width: 2.4; }
+    </style>
+  </defs>
+
+  <rect width="1600" height="900" fill="#ffffff"/>
+  <text x="800" y="66" text-anchor="middle" class="title">GEMM 分块：沿 K 方向累加输出 Tile</text>
+  <text x="800" y="104" text-anchor="middle" class="small">数学公式不变，改变的是计算顺序和数据搬运方式</text>
+
+  <!-- A matrix 6x4 -->
+  <text x="260" y="155" text-anchor="middle" class="h2">A：M × K</text>
+  <g transform="translate(100,180)">
+    <rect width="320" height="300" class="grid"/>
+    <g stroke="#4a72c8" stroke-width="1.4">
+      <line x1="80" y1="0" x2="80" y2="300"/><line x1="160" y1="0" x2="160" y2="300"/><line x1="240" y1="0" x2="240" y2="300"/>
+      <line x1="0" y1="50" x2="320" y2="50"/><line x1="0" y1="100" x2="320" y2="100"/><line x1="0" y1="150" x2="320" y2="150"/>
+      <line x1="0" y1="200" x2="320" y2="200"/><line x1="0" y1="250" x2="320" y2="250"/>
+    </g>
+    <!-- BM=2 rows, BK=2 cols -->
+    <rect x="80" y="100" width="160" height="100" class="highlightA"/>
+    <line x1="160" y1="100" x2="160" y2="200" stroke="#1473e6" stroke-width="1.7"/>
+    <line x1="80" y1="150" x2="240" y2="150" stroke="#1473e6" stroke-width="1.7"/>
+    <text x="160" y="158" text-anchor="middle" class="label">A tile</text>
+  </g>
+  <text x="72" y="338" text-anchor="middle" class="label">M</text>
+  <text x="260" y="513" text-anchor="middle" class="label">K</text>
+
+  <text x="470" y="336" text-anchor="middle" font-size="48" font-weight="700" fill="#17223b">×</text>
+
+  <!-- B matrix 4x6 -->
+  <text x="700" y="155" text-anchor="middle" class="h2">B：K × N</text>
+  <g transform="translate(520,180)">
+    <rect width="360" height="240" class="grid"/>
+    <g stroke="#4a72c8" stroke-width="1.4">
+      <line x1="60" y1="0" x2="60" y2="240"/><line x1="120" y1="0" x2="120" y2="240"/><line x1="180" y1="0" x2="180" y2="240"/>
+      <line x1="240" y1="0" x2="240" y2="240"/><line x1="300" y1="0" x2="300" y2="240"/>
+      <line x1="0" y1="60" x2="360" y2="60"/><line x1="0" y1="120" x2="360" y2="120"/><line x1="0" y1="180" x2="360" y2="180"/>
+    </g>
+    <!-- BK=2 rows, BN=3 cols; same K interval as A tile -->
+    <rect x="180" y="60" width="180" height="120" class="highlightB"/>
+    <line x1="240" y1="60" x2="240" y2="180" stroke="#6d28d9" stroke-width="1.7"/>
+    <line x1="300" y1="60" x2="300" y2="180" stroke="#6d28d9" stroke-width="1.7"/>
+    <line x1="180" y1="120" x2="360" y2="120" stroke="#6d28d9" stroke-width="1.7"/>
+    <text x="270" y="128" text-anchor="middle" class="label">B tile</text>
+  </g>
+  <text x="700" y="453" text-anchor="middle" class="label">N</text>
+
+  <text x="930" y="336" text-anchor="middle" font-size="48" font-weight="700" fill="#17223b">→</text>
+
+  <!-- C matrix 6x6 -->
+  <text x="1180" y="155" text-anchor="middle" class="h2">C：M × N</text>
+  <g transform="translate(1000,180)">
+    <rect width="360" height="300" class="grid"/>
+    <g stroke="#4a72c8" stroke-width="1.4">
+      <line x1="60" y1="0" x2="60" y2="300"/><line x1="120" y1="0" x2="120" y2="300"/><line x1="180" y1="0" x2="180" y2="300"/>
+      <line x1="240" y1="0" x2="240" y2="300"/><line x1="300" y1="0" x2="300" y2="300"/>
+      <line x1="0" y1="50" x2="360" y2="50"/><line x1="0" y1="100" x2="360" y2="100"/><line x1="0" y1="150" x2="360" y2="150"/>
+      <line x1="0" y1="200" x2="360" y2="200"/><line x1="0" y1="250" x2="360" y2="250"/>
+    </g>
+    <!-- matching BM=2, BN=3 output tile -->
+    <rect x="180" y="100" width="180" height="100" class="highlightC"/>
+    <line x1="240" y1="100" x2="240" y2="200" stroke="#059669" stroke-width="1.7"/>
+    <line x1="300" y1="100" x2="300" y2="200" stroke="#059669" stroke-width="1.7"/>
+    <line x1="180" y1="150" x2="360" y2="150" stroke="#059669" stroke-width="1.7"/>
+    <text x="270" y="158" text-anchor="middle" class="label">C tile</text>
+  </g>
+  <text x="972" y="338" text-anchor="middle" class="label">M</text>
+  <text x="1180" y="513" text-anchor="middle" class="label">N</text>
+
+  <rect x="1040" y="515" width="285" height="54" rx="14" fill="#effcf6" stroke="#059669" stroke-width="2"/>
+  <text x="1182" y="550" text-anchor="middle" class="formula">C tile += A tile @ B tile</text>
+
+  <!-- K-loop annotation -->
+  <path d="M420,575 C630,520 790,520 1000,575" fill="none" stroke="#6d28d9" stroke-width="3" marker-end="url(#arrowPurple)"/>
+  <text x="710" y="546" text-anchor="middle" class="formula">沿 K 方向换下一组 tile，继续累加</text>
+
+  <!-- memory hierarchy flow -->
+  <text x="800" y="626" text-anchor="middle" class="h2">一次 Tile 计算中的数据流</text>
+
+  <rect x="85" y="670" width="260" height="130" class="flowBox" fill="#eef4ff" stroke="#2156c4"/>
+  <text x="215" y="712" text-anchor="middle" class="label">HBM / Global Memory</text>
+  <text x="215" y="747" text-anchor="middle" class="small">容量大、访问代价高</text>
+  <text x="215" y="778" text-anchor="middle" class="small">保存完整 A、B、C</text>
+
+  <line x1="345" y1="735" x2="440" y2="735" stroke="#2156c4" stroke-width="3" marker-end="url(#arrow)"/>
+  <text x="392" y="718" text-anchor="middle" class="small">搬入</text>
+
+  <rect x="455" y="670" width="285" height="130" class="flowBox" fill="#e8f7ff" stroke="#0284c7"/>
+  <text x="598" y="712" text-anchor="middle" class="label">Shared Memory</text>
+  <text x="598" y="747" text-anchor="middle" class="small">保存 A tile、B tile</text>
+  <text x="598" y="778" text-anchor="middle" class="small">同一 block 的线程复用</text>
+
+  <line x1="740" y1="735" x2="835" y2="735" stroke="#2156c4" stroke-width="3" marker-end="url(#arrow)"/>
+  <text x="787" y="718" text-anchor="middle" class="small">反复读取</text>
+
+  <rect x="850" y="670" width="290" height="130" class="flowBox" fill="#f3edff" stroke="#6d28d9"/>
+  <text x="995" y="712" text-anchor="middle" class="label">Registers / Tensor Core</text>
+  <text x="995" y="747" text-anchor="middle" class="small">执行乘加（MMA）</text>
+  <text x="995" y="778" text-anchor="middle" class="small">寄存器保存 C tile 累加器</text>
+
+  <line x1="1140" y1="735" x2="1235" y2="735" stroke="#2156c4" stroke-width="3" marker-end="url(#arrow)"/>
+  <text x="1187" y="718" text-anchor="middle" class="small">完成后写回</text>
+
+  <rect x="1250" y="670" width="260" height="130" class="flowBox" fill="#effcf6" stroke="#059669"/>
+  <text x="1380" y="712" text-anchor="middle" class="label">HBM 中的 C</text>
+  <text x="1380" y="747" text-anchor="middle" class="small">每个输出 tile</text>
+  <text x="1380" y="778" text-anchor="middle" class="small">完成后只写回一次</text>
+
+  <rect x="250" y="828" width="1100" height="48" rx="14" fill="#fff7ed" stroke="#ea580c" stroke-width="2"/>
+  <text x="800" y="860" text-anchor="middle" font-size="20" font-weight="700" fill="#9a3412">核心：不是少算乘法，而是让从 HBM 搬进来的数据在片上被重复使用</text>
+</svg>

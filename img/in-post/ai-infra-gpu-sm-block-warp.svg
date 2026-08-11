@@ -1,0 +1,104 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="930" viewBox="0 0 1600 930">
+  <defs>
+    <marker id="arrow" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto">
+      <path d="M0,0 L9,4.5 L0,9 Z" fill="#2156c4"/>
+    </marker>
+    <style>
+      text { font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", Arial, sans-serif; }
+      .title { font-size: 46px; font-weight: 800; fill: #102a72; }
+      .h2 { font-size: 25px; font-weight: 750; fill: #174ea6; }
+      .label { font-size: 19px; font-weight: 700; fill: #17223b; }
+      .small { font-size: 16px; fill: #35415c; }
+      .tiny { font-size: 14px; fill: #35415c; }
+      .block { fill: #dcecff; stroke: #2563eb; stroke-width: 2; rx: 12; }
+      .sm { fill: #f8f6ff; stroke: #6d28d9; stroke-width: 2.5; rx: 22; }
+      .warp { fill: #e9ddff; stroke: #7c3aed; stroke-width: 1.5; rx: 8; }
+      .resource { stroke-width: 2; rx: 14; }
+    </style>
+  </defs>
+
+  <rect width="1600" height="930" fill="#ffffff"/>
+  <text x="800" y="64" text-anchor="middle" class="title">Grid、Block、SM、Warp 与 Thread 的关系</text>
+  <text x="800" y="101" text-anchor="middle" class="small">线程属于 block；block 被完整调度到 SM；SM 以 warp 为单位发射指令</text>
+
+  <!-- Grid and blocks -->
+  <rect x="55" y="145" width="360" height="490" rx="22" fill="#f5f9ff" stroke="#2156c4" stroke-width="2.5"/>
+  <text x="235" y="183" text-anchor="middle" class="h2">一次 Kernel 启动：Grid</text>
+  <text x="235" y="212" text-anchor="middle" class="small">例：kernel&lt;&lt;&lt;8, 256&gt;&gt;&gt;</text>
+
+  <g>
+    <rect x="85" y="245" width="135" height="78" class="block"/><text x="152" y="276" text-anchor="middle" class="label">Block 0</text><text x="152" y="302" text-anchor="middle" class="tiny">256 threads</text>
+    <rect x="250" y="245" width="135" height="78" class="block"/><text x="317" y="276" text-anchor="middle" class="label">Block 1</text><text x="317" y="302" text-anchor="middle" class="tiny">256 threads</text>
+    <rect x="85" y="345" width="135" height="78" class="block"/><text x="152" y="376" text-anchor="middle" class="label">Block 2</text><text x="152" y="402" text-anchor="middle" class="tiny">256 threads</text>
+    <rect x="250" y="345" width="135" height="78" class="block"/><text x="317" y="376" text-anchor="middle" class="label">Block 3</text><text x="317" y="402" text-anchor="middle" class="tiny">256 threads</text>
+    <rect x="85" y="445" width="135" height="78" class="block"/><text x="152" y="476" text-anchor="middle" class="label">Block 4</text><text x="152" y="502" text-anchor="middle" class="tiny">256 threads</text>
+    <rect x="250" y="445" width="135" height="78" class="block"/><text x="317" y="476" text-anchor="middle" class="label">Block 5</text><text x="317" y="502" text-anchor="middle" class="tiny">256 threads</text>
+    <rect x="85" y="545" width="135" height="64" class="block"/><text x="152" y="584" text-anchor="middle" class="label">Block 6</text>
+    <rect x="250" y="545" width="135" height="64" class="block"/><text x="317" y="584" text-anchor="middle" class="label">Block 7</text>
+  </g>
+
+  <line x1="415" y1="330" x2="500" y2="260" stroke="#2156c4" stroke-width="3" marker-end="url(#arrow)"/>
+  <line x1="415" y1="450" x2="500" y2="520" stroke="#2156c4" stroke-width="3" marker-end="url(#arrow)"/>
+  <text x="466" y="392" text-anchor="middle" class="small">硬件调度</text>
+
+  <!-- Two SMs -->
+  <rect x="515" y="140" width="610" height="305" class="sm"/>
+  <text x="820" y="178" text-anchor="middle" class="h2" fill="#5b21b6">SM 0（Streaming Multiprocessor）</text>
+  <text x="820" y="205" text-anchor="middle" class="small">GPU 内可独立调度和执行大量 warp 的计算单元</text>
+
+  <rect x="545" y="230" width="250" height="160" class="resource" fill="#e8f7ff" stroke="#0284c7"/>
+  <text x="670" y="263" text-anchor="middle" class="label">Block 0 驻留</text>
+  <text x="670" y="293" text-anchor="middle" class="small">256 threads = 8 warps</text>
+  <text x="670" y="323" text-anchor="middle" class="small">占用一部分 shared memory</text>
+  <text x="670" y="351" text-anchor="middle" class="small">每个线程占用若干 registers</text>
+
+  <rect x="815" y="230" width="250" height="160" class="resource" fill="#ecfdf5" stroke="#059669"/>
+  <text x="940" y="263" text-anchor="middle" class="label">Block 1 驻留</text>
+  <text x="940" y="293" text-anchor="middle" class="small">256 threads = 8 warps</text>
+  <text x="940" y="323" text-anchor="middle" class="small">与 Block 0 隔离</text>
+  <text x="940" y="351" text-anchor="middle" class="small">但共享同一个 SM 的总资源</text>
+
+  <rect x="515" y="475" width="610" height="230" class="sm"/>
+  <text x="820" y="512" text-anchor="middle" class="h2" fill="#5b21b6">SM 1</text>
+  <rect x="560" y="545" width="225" height="115" class="resource" fill="#e8f7ff" stroke="#0284c7"/>
+  <text x="672" y="581" text-anchor="middle" class="label">Block 2 驻留</text>
+  <text x="672" y="614" text-anchor="middle" class="small">8 个 resident warp</text>
+  <rect x="850" y="545" width="225" height="115" class="resource" fill="#ecfdf5" stroke="#059669"/>
+  <text x="962" y="581" text-anchor="middle" class="label">Block 3 驻留</text>
+  <text x="962" y="614" text-anchor="middle" class="small">8 个 resident warp</text>
+  <text x="820" y="686" text-anchor="middle" class="small">其他 block 等待 SM 释放资源后再进入</text>
+
+  <!-- Warp decomposition -->
+  <rect x="1160" y="140" width="385" height="565" rx="22" fill="#fff" stroke="#6d28d9" stroke-width="2.5"/>
+  <text x="1352" y="180" text-anchor="middle" class="h2" fill="#5b21b6">一个 256 线程 Block</text>
+  <text x="1352" y="213" text-anchor="middle" class="label">256 ÷ 32 = 8 个 Warp</text>
+
+  <g>
+    <rect x="1200" y="242" width="305" height="42" class="warp"/><text x="1220" y="269" class="small">Warp 0</text><text x="1490" y="269" text-anchor="end" class="tiny">thread 0–31</text>
+    <rect x="1200" y="296" width="305" height="42" class="warp"/><text x="1220" y="323" class="small">Warp 1</text><text x="1490" y="323" text-anchor="end" class="tiny">thread 32–63</text>
+    <rect x="1200" y="350" width="305" height="42" class="warp"/><text x="1220" y="377" class="small">Warp 2</text><text x="1490" y="377" text-anchor="end" class="tiny">thread 64–95</text>
+    <rect x="1200" y="404" width="305" height="42" class="warp"/><text x="1220" y="431" class="small">Warp 3</text><text x="1490" y="431" text-anchor="end" class="tiny">thread 96–127</text>
+    <rect x="1200" y="458" width="305" height="42" class="warp"/><text x="1220" y="485" class="small">Warp 4</text><text x="1490" y="485" text-anchor="end" class="tiny">thread 128–159</text>
+    <rect x="1200" y="512" width="305" height="42" class="warp"/><text x="1220" y="539" class="small">Warp 5</text><text x="1490" y="539" text-anchor="end" class="tiny">thread 160–191</text>
+    <rect x="1200" y="566" width="305" height="42" class="warp"/><text x="1220" y="593" class="small">Warp 6</text><text x="1490" y="593" text-anchor="end" class="tiny">thread 192–223</text>
+    <rect x="1200" y="620" width="305" height="42" class="warp"/><text x="1220" y="647" class="small">Warp 7</text><text x="1490" y="647" text-anchor="end" class="tiny">thread 224–255</text>
+  </g>
+  <text x="1352" y="688" text-anchor="middle" class="small">Warp 是 SM 发射和调度指令的基本线程组</text>
+
+  <!-- Resource fitting explanation -->
+  <rect x="55" y="745" width="1490" height="150" rx="22" fill="#fff8ed" stroke="#ea580c" stroke-width="2.5"/>
+  <text x="800" y="782" text-anchor="middle" class="h2" fill="#9a3412">为什么 tile 太大会减少 resident block / warp？（示意数值）</text>
+
+  <text x="100" y="825" class="label">假设一个 SM 有 64 KB shared memory：</text>
+  <rect x="475" y="805" width="285" height="58" rx="12" fill="#dff4ff" stroke="#0284c7" stroke-width="2"/>
+  <text x="617" y="830" text-anchor="middle" class="small">每 block 用 16 KB</text>
+  <text x="617" y="853" text-anchor="middle" class="label">最多 4 blocks</text>
+  <rect x="795" y="805" width="285" height="58" rx="12" fill="#eee7ff" stroke="#7c3aed" stroke-width="2"/>
+  <text x="937" y="830" text-anchor="middle" class="small">每 block 用 32 KB</text>
+  <text x="937" y="853" text-anchor="middle" class="label">最多 2 blocks</text>
+  <rect x="1115" y="805" width="285" height="58" rx="12" fill="#ffe7df" stroke="#ea580c" stroke-width="2"/>
+  <text x="1257" y="830" text-anchor="middle" class="small">每 block 用 48 KB</text>
+  <text x="1257" y="853" text-anchor="middle" class="label">最多 1 block</text>
+
+  <text x="800" y="886" text-anchor="middle" class="small">共享内存按 block 保留，寄存器按线程保留；任一资源先耗尽，都会限制 SM 同时驻留的 block 和 warp 数量</text>
+</svg>
