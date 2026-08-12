@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900">
+  <defs>
+    <style>
+      text { font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", Arial, sans-serif; }
+      .title { font-size: 46px; font-weight: 800; fill: #102a72; }
+      .h2 { font-size: 25px; font-weight: 750; fill: #174ea6; }
+      .label { font-size: 20px; font-weight: 700; fill: #17223b; }
+      .small { font-size: 17px; fill: #35415c; }
+      .formula { font-size: 23px; font-weight: 700; fill: #5b21b6; }
+      .box { rx: 20; stroke-width: 2.4; }
+    </style>
+  </defs>
+  <rect width="1600" height="900" fill="#fff"/>
+  <text x="800" y="68" text-anchor="middle" class="title">交叉熵与 KL：真实分布 q 和模型分布 p 差在哪里？</text>
+  <text x="800" y="105" text-anchor="middle" class="small">同一个三分类例子：q = [0.7, 0.2, 0.1]，p = [0.4, 0.4, 0.2]</text>
+
+  <!-- q chart -->
+  <rect x="75" y="150" width="580" height="390" class="box" fill="#eef4ff" stroke="#2563eb"/>
+  <text x="365" y="195" text-anchor="middle" class="h2">真实分布 q</text>
+  <text x="365" y="229" text-anchor="middle" class="small">数据本身的概率结构</text>
+  <line x1="155" y1="470" x2="580" y2="470" stroke="#5676ae" stroke-width="2"/>
+  <line x1="155" y1="270" x2="155" y2="470" stroke="#5676ae" stroke-width="2"/>
+  <rect x="205" y="330" width="80" height="140" fill="#3182ce"/><text x="245" y="318" text-anchor="middle" class="label">0.7</text><text x="245" y="503" text-anchor="middle" class="small">苹果</text>
+  <rect x="335" y="430" width="80" height="40" fill="#3182ce"/><text x="375" y="418" text-anchor="middle" class="label">0.2</text><text x="375" y="503" text-anchor="middle" class="small">香蕉</text>
+  <rect x="465" y="450" width="80" height="20" fill="#3182ce"/><text x="505" y="438" text-anchor="middle" class="label">0.1</text><text x="505" y="503" text-anchor="middle" class="small">汽车</text>
+
+  <!-- p chart -->
+  <rect x="945" y="150" width="580" height="390" class="box" fill="#f3edff" stroke="#7c3aed"/>
+  <text x="1235" y="195" text-anchor="middle" class="h2" fill="#5b21b6">模型预测分布 p</text>
+  <text x="1235" y="229" text-anchor="middle" class="small">模型实际分配的概率</text>
+  <line x1="1025" y1="470" x2="1450" y2="470" stroke="#8064b3" stroke-width="2"/>
+  <line x1="1025" y1="270" x2="1025" y2="470" stroke="#8064b3" stroke-width="2"/>
+  <rect x="1075" y="390" width="80" height="80" fill="#7c3aed"/><text x="1115" y="378" text-anchor="middle" class="label">0.4</text><text x="1115" y="503" text-anchor="middle" class="small">苹果</text>
+  <rect x="1205" y="390" width="80" height="80" fill="#7c3aed"/><text x="1245" y="378" text-anchor="middle" class="label">0.4</text><text x="1245" y="503" text-anchor="middle" class="small">香蕉</text>
+  <rect x="1335" y="430" width="80" height="40" fill="#7c3aed"/><text x="1375" y="418" text-anchor="middle" class="label">0.2</text><text x="1375" y="503" text-anchor="middle" class="small">汽车</text>
+
+  <!-- comparison middle -->
+  <text x="800" y="283" text-anchor="middle" font-size="36" font-weight="800" fill="#17223b">比较</text>
+  <text x="800" y="330" text-anchor="middle" class="formula">q ≠ p</text>
+  <text x="800" y="384" text-anchor="middle" class="small">模型低估苹果</text>
+  <text x="800" y="416" text-anchor="middle" class="small">高估香蕉和汽车</text>
+
+  <!-- decomposition -->
+  <rect x="75" y="585" width="1450" height="225" class="box" fill="#fbfaff" stroke="#6d28d9"/>
+  <text x="800" y="628" text-anchor="middle" class="h2" fill="#5b21b6">交叉熵 = 真实分布自身的不确定性 + 模型额外造成的分布偏差</text>
+
+  <rect x="120" y="665" width="390" height="105" rx="16" fill="#eef4ff" stroke="#2563eb" stroke-width="2"/>
+  <text x="315" y="702" text-anchor="middle" class="formula">H(q) = −Σᵢ qᵢ log qᵢ</text>
+  <text x="315" y="739" text-anchor="middle" class="small">只由真实分布 q 决定，训练时固定</text>
+
+  <text x="552" y="725" text-anchor="middle" font-size="42" font-weight="700" fill="#17223b">+</text>
+
+  <rect x="595" y="665" width="430" height="105" rx="16" fill="#fff7ed" stroke="#ea580c" stroke-width="2"/>
+  <text x="810" y="702" text-anchor="middle" class="formula">D_KL(q ‖ p) = Σᵢ qᵢ log(qᵢ/pᵢ)</text>
+  <text x="810" y="739" text-anchor="middle" class="small">p 没有复现 q 所产生的额外代价</text>
+
+  <text x="1067" y="725" text-anchor="middle" font-size="42" font-weight="700" fill="#17223b">=</text>
+
+  <rect x="1110" y="665" width="365" height="105" rx="16" fill="#ecfdf5" stroke="#059669" stroke-width="2"/>
+  <text x="1292" y="702" text-anchor="middle" class="formula">H(q,p) = −Σᵢ qᵢ log pᵢ</text>
+  <text x="1292" y="739" text-anchor="middle" class="small">用模型 p 描述真实分布 q 的总代价</text>
+
+  <rect x="270" y="832" width="1060" height="48" rx="14" fill="#fff3f1" stroke="#dc2626" stroke-width="2"/>
+  <text x="800" y="864" text-anchor="middle" font-size="20" font-weight="750" fill="#b91c1c">q 固定时，H(q) 不变，所以最小化交叉熵等价于最小化 D_KL(q ‖ p)</text>
+</svg>
