@@ -44,10 +44,10 @@ Transformer 中同一个字母有时会被不同资料赋予不同含义。为�
 | $D_h$ | 每个 Attention head 的维度，通常 $D_h=H/N_h$ |
 | $H_{ff}$ | FFN 的中间维度 |
 | $L$ | Decoder Block 的层数 |
-| $|\mathcal V|$ | tokenizer 的词表大小 |
+| $\lvert\mathcal V\rvert$ | tokenizer 的词表大小 |
 | $V_{val}$ | Attention 中的 Value 张量，避免与词表混淆 |
 
-这里最容易混淆的是 $S$、$H$ 和 $|\mathcal V|$：
+这里最容易混淆的是 $S$、$H$ 和 $\lvert\mathcal V\rvert$：
 
 ```text
 S：当前这段输入实际有多少个 token
@@ -75,11 +75,11 @@ Tokenizer 会把它转换成一串 token ID：
 
 如果一共得到 $S$ 个 token，那么 token ID 张量的形状是：
 
-<p align="center">$\text{token\_ids}\in\mathbb{N}^{B\times S}$</p>
+<p align="center">$\text{token_ids}\in\mathbb{N}^{B\times S}$</p>
 
 模型内部维护一个 Embedding 参数矩阵：
 
-<p align="center">$E\in\mathbb{R}^{|\mathcal V|\times H}$</p>
+<p align="center">$E\in\mathbb{R}^{\lvert\mathcal V\rvert\times H}$</p>
 
 其中每一行保存一个词表 token 的 $H$ 维表示。对于第 $s$ 个输入 token，查表得到：
 
@@ -89,7 +89,7 @@ Tokenizer 会把它转换成一串 token ID：
 
 <p align="center">$X\in\mathbb{R}^{B\times S\times H}$</p>
 
-所以 Transformer 的输入是 $[B,S,H]$，而不是 $[B,|\mathcal V|,H]$。$|\mathcal V|$ 只表示整个 Embedding 表有多少行；当前句子只从中查出了 $S$ 行。
+所以 Transformer 的输入是 $[B,S,H]$，而不是 $[B,\lvert\mathcal V\rvert,H]$。$\lvert\mathcal V\rvert$ 只表示整个 Embedding 表有多少行；当前句子只从中查出了 $S$ 行。
 
 例如：
 
@@ -922,7 +922,7 @@ SwiGLU 的三个矩阵为：
 
 然后通过 LM Head 映射到整个词表：
 
-<p align="center">$W_{lm}\in\mathbb{R}^{H\times|\mathcal V|}$</p>
+<p align="center">$W_{lm}\in\mathbb{R}^{H\times\lvert\mathcal V\rvert}$</p>
 
 <p align="center">$\text{logits}=X_{final}W_{lm}$</p>
 
@@ -1061,7 +1061,7 @@ Logits [B, S, |V|]
 
 这次最重要的几个理解是：
 
-1. $S$ 是当前输入的 token 数，$H$ 是每个 token 的隐藏维度，$|\mathcal V|$ 是整个词表大小；
+1. $S$ 是当前输入的 token 数，$H$ 是每个 token 的隐藏维度，$\lvert\mathcal V\rvert$ 是整个词表大小；
 2. Q、K、V 是同一输入经过不同参数投影得到的三种表示；
 3. 多头的投影可以合并成一次大 GEMM，但每个 head 仍会独立计算注意力分数和 Softmax；
 4. 输出投影 $W_O$ 用来混合多个 head，并让结果回到残差流的 $H$ 维；
