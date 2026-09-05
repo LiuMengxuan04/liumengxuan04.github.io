@@ -1,0 +1,112 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1500" height="900" viewBox="0 0 1500 900" role="img" aria-labelledby="title desc">
+  <title id="title">Transformer 中 LayerNorm 和 BatchNorm 的归约方向</title>
+  <desc id="desc">将 B 和 S 展平为六个 token。LayerNorm 对每个 token 独立沿 H 维统计；BatchNorm 对同一特征跨 token 统计。</desc>
+  <defs>
+    <style>
+      .bg { fill: #f7f8fa; }
+      .panel { fill: #ffffff; stroke: #cfd7e3; stroke-width: 2; }
+      .title { font: 700 38px 'PingFang SC','Microsoft YaHei',Arial,sans-serif; fill: #17233a; }
+      .subtitle { font: 400 20px 'PingFang SC','Microsoft YaHei',Arial,sans-serif; fill: #536176; }
+      .head { font: 700 28px 'PingFang SC','Microsoft YaHei',Arial,sans-serif; fill: #17233a; }
+      .label { font: 600 20px 'PingFang SC','Microsoft YaHei',Arial,sans-serif; fill: #17233a; }
+      .small { font: 400 17px 'PingFang SC','Microsoft YaHei',Arial,sans-serif; fill: #536176; }
+      .tiny { font: 500 15px 'PingFang SC','Microsoft YaHei',Arial,sans-serif; fill: #536176; }
+      .cell { stroke: #ffffff; stroke-width: 3; }
+      .row-a { fill: #dfeaf8; }
+      .row-b { fill: #e6f1e8; }
+      .row-c { fill: #fbe9dc; }
+      .row-d { fill: #eee8f7; }
+      .row-e { fill: #fae4e2; }
+      .row-f { fill: #e4f0f1; }
+      .col-a { fill: #dfeaf8; }
+      .col-b { fill: #e6f1e8; }
+      .col-c { fill: #fbe9dc; }
+      .col-d { fill: #eee8f7; }
+      .group-ln { fill: none; stroke: #4776a8; stroke-width: 4; }
+      .group-bn { fill: none; stroke: #b05f42; stroke-width: 4; }
+      .note { fill: #eef1f5; stroke: #cfd7e3; stroke-width: 1.5; }
+    </style>
+  </defs>
+
+  <rect class="bg" width="1500" height="900"/>
+  <text class="title" x="60" y="65">归一化方向：Transformer 关心的是每个 token 自己的隐藏向量</text>
+  <text class="subtitle" x="60" y="103">示例 X ∈ R^[B,S,H]，取 B=2、S=3、H=4；图中把 B×S 展平为 6 行 token</text>
+
+  <rect class="panel" x="55" y="140" width="675" height="650" rx="8"/>
+  <rect class="panel" x="770" y="140" width="675" height="650" rx="8"/>
+
+  <text class="head" x="392" y="190" text-anchor="middle">LayerNorm / RMSNorm</text>
+  <text class="small" x="392" y="221" text-anchor="middle">每一行单独沿 H=4 统计，不读取其他 token</text>
+
+  <text class="tiny" x="170" y="264">token</text>
+  <text class="tiny" x="315" y="264">h₀</text>
+  <text class="tiny" x="395" y="264">h₁</text>
+  <text class="tiny" x="475" y="264">h₂</text>
+  <text class="tiny" x="555" y="264">h₃</text>
+
+  <text class="label" x="150" y="312">b₀,s₀</text>
+  <rect class="cell row-a" x="280" y="280" width="80" height="50"/><rect class="cell row-a" x="360" y="280" width="80" height="50"/><rect class="cell row-a" x="440" y="280" width="80" height="50"/><rect class="cell row-a" x="520" y="280" width="80" height="50"/>
+  <rect class="group-ln" x="274" y="274" width="332" height="62" rx="8"/>
+
+  <text class="label" x="150" y="382">b₀,s₁</text>
+  <rect class="cell row-b" x="280" y="350" width="80" height="50"/><rect class="cell row-b" x="360" y="350" width="80" height="50"/><rect class="cell row-b" x="440" y="350" width="80" height="50"/><rect class="cell row-b" x="520" y="350" width="80" height="50"/>
+  <rect class="group-ln" x="274" y="344" width="332" height="62" rx="8"/>
+
+  <text class="label" x="150" y="452">b₀,s₂</text>
+  <rect class="cell row-c" x="280" y="420" width="80" height="50"/><rect class="cell row-c" x="360" y="420" width="80" height="50"/><rect class="cell row-c" x="440" y="420" width="80" height="50"/><rect class="cell row-c" x="520" y="420" width="80" height="50"/>
+  <rect class="group-ln" x="274" y="414" width="332" height="62" rx="8"/>
+
+  <text class="label" x="150" y="522">b₁,s₀</text>
+  <rect class="cell row-d" x="280" y="490" width="80" height="50"/><rect class="cell row-d" x="360" y="490" width="80" height="50"/><rect class="cell row-d" x="440" y="490" width="80" height="50"/><rect class="cell row-d" x="520" y="490" width="80" height="50"/>
+  <rect class="group-ln" x="274" y="484" width="332" height="62" rx="8"/>
+
+  <text class="label" x="150" y="592">b₁,s₁</text>
+  <rect class="cell row-e" x="280" y="560" width="80" height="50"/><rect class="cell row-e" x="360" y="560" width="80" height="50"/><rect class="cell row-e" x="440" y="560" width="80" height="50"/><rect class="cell row-e" x="520" y="560" width="80" height="50"/>
+  <rect class="group-ln" x="274" y="554" width="332" height="62" rx="8"/>
+
+  <text class="label" x="150" y="662">b₁,s₂</text>
+  <rect class="cell row-f" x="280" y="630" width="80" height="50"/><rect class="cell row-f" x="360" y="630" width="80" height="50"/><rect class="cell row-f" x="440" y="630" width="80" height="50"/><rect class="cell row-f" x="520" y="630" width="80" height="50"/>
+  <rect class="group-ln" x="274" y="624" width="332" height="62" rx="8"/>
+
+  <rect class="note" x="115" y="716" width="555" height="52" rx="7"/>
+  <text class="small" x="392" y="748" text-anchor="middle">每个 token 各得到一组统计量；B=1、S=1 也能工作</text>
+
+  <text class="head" x="1107" y="190" text-anchor="middle">BatchNorm（概念对比）</text>
+  <text class="small" x="1107" y="221" text-anchor="middle">每一列跨 B×S=6 个 token 统计，依赖批次组成</text>
+
+  <text class="tiny" x="885" y="264">token</text>
+  <text class="tiny" x="1030" y="264">h₀</text>
+  <text class="tiny" x="1110" y="264">h₁</text>
+  <text class="tiny" x="1190" y="264">h₂</text>
+  <text class="tiny" x="1270" y="264">h₃</text>
+
+  <text class="label" x="865" y="312">b₀,s₀</text>
+  <text class="label" x="865" y="382">b₀,s₁</text>
+  <text class="label" x="865" y="452">b₀,s₂</text>
+  <text class="label" x="865" y="522">b₁,s₀</text>
+  <text class="label" x="865" y="592">b₁,s₁</text>
+  <text class="label" x="865" y="662">b₁,s₂</text>
+
+  <g class="col-a">
+    <rect class="cell" x="995" y="280" width="80" height="50"/><rect class="cell" x="995" y="350" width="80" height="50"/><rect class="cell" x="995" y="420" width="80" height="50"/><rect class="cell" x="995" y="490" width="80" height="50"/><rect class="cell" x="995" y="560" width="80" height="50"/><rect class="cell" x="995" y="630" width="80" height="50"/>
+  </g>
+  <g class="col-b">
+    <rect class="cell" x="1075" y="280" width="80" height="50"/><rect class="cell" x="1075" y="350" width="80" height="50"/><rect class="cell" x="1075" y="420" width="80" height="50"/><rect class="cell" x="1075" y="490" width="80" height="50"/><rect class="cell" x="1075" y="560" width="80" height="50"/><rect class="cell" x="1075" y="630" width="80" height="50"/>
+  </g>
+  <g class="col-c">
+    <rect class="cell" x="1155" y="280" width="80" height="50"/><rect class="cell" x="1155" y="350" width="80" height="50"/><rect class="cell" x="1155" y="420" width="80" height="50"/><rect class="cell" x="1155" y="490" width="80" height="50"/><rect class="cell" x="1155" y="560" width="80" height="50"/><rect class="cell" x="1155" y="630" width="80" height="50"/>
+  </g>
+  <g class="col-d">
+    <rect class="cell" x="1235" y="280" width="80" height="50"/><rect class="cell" x="1235" y="350" width="80" height="50"/><rect class="cell" x="1235" y="420" width="80" height="50"/><rect class="cell" x="1235" y="490" width="80" height="50"/><rect class="cell" x="1235" y="560" width="80" height="50"/><rect class="cell" x="1235" y="630" width="80" height="50"/>
+  </g>
+  <rect class="group-bn" x="989" y="274" width="92" height="412" rx="8"/>
+  <rect class="group-bn" x="1069" y="274" width="92" height="412" rx="8"/>
+  <rect class="group-bn" x="1149" y="274" width="92" height="412" rx="8"/>
+  <rect class="group-bn" x="1229" y="274" width="92" height="412" rx="8"/>
+
+  <rect class="note" x="830" y="716" width="555" height="52" rx="7"/>
+  <text class="small" x="1107" y="748" text-anchor="middle">训练统计会随 batch、padding 与设备切分而变化</text>
+
+  <rect class="note" x="225" y="815" width="1050" height="54" rx="7"/>
+  <text class="label" x="750" y="848" text-anchor="middle">RMSNorm 与 LayerNorm 使用同一归约方向；区别是 RMSNorm 不减均值</text>
+</svg>

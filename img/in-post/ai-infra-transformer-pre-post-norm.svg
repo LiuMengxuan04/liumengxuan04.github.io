@@ -1,0 +1,107 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1500" height="960" viewBox="0 0 1500 960" role="img" aria-labelledby="title desc">
+  <title id="title">Transformer 的 Post-Norm 与 Pre-Norm 对比</title>
+  <desc id="desc">左侧是原始 Transformer 的 Post-Norm，右侧是现代大模型常用的 Pre-Norm。两者都包含两条残差路径和 FFN 内的激活函数。</desc>
+  <defs>
+    <marker id="blue-arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+      <path d="M0,0 L10,5 L0,10 Z" fill="#315b8a"/>
+    </marker>
+    <marker id="green-arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+      <path d="M0,0 L10,5 L0,10 Z" fill="#397453"/>
+    </marker>
+    <style>
+      .bg { fill: #f7f8fa; }
+      .panel { fill: #ffffff; stroke: #cfd7e3; stroke-width: 2; }
+      .title { font: 700 38px 'PingFang SC','Microsoft YaHei',Arial,sans-serif; fill: #17233a; }
+      .subtitle { font: 400 20px 'PingFang SC','Microsoft YaHei',Arial,sans-serif; fill: #536176; }
+      .head { font: 700 29px 'PingFang SC','Microsoft YaHei',Arial,sans-serif; fill: #17233a; }
+      .tag { font: 600 17px 'PingFang SC','Microsoft YaHei',Arial,sans-serif; fill: #ffffff; }
+      .label { font: 600 21px 'PingFang SC','Microsoft YaHei',Arial,sans-serif; fill: #17233a; }
+      .small { font: 400 17px 'PingFang SC','Microsoft YaHei',Arial,sans-serif; fill: #536176; }
+      .formula { font: 600 20px Georgia,'Times New Roman',serif; fill: #17233a; }
+      .attn { fill: #e7f0fb; stroke: #4776a8; stroke-width: 2; }
+      .ffn { fill: #fff0df; stroke: #bf7843; stroke-width: 2; }
+      .norm { fill: #e8f4ea; stroke: #4b8b61; stroke-width: 2; }
+      .sum { fill: #ffffff; stroke: #a74f4b; stroke-width: 3; }
+      .flow-post { fill: none; stroke: #315b8a; stroke-width: 4; marker-end: url(#blue-arrow); }
+      .skip-post { fill: none; stroke: #315b8a; stroke-width: 4; stroke-dasharray: 9 7; marker-end: url(#blue-arrow); }
+      .flow-pre { fill: none; stroke: #397453; stroke-width: 4; marker-end: url(#green-arrow); }
+      .skip-pre { fill: none; stroke: #397453; stroke-width: 4; stroke-dasharray: 9 7; marker-end: url(#green-arrow); }
+    </style>
+  </defs>
+
+  <rect class="bg" width="1500" height="960"/>
+  <text class="title" x="60" y="65">Post-Norm 和 Pre-Norm：只看 Norm 相对“子层 + 残差”的位置</text>
+  <text class="subtitle" x="60" y="103">第一处 Norm 位于 FFN 前，不代表它就是 Pre-Norm；要看它服务的是哪一个子层</text>
+
+  <rect class="panel" x="55" y="135" width="660" height="760" rx="8"/>
+  <rect class="panel" x="785" y="135" width="660" height="760" rx="8"/>
+
+  <text class="head" x="385" y="185" text-anchor="middle">Post-Norm</text>
+  <rect x="494" y="158" width="142" height="32" rx="6" fill="#4776a8"/>
+  <text class="tag" x="565" y="180" text-anchor="middle">原始 Transformer</text>
+  <text class="formula" x="385" y="220" text-anchor="middle">y = Norm(x + Sublayer(x))</text>
+
+  <text class="label" x="385" y="265" text-anchor="middle">x</text>
+  <path class="flow-post" d="M385 278 L385 315"/>
+  <rect class="attn" x="205" y="320" width="360" height="58" rx="8"/>
+  <text class="label" x="385" y="356" text-anchor="middle">Multi-Head Attention</text>
+  <path class="flow-post" d="M385 378 L385 415"/>
+  <circle class="sum" cx="385" cy="441" r="25"/>
+  <text class="head" x="385" y="450" text-anchor="middle">+</text>
+  <path class="skip-post" d="M385 285 L120 285 L120 441 L354 441"/>
+  <text class="small" x="137" y="310">残差保留 x</text>
+  <path class="flow-post" d="M385 466 L385 498"/>
+  <rect class="norm" x="225" y="503" width="320" height="54" rx="8"/>
+  <text class="label" x="385" y="537" text-anchor="middle">LayerNorm</text>
+  <text class="small" x="560" y="535">得到 h</text>
+  <path class="flow-post" d="M385 557 L385 595"/>
+  <rect class="ffn" x="175" y="600" width="420" height="72" rx="8"/>
+  <text class="label" x="385" y="630" text-anchor="middle">FFN</text>
+  <text class="small" x="385" y="657" text-anchor="middle">Linear → ReLU / GELU → Linear</text>
+  <path class="flow-post" d="M385 672 L385 708"/>
+  <circle class="sum" cx="385" cy="734" r="25"/>
+  <text class="head" x="385" y="743" text-anchor="middle">+</text>
+  <path class="skip-post" d="M385 574 L120 574 L120 734 L354 734"/>
+  <text class="small" x="137" y="599">残差保留 h</text>
+  <path class="flow-post" d="M385 759 L385 791"/>
+  <rect class="norm" x="225" y="796" width="320" height="54" rx="8"/>
+  <text class="label" x="385" y="830" text-anchor="middle">LayerNorm</text>
+  <path class="flow-post" d="M385 850 L385 873"/>
+  <text class="label" x="385" y="884" text-anchor="middle">y</text>
+
+  <text class="head" x="1115" y="185" text-anchor="middle">Pre-Norm</text>
+  <rect x="1228" y="158" width="142" height="32" rx="6" fill="#397453"/>
+  <text class="tag" x="1299" y="180" text-anchor="middle">现代 LLM 常见</text>
+  <text class="formula" x="1115" y="220" text-anchor="middle">y = x + Sublayer(Norm(x))</text>
+
+  <text class="label" x="1115" y="265" text-anchor="middle">x</text>
+  <path class="flow-pre" d="M1115 278 L1115 305"/>
+  <rect class="norm" x="955" y="310" width="320" height="54" rx="8"/>
+  <text class="label" x="1115" y="344" text-anchor="middle">LayerNorm / RMSNorm</text>
+  <path class="flow-pre" d="M1115 364 L1115 391"/>
+  <rect class="attn" x="935" y="396" width="360" height="58" rx="8"/>
+  <text class="label" x="1115" y="432" text-anchor="middle">Multi-Head Attention</text>
+  <path class="flow-pre" d="M1115 454 L1115 481"/>
+  <circle class="sum" cx="1115" cy="507" r="25"/>
+  <text class="head" x="1115" y="516" text-anchor="middle">+</text>
+  <path class="skip-pre" d="M1115 285 L1380 285 L1380 507 L1146 507"/>
+  <text class="small" x="1235" y="310">残差主路绕过 Norm</text>
+  <text class="small" x="1190" y="500">得到 h</text>
+  <path class="flow-pre" d="M1115 532 L1115 559"/>
+  <rect class="norm" x="955" y="564" width="320" height="54" rx="8"/>
+  <text class="label" x="1115" y="598" text-anchor="middle">LayerNorm / RMSNorm</text>
+  <path class="flow-pre" d="M1115 618 L1115 645"/>
+  <rect class="ffn" x="905" y="650" width="420" height="72" rx="8"/>
+  <text class="label" x="1115" y="680" text-anchor="middle">FFN</text>
+  <text class="small" x="1115" y="707" text-anchor="middle">Linear → GELU / SwiGLU → Linear</text>
+  <path class="flow-pre" d="M1115 722 L1115 749"/>
+  <circle class="sum" cx="1115" cy="775" r="25"/>
+  <text class="head" x="1115" y="784" text-anchor="middle">+</text>
+  <path class="skip-pre" d="M1115 542 L1380 542 L1380 775 L1146 775"/>
+  <text class="small" x="1245" y="566">残差保留 h</text>
+  <path class="flow-pre" d="M1115 800 L1115 853"/>
+  <text class="label" x="1115" y="884" text-anchor="middle">y</text>
+
+  <rect x="270" y="910" width="960" height="34" rx="6" fill="#eef1f5"/>
+  <text class="small" x="750" y="933" text-anchor="middle">两种结构都有两个 Norm、两个残差加法和 FFN 激活函数；变化的是执行顺序</text>
+</svg>

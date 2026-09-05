@@ -1,0 +1,112 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1500" height="1170" viewBox="0 0 1500 1170" role="img" aria-labelledby="title desc">
+  <title id="title">原始 Transformer Encoder-Decoder 架构</title>
+  <desc id="desc">源序列经过 Encoder，目标序列经过带掩码的 Decoder，Encoder 输出作为 Cross-Attention 的 Key 和 Value。</desc>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+      <path d="M0,0 L10,5 L0,10 Z" fill="#315b8a"/>
+    </marker>
+    <style>
+      .bg { fill: #f7f8fa; }
+      .panel { fill: #ffffff; stroke: #cfd7e3; stroke-width: 2; }
+      .title { font: 700 38px 'PingFang SC','Microsoft YaHei',Arial,sans-serif; fill: #17233a; }
+      .subtitle { font: 400 20px 'PingFang SC','Microsoft YaHei',Arial,sans-serif; fill: #536176; }
+      .head { font: 700 27px 'PingFang SC','Microsoft YaHei',Arial,sans-serif; fill: #17233a; }
+      .label { font: 600 21px 'PingFang SC','Microsoft YaHei',Arial,sans-serif; fill: #17233a; }
+      .small { font: 400 17px 'PingFang SC','Microsoft YaHei',Arial,sans-serif; fill: #536176; }
+      .tiny { font: 500 16px 'PingFang SC','Microsoft YaHei',Arial,sans-serif; fill: #536176; }
+      .input { fill: #e8f4ea; stroke: #4b8b61; stroke-width: 2; }
+      .attn { fill: #e7f0fb; stroke: #4776a8; stroke-width: 2; }
+      .cross { fill: #e9e6f7; stroke: #7167aa; stroke-width: 2; }
+      .ffn { fill: #fff0df; stroke: #bf7843; stroke-width: 2; }
+      .norm { fill: #f1f3f6; stroke: #69778a; stroke-width: 2; }
+      .output { fill: #fbe9e7; stroke: #b85f58; stroke-width: 2; }
+      .flow { fill: none; stroke: #315b8a; stroke-width: 4; marker-end: url(#arrow); }
+      .memory { fill: none; stroke: #7167aa; stroke-width: 5; marker-end: url(#arrow); }
+      .stack { fill: none; stroke: #8090a5; stroke-width: 2; stroke-dasharray: 8 7; }
+    </style>
+  </defs>
+
+  <rect class="bg" width="1500" height="1170"/>
+  <text class="title" x="60" y="65">原始 Transformer：Encoder 负责理解，Decoder 负责生成</text>
+  <text class="subtitle" x="60" y="103">三种 Attention 的计算形式相同，区别在于 Q、K、V 的来源和可见范围</text>
+
+  <rect class="panel" x="55" y="135" width="650" height="965" rx="8"/>
+  <rect class="panel" x="795" y="135" width="650" height="965" rx="8"/>
+  <text class="head" x="380" y="185" text-anchor="middle">Encoder</text>
+  <text class="small" x="380" y="216" text-anchor="middle">双向读取完整源序列</text>
+  <text class="head" x="1120" y="185" text-anchor="middle">Decoder</text>
+  <text class="small" x="1120" y="216" text-anchor="middle">在生成端逐步预测目标 token</text>
+
+  <rect class="input" x="165" y="248" width="430" height="64" rx="8"/>
+  <text class="label" x="380" y="288" text-anchor="middle">源序列 Token IDs</text>
+  <path class="flow" d="M380 312 L380 345"/>
+  <rect class="input" x="145" y="350" width="470" height="72" rx="8"/>
+  <text class="label" x="380" y="380" text-anchor="middle">Token Embedding + Position</text>
+  <text class="tiny" x="380" y="406" text-anchor="middle">[B, S_src, H]</text>
+  <path class="flow" d="M380 422 L380 461"/>
+
+  <rect class="stack" x="105" y="455" width="550" height="445" rx="8"/>
+  <text class="small" x="126" y="485">Encoder Layer × N</text>
+  <rect class="attn" x="155" y="510" width="450" height="70" rx="8"/>
+  <text class="label" x="380" y="541" text-anchor="middle">双向 Multi-Head Self-Attention</text>
+  <text class="tiny" x="380" y="566" text-anchor="middle">Q、K、V 都来自 Encoder 当前输入</text>
+  <path class="flow" d="M380 580 L380 613"/>
+  <rect class="norm" x="190" y="618" width="380" height="55" rx="8"/>
+  <text class="label" x="380" y="653" text-anchor="middle">Residual Add + LayerNorm</text>
+  <path class="flow" d="M380 673 L380 706"/>
+  <rect class="ffn" x="155" y="711" width="450" height="70" rx="8"/>
+  <text class="label" x="380" y="741" text-anchor="middle">Position-wise FFN</text>
+  <text class="tiny" x="380" y="767" text-anchor="middle">Linear → ReLU → Linear（逐 token）</text>
+  <path class="flow" d="M380 781 L380 811"/>
+  <rect class="norm" x="190" y="816" width="380" height="55" rx="8"/>
+  <text class="label" x="380" y="851" text-anchor="middle">Residual Add + LayerNorm</text>
+  <path class="flow" d="M380 871 L380 904"/>
+  <rect class="input" x="145" y="909" width="470" height="64" rx="8"/>
+  <text class="label" x="380" y="938" text-anchor="middle">Encoder Memory</text>
+  <text class="tiny" x="380" y="961" text-anchor="middle">[B, S_src, H]</text>
+
+  <rect class="input" x="905" y="248" width="430" height="64" rx="8"/>
+  <text class="label" x="1120" y="277" text-anchor="middle">右移后的目标序列</text>
+  <text class="tiny" x="1120" y="300" text-anchor="middle">训练时一次输入，因果 Mask 防止偷看未来</text>
+  <path class="flow" d="M1120 312 L1120 345"/>
+  <rect class="input" x="885" y="350" width="470" height="72" rx="8"/>
+  <text class="label" x="1120" y="380" text-anchor="middle">Token Embedding + Position</text>
+  <text class="tiny" x="1120" y="406" text-anchor="middle">[B, S_tgt, H]</text>
+  <path class="flow" d="M1120 422 L1120 461"/>
+
+  <rect class="stack" x="845" y="455" width="550" height="540" rx="8"/>
+  <text class="small" x="866" y="485">Decoder Layer × N</text>
+  <rect class="attn" x="895" y="510" width="450" height="62" rx="8"/>
+  <text class="label" x="1120" y="537" text-anchor="middle">Masked Self-Attention</text>
+  <text class="tiny" x="1120" y="560" text-anchor="middle">只能看当前和更早的目标 token</text>
+  <path class="flow" d="M1120 572 L1120 595"/>
+  <rect class="norm" x="930" y="600" width="380" height="48" rx="8"/>
+  <text class="label" x="1120" y="631" text-anchor="middle">Residual Add + LayerNorm</text>
+  <path class="flow" d="M1120 648 L1120 671"/>
+  <rect class="cross" x="895" y="676" width="450" height="68" rx="8"/>
+  <text class="label" x="1120" y="704" text-anchor="middle">Cross-Attention</text>
+  <text class="tiny" x="1120" y="730" text-anchor="middle">Q 来自 Decoder，K/V 来自 Encoder</text>
+  <path class="flow" d="M1120 744 L1120 767"/>
+  <rect class="norm" x="930" y="772" width="380" height="48" rx="8"/>
+  <text class="label" x="1120" y="803" text-anchor="middle">Residual Add + LayerNorm</text>
+  <path class="flow" d="M1120 820 L1120 843"/>
+  <rect class="ffn" x="895" y="848" width="450" height="68" rx="8"/>
+  <text class="label" x="1120" y="876" text-anchor="middle">Position-wise FFN</text>
+  <text class="tiny" x="1120" y="901" text-anchor="middle">Linear → ReLU → Linear（含激活函数）</text>
+  <path class="flow" d="M1120 916 L1120 931"/>
+  <rect class="norm" x="930" y="936" width="380" height="48" rx="8"/>
+  <text class="label" x="1120" y="967" text-anchor="middle">Residual Add + LayerNorm</text>
+  <path class="flow" d="M1120 984 L1120 1000"/>
+
+  <path class="memory" d="M615 941 C755 941 740 710 890 710"/>
+  <text class="small" x="750" y="900" text-anchor="middle">完整源序列的 K、V</text>
+
+  <rect class="output" x="895" y="1005" width="450" height="70" rx="8"/>
+  <text class="label" x="1120" y="1034" text-anchor="middle">Linear → Softmax</text>
+  <text class="tiny" x="1120" y="1061" text-anchor="middle">预测下一个目标 token</text>
+
+  <rect x="80" y="1120" width="18" height="18" rx="3" fill="#e7f0fb" stroke="#4776a8"/>
+  <text class="tiny" x="108" y="1135">Self-Attention：同一序列内交换信息</text>
+  <rect x="790" y="1120" width="18" height="18" rx="3" fill="#e9e6f7" stroke="#7167aa"/>
+  <text class="tiny" x="818" y="1135">Cross-Attention：Decoder 查询 Encoder 输出</text>
+</svg>

@@ -1,0 +1,107 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1500" height="940" viewBox="0 0 1500 940" role="img" aria-labelledby="title desc">
+  <title id="title">LLM 推理中的 Prefill 与 Decode</title>
+  <desc id="desc">Prefill 在每一层并行处理全部 Prompt token 并建立 KV Cache；Decode 每一步只处理一个新 token，读取历史 KV Cache 后追加新的 K 和 V。</desc>
+  <defs>
+    <marker id="arrow-blue" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 Z" fill="#315b8a"/></marker>
+    <marker id="arrow-red" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 Z" fill="#a74f4b"/></marker>
+    <style>
+      .bg { fill: #f7f8fa; }
+      .panel { fill: #ffffff; stroke: #cfd7e3; stroke-width: 2; }
+      .title { font: 700 38px 'PingFang SC','Microsoft YaHei',Arial,sans-serif; fill: #17233a; }
+      .subtitle { font: 400 20px 'PingFang SC','Microsoft YaHei',Arial,sans-serif; fill: #536176; }
+      .head { font: 700 29px 'PingFang SC','Microsoft YaHei',Arial,sans-serif; fill: #17233a; }
+      .label { font: 600 20px 'PingFang SC','Microsoft YaHei',Arial,sans-serif; fill: #17233a; }
+      .small { font: 400 17px 'PingFang SC','Microsoft YaHei',Arial,sans-serif; fill: #536176; }
+      .tiny { font: 500 15px 'PingFang SC','Microsoft YaHei',Arial,sans-serif; fill: #536176; }
+      .token { fill: #e7f0fb; stroke: #4776a8; stroke-width: 1.5; }
+      .new-token { fill: #fbe9e7; stroke: #a74f4b; stroke-width: 2; }
+      .block { fill: #e8f4ea; stroke: #4b8b61; stroke-width: 2; }
+      .cache { fill: #fff0df; stroke: #bf7843; stroke-width: 2; }
+      .output { fill: #eee8f7; stroke: #7167aa; stroke-width: 2; }
+      .flow { fill: none; stroke: #315b8a; stroke-width: 4; marker-end: url(#arrow-blue); }
+      .decode-flow { fill: none; stroke: #a74f4b; stroke-width: 4; marker-end: url(#arrow-red); }
+      .repeat { fill: none; stroke: #a74f4b; stroke-width: 3; stroke-dasharray: 8 7; marker-end: url(#arrow-red); }
+      .note { fill: #eef1f5; stroke: #cfd7e3; stroke-width: 1.5; }
+    </style>
+  </defs>
+
+  <rect class="bg" width="1500" height="940"/>
+  <text class="title" x="60" y="65">Prefill 与 Decode：同一个模型，两种完全不同的执行形态</text>
+  <text class="subtitle" x="60" y="103">示例 B=1、Prompt 长度 P=10、隐藏维 H=4096；32 层仍然必须按层依次执行</text>
+
+  <rect class="panel" x="55" y="140" width="675" height="720" rx="8"/>
+  <rect class="panel" x="770" y="140" width="675" height="720" rx="8"/>
+
+  <text class="head" x="392" y="190" text-anchor="middle">Prefill：一次处理完整 Prompt</text>
+  <text class="small" x="392" y="221" text-anchor="middle">同一层内，10 个 Query 位置可以并行计算</text>
+
+  <text class="label" x="392" y="267" text-anchor="middle">Prompt Token IDs [1, 10]</text>
+  <g>
+    <rect class="token" x="117" y="290" width="48" height="48" rx="5"/><rect class="token" x="171" y="290" width="48" height="48" rx="5"/>
+    <rect class="token" x="225" y="290" width="48" height="48" rx="5"/><rect class="token" x="279" y="290" width="48" height="48" rx="5"/>
+    <rect class="token" x="333" y="290" width="48" height="48" rx="5"/><rect class="token" x="387" y="290" width="48" height="48" rx="5"/>
+    <rect class="token" x="441" y="290" width="48" height="48" rx="5"/><rect class="token" x="495" y="290" width="48" height="48" rx="5"/>
+    <rect class="token" x="549" y="290" width="48" height="48" rx="5"/><rect class="token" x="603" y="290" width="48" height="48" rx="5"/>
+  </g>
+  <text class="tiny" x="141" y="321" text-anchor="middle">t₀</text><text class="tiny" x="195" y="321" text-anchor="middle">t₁</text>
+  <text class="tiny" x="249" y="321" text-anchor="middle">t₂</text><text class="tiny" x="303" y="321" text-anchor="middle">t₃</text>
+  <text class="tiny" x="357" y="321" text-anchor="middle">t₄</text><text class="tiny" x="411" y="321" text-anchor="middle">t₅</text>
+  <text class="tiny" x="465" y="321" text-anchor="middle">t₆</text><text class="tiny" x="519" y="321" text-anchor="middle">t₇</text>
+  <text class="tiny" x="573" y="321" text-anchor="middle">t₈</text><text class="tiny" x="627" y="321" text-anchor="middle">t₉</text>
+
+  <path class="flow" d="M392 345 L392 385"/>
+  <rect class="block" x="155" y="390" width="475" height="160" rx="8"/>
+  <text class="label" x="392" y="423" text-anchor="middle">当前 Decoder Block</text>
+  <text class="small" x="392" y="454" text-anchor="middle">RMSNorm → QKV → RoPE → Causal Attention</text>
+  <text class="small" x="392" y="482" text-anchor="middle">→ 残差 → RMSNorm → SwiGLU FFN → 残差</text>
+  <text class="label" x="392" y="522" text-anchor="middle">[1, 10, 4096] → [1, 10, 4096]</text>
+  <path class="flow" d="M392 550 L392 586"/>
+  <rect class="cache" x="105" y="591" width="250" height="105" rx="8"/>
+  <text class="label" x="230" y="624" text-anchor="middle">写入本层 KV Cache</text>
+  <text class="small" x="230" y="653" text-anchor="middle">10 组 K、V</text>
+  <text class="tiny" x="230" y="680" text-anchor="middle">后续 Decode 复用</text>
+  <rect class="output" x="430" y="591" width="250" height="105" rx="8"/>
+  <text class="label" x="555" y="624" text-anchor="middle">传给下一层</text>
+  <text class="small" x="555" y="653" text-anchor="middle">共顺序经过 32 层</text>
+  <text class="tiny" x="555" y="680" text-anchor="middle">层之间不可同时完成</text>
+
+  <path class="flow" d="M555 696 L555 731"/>
+  <rect class="output" x="330" y="736" width="350" height="74" rx="8"/>
+  <text class="label" x="505" y="767" text-anchor="middle">最后位置 logits → 第一个输出 token</text>
+  <text class="small" x="505" y="794" text-anchor="middle">完成时刻决定 TTFT</text>
+
+  <text class="head" x="1107" y="190" text-anchor="middle">Decode：每步处理一个新 Token</text>
+  <text class="small" x="1107" y="221" text-anchor="middle">每生成一个 token，下一步才能开始</text>
+
+  <rect class="new-token" x="1039" y="274" width="136" height="62" rx="8"/>
+  <text class="label" x="1107" y="301" text-anchor="middle">新 token</text>
+  <text class="tiny" x="1107" y="324" text-anchor="middle">[1, 1, H]</text>
+  <path class="decode-flow" d="M1107 336 L1107 381"/>
+  <rect class="block" x="870" y="386" width="475" height="160" rx="8"/>
+  <text class="label" x="1107" y="419" text-anchor="middle">当前 Decoder Block</text>
+  <text class="small" x="1107" y="450" text-anchor="middle">只为新 token 计算 Q、K、V</text>
+  <text class="small" x="1107" y="479" text-anchor="middle">新 Q 读取全部历史 K/V 做 Attention</text>
+  <text class="label" x="1107" y="518" text-anchor="middle">Query 长度 1，KV 长度 T</text>
+
+  <rect class="cache" x="805" y="590" width="280" height="112" rx="8"/>
+  <text class="label" x="945" y="623" text-anchor="middle">读取历史 KV Cache</text>
+  <text class="small" x="945" y="652" text-anchor="middle">Prompt + 已生成 token</text>
+  <text class="tiny" x="945" y="681" text-anchor="middle">随上下文长度持续增长</text>
+  <path class="decode-flow" d="M945 590 C945 560 990 545 1038 535"/>
+
+  <rect class="cache" x="1130" y="590" width="280" height="112" rx="8"/>
+  <text class="label" x="1270" y="623" text-anchor="middle">追加新 K、V</text>
+  <text class="small" x="1270" y="652" text-anchor="middle">每层各追加 1 组</text>
+  <text class="tiny" x="1270" y="681" text-anchor="middle">历史 Q 无需缓存</text>
+  <path class="decode-flow" d="M1175 546 C1210 560 1270 565 1270 590"/>
+
+  <path class="decode-flow" d="M1107 546 L1107 731"/>
+  <rect class="output" x="932" y="736" width="350" height="74" rx="8"/>
+  <text class="label" x="1107" y="767" text-anchor="middle">logits → 采样下一个 token</text>
+  <text class="small" x="1107" y="794" text-anchor="middle">单步延迟影响 TPOT</text>
+  <path class="repeat" d="M1282 773 C1380 773 1380 305 1185 305"/>
+  <text class="small" x="1372" y="535" text-anchor="middle" transform="rotate(-90 1372 535)">串行重复，直到生成结束</text>
+
+  <rect class="note" x="160" y="880" width="1180" height="40" rx="7"/>
+  <text class="small" x="750" y="906" text-anchor="middle">Prefill 通常更容易形成大 GEMM；Decode 通常更受权重与 KV Cache 读带宽限制，具体瓶颈仍取决于 batch、长度和实现</text>
+</svg>
