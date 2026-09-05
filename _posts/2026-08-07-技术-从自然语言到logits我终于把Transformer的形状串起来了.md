@@ -10,7 +10,7 @@ categories: [技术]
 tags:       [技术, AI Infra, Transformer, 数学基础, 线性代数, 深度学习]
 ---
 
-最近开始系统学习 AI Infra。我先从仓库里的前置知识开始看，到了数学基础这一章，遇到了一条看起来很短、但实际上包含了很多信息的公式：
+在 Transformer 的计算链路中，有一条看起来很短、但实际上包含了很多信息的公式：
 
 <p align="center">$\displaystyle Y=XW,\qquad X\in\mathbb{R}^{(BS)\times H},\qquad W\in\mathbb{R}^{H\times V}$</p>
 

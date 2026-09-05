@@ -251,25 +251,46 @@ BatchNorm 的典型思想，是对同一个特征跨样本统计。应用到序�
 
 LayerNorm 和 RMSNorm 都只读取当前 token 的 $H$ 个值，不依赖其他句子或 token，也不需要跨卡同步 batch 统计量。这正符合 Transformer 的执行方式。
 
-### 6.2 为什么教程同时写了 LayerNorm 和 RMSNorm？
+### 6.2 LayerNorm 和 RMSNorm 的区别
 
-如果一段教程写成：
-
-```text
-LayerNorm：对输入做归一化
-(10, 4096) → RMSNorm → (10, 4096)
-```
-
-这里并不是先执行 LayerNorm，再执行 RMSNorm。前面的 `LayerNorm` 被作者当作“归一化层”的泛称，后面的 `RMSNorm` 才是这个具体模型实际使用的算子。
-
-更准确的写法是：
+LayerNorm 和 RMSNorm 都对每个 token 独立沿隐藏维 $H$ 归一化，也都保持输入输出形状不变：
 
 ```text
-Norm（此处具体采用 RMSNorm）
-[1, 10, 4096] → RMSNorm → [1, 10, 4096]
+输入： [B, S, H]
+输出： [B, S, H]
 ```
 
-原始 Transformer 使用 LayerNorm；LLaMA 等现代模型通常使用 RMSNorm。具体模型一般在这个位置选择其中一种，不会把两者按顺序都执行一遍。
+两者的区别在于如何定义“当前向量的尺度”。LayerNorm 先减去均值，再除以标准差；RMSNorm 不减均值，直接除以均方根。
+
+取一个 token 的隐藏向量：
+
+<p align="center">$x=[1,2,3]$</p>
+
+LayerNorm 先得到均值 $\mu=2$ 和标准差 $\sigma=\sqrt{2/3}$。忽略 $\epsilon$、$\gamma$ 和 $\beta$ 后：
+
+<p align="center">$\operatorname{LayerNorm}(x)\approx[-1.225,0,1.225]$</p>
+
+输出均值为 0，表示向量的整体偏移被去除了。
+
+RMSNorm 计算：
+
+<p align="center">$\operatorname{RMS}(x)=\sqrt{\frac{1^2+2^2+3^2}{3}}=\sqrt{\frac{14}{3}}\approx2.160$</p>
+
+所以忽略 $\epsilon$ 和 $\gamma$ 后：
+
+<p align="center">$\operatorname{RMSNorm}(x)\approx[0.463,0.926,1.389]$</p>
+
+它只把整体幅度拉回稳定范围，输出均值不必为 0。
+
+| 对比项 | LayerNorm | RMSNorm |
+| --- | --- | --- |
+| 归约方向 | 每个 token 沿 $H$ | 每个 token 沿 $H$ |
+| 是否减均值 | 是 | 否 |
+| 缩放依据 | 标准差 | 均方根 |
+| 常见可学习参数 | $\gamma$、$\beta$ | 通常只有 $\gamma$ |
+| 典型模型 | 原始 Transformer、BERT、GPT-2 | LLaMA、Qwen 等现代 LLM |
+
+RMSNorm 少了求均值和减均值的步骤，计算形式更简单；实际速度收益仍取决于 Kernel 融合和显存访问。模型通常在一个 Norm 位置选择其中一种，两者不会按顺序连续执行。
 
 ## 7. Post-Norm 和 Pre-Norm 到底怎么判断？
 
@@ -291,15 +312,15 @@ Norm（此处具体采用 RMSNorm）
   <img src="/img/in-post/ai-infra-transformer-pre-post-norm.svg" alt="原始 Transformer Post-Norm 与现代大模型 Pre-Norm 的完整对比" style="max-width: 100%;">
 </p>
 
-### 7.1 为什么原来的 Encoder 图容易被看成两种结构混在一起？
+### 7.1 为什么 Norm 在 FFN 前仍可能是 Post-Norm？
 
-原图的数据流通常是：
+考虑下面这条 Encoder 数据流：
 
 ```text
 x → Attention → +x → LayerNorm → FFN → +残差 → LayerNorm
 ```
 
-第一个 LayerNorm 的确画在 FFN 前面，但它属于 **Attention 子层的 Post-Norm**。它同时也是下一个 FFN 子层的输入，并不意味着 FFN 使用了 Pre-Norm。
+第一个 LayerNorm 虽然位于 FFN 前面，但它处理的是 `x + Attention(x)`，因此属于 **Attention 子层的 Post-Norm**。它的输出同时成为下一个 FFN 子层的输入，不能只根据图上的上下位置把它判断为 FFN 的 Pre-Norm。
 
 要逐个子层判断：
 
@@ -308,7 +329,7 @@ Attention 子层：Attention → Add → Norm，所以是 Post-Norm
 FFN 子层：      FFN       → Add → Norm，所以也是 Post-Norm
 ```
 
-因此那张图完整画的是 Post-Norm。容易误解的地方在于说明文字同时介绍了现代 Pre-Norm，却没有单独再画一条 Pre-Norm 数据流。
+所以这条完整数据流是 Post-Norm。判断时应该把每个 Norm 与它前面的残差加法或后面的子层配对，而不是只看 Norm 是否恰好画在某个方框上方。
 
 ### 7.2 Pre-Norm 为什么常用于深层模型？
 
@@ -359,7 +380,7 @@ L = 32 层 Decoder Block
 [1, 10, 4096]
 ```
 
-教程中的 `(10,4096)` 隐含了 `B=1`，或者把 `B×S` 展平了。这里的 `10` 是序列长度 $S$，不是 batch size。在线性层内部常把前两维展平：
+有些实现会把这个张量简写成 `(10,4096)`：它可能省略了值为 1 的 batch 维，也可能已经把 `B×S` 展平。这里的 `10` 是序列长度 $S$，不是 batch size。在线性层内部常把前两维展平：
 
 <p align="center">$[B,S,H]\rightarrow[BS,H]$</p>
 
