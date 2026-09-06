@@ -1,0 +1,101 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="950" viewBox="0 0 1600 950" role="img" aria-labelledby="title desc">
+  <title id="title">Prefill 中因果 Mask 让并行计算等价于逐步计算</title>
+  <desc id="desc">一次计算 Q1 到 Q3 与 K1 到 K3 的三乘三分数矩阵，再用因果 Mask 遮住右上角，等价于分别计算每个 Query 对自己及历史 Key 的分数。</desc>
+  <defs>
+    <marker id="blue" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 Z" fill="#315b8a"/></marker>
+    <marker id="purple" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 Z" fill="#7657a8"/></marker>
+    <style>
+      text { font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", Arial, sans-serif; }
+      .title { font-size: 42px; font-weight: 800; fill: #17233a; }
+      .subtitle { font-size: 20px; fill: #536176; }
+      .head { font-size: 27px; font-weight: 750; fill: #17233a; }
+      .label { font-size: 19px; font-weight: 700; fill: #17233a; }
+      .small { font-size: 17px; fill: #536176; }
+      .tiny { font-size: 15px; fill: #536176; }
+      .panel { fill: #ffffff; stroke: #cfd7e3; stroke-width: 2; }
+      .step { fill: #e7f0fb; stroke: #4776a8; stroke-width: 2; }
+      .valid { fill: #e8f4ea; stroke: #4b8b61; stroke-width: 1.5; }
+      .masked { fill: #f1f3f6; stroke: #c6ced8; stroke-width: 1.5; }
+      .out { fill: #eee8f7; stroke: #7657a8; stroke-width: 2; }
+      .blue-line { stroke: #315b8a; stroke-width: 2.5; fill: none; marker-end: url(#blue); }
+      .purple-line { stroke: #7657a8; stroke-width: 2.5; fill: none; marker-end: url(#purple); }
+    </style>
+  </defs>
+
+  <rect width="1600" height="950" fill="#f7f8fa"/>
+  <text x="800" y="62" text-anchor="middle" class="title">因果 Mask：一次并行计算，等价于逐步计算</text>
+  <text x="800" y="100" text-anchor="middle" class="subtitle">以 3 个 token 为例：未来位置的分数被遮住，保留下三角仍与自回归计算一致</text>
+
+  <rect x="55" y="145" width="555" height="650" rx="18" class="panel"/>
+  <text x="90" y="198" class="head">逐步计算的逻辑</text>
+  <text x="90" y="232" class="small">每个位置只看自己和左侧历史</text>
+
+  <rect x="105" y="285" width="125" height="70" rx="12" class="step"/>
+  <text x="168" y="315" text-anchor="middle" class="label">q₁</text>
+  <text x="168" y="340" text-anchor="middle" class="small">× K₁</text>
+  <path d="M245 320 H305" class="blue-line"/>
+  <rect x="320" y="285" width="190" height="70" rx="12" class="out"/>
+  <text x="415" y="315" text-anchor="middle" class="label">只得到第 1 行</text>
+  <text x="415" y="340" text-anchor="middle" class="small">o₁</text>
+
+  <rect x="105" y="420" width="125" height="70" rx="12" class="step"/>
+  <text x="168" y="450" text-anchor="middle" class="label">q₂</text>
+  <text x="168" y="475" text-anchor="middle" class="small">× K₁:₂</text>
+  <path d="M245 455 H305" class="blue-line"/>
+  <rect x="320" y="420" width="190" height="70" rx="12" class="out"/>
+  <text x="415" y="450" text-anchor="middle" class="label">只得到第 2 行</text>
+  <text x="415" y="475" text-anchor="middle" class="small">o₂</text>
+
+  <rect x="105" y="555" width="125" height="70" rx="12" class="step"/>
+  <text x="168" y="585" text-anchor="middle" class="label">q₃</text>
+  <text x="168" y="610" text-anchor="middle" class="small">× K₁:₃</text>
+  <path d="M245 590 H305" class="blue-line"/>
+  <rect x="320" y="555" width="190" height="70" rx="12" class="out"/>
+  <text x="415" y="585" text-anchor="middle" class="label">只得到第 3 行</text>
+  <text x="415" y="610" text-anchor="middle" class="small">o₃</text>
+
+  <rect x="105" y="690" width="405" height="62" rx="10" fill="#f1f5f9" stroke="#d6dee8"/>
+  <text x="307" y="727" text-anchor="middle" class="small">逻辑上是三次不同长度的计算</text>
+
+  <rect x="650" y="145" width="895" height="650" rx="18" class="panel"/>
+  <text x="685" y="198" class="head">Prefill 的并行计算</text>
+  <text x="685" y="232" class="small">先形成 Q₁:₃ K₁:₃ᵀ 的 3×3 分数矩阵，再遮住右上角</text>
+
+  <text x="885" y="290" text-anchor="middle" class="small">K₁</text>
+  <text x="1010" y="290" text-anchor="middle" class="small">K₂</text>
+  <text x="1135" y="290" text-anchor="middle" class="small">K₃</text>
+  <text x="745" y="355" text-anchor="middle" class="small">Q₁</text>
+  <text x="745" y="480" text-anchor="middle" class="small">Q₂</text>
+  <text x="745" y="605" text-anchor="middle" class="small">Q₃</text>
+
+  <rect x="810" y="310" width="110" height="110" rx="6" class="valid"/>
+  <rect x="935" y="310" width="110" height="110" rx="6" class="masked"/>
+  <rect x="1060" y="310" width="110" height="110" rx="6" class="masked"/>
+  <rect x="810" y="435" width="110" height="110" rx="6" class="valid"/>
+  <rect x="935" y="435" width="110" height="110" rx="6" class="valid"/>
+  <rect x="1060" y="435" width="110" height="110" rx="6" class="masked"/>
+  <rect x="810" y="560" width="110" height="110" rx="6" class="valid"/>
+  <rect x="935" y="560" width="110" height="110" rx="6" class="valid"/>
+  <rect x="1060" y="560" width="110" height="110" rx="6" class="valid"/>
+
+  <text x="865" y="370" text-anchor="middle" class="label">a₁₁</text>
+  <text x="990" y="370" text-anchor="middle" class="label" fill="#8b96a3">−∞</text>
+  <text x="1115" y="370" text-anchor="middle" class="label" fill="#8b96a3">−∞</text>
+  <text x="865" y="495" text-anchor="middle" class="label">a₂₁</text>
+  <text x="990" y="495" text-anchor="middle" class="label">a₂₂</text>
+  <text x="1115" y="495" text-anchor="middle" class="label" fill="#8b96a3">−∞</text>
+  <text x="865" y="620" text-anchor="middle" class="label">a₃₁</text>
+  <text x="990" y="620" text-anchor="middle" class="label">a₃₂</text>
+  <text x="1115" y="620" text-anchor="middle" class="label">a₃₃</text>
+
+  <path d="M1210 490 H1280" class="purple-line"/>
+  <rect x="1290" y="425" width="205" height="135" rx="12" class="out"/>
+  <text x="1392" y="464" text-anchor="middle" class="label">逐行 Softmax</text>
+  <text x="1392" y="495" text-anchor="middle" class="small">遮住项权重变成 0</text>
+  <text x="1392" y="526" text-anchor="middle" class="small">→ o₁、o₂、o₃</text>
+
+  <rect x="685" y="705" width="810" height="62" rx="10" fill="#f1f5f9" stroke="#d6dee8"/>
+  <text x="1090" y="742" text-anchor="middle" class="small">数学结果相同；并行实现能把许多位置交给一次 GEMM，实际高效 kernel 也可避免显式物化无效区域</text>
+
+  <text x="800" y="865" text-anchor="middle" class="subtitle">因果 Mask 保证“并行计算”不偷看未来，KV Cache 则保证后续 Decode 不重算历史</text>
+</svg>
