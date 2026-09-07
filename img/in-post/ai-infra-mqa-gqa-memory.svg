@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="850" viewBox="0 0 1600 850" role="img" aria-labelledby="title desc">
+  <title id="title">MHA、GQA 与 MQA 的 KV Cache 对比</title>
+  <desc id="desc">在三十二个 Query heads 的例子中，KV heads 从三十二减到八和一，缓存从 2048 MiB 降到 512 MiB 和 64 MiB。</desc>
+  <style>text{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",Arial,sans-serif}.title{font-size:42px;font-weight:800;fill:#17233a}.sub{font-size:20px;fill:#56647a}.name{font-size:25px;font-weight:750;fill:#17233a}.value{font-size:22px;font-weight:700;fill:#263750}.axis{font-size:17px;fill:#667286}.base{fill:#e8edf3}.mha{fill:#527aa3}.gqa{fill:#4f936b}.mqa{fill:#c57b39}.grid{stroke:#d7dde6;stroke-width:2}</style>
+  <rect width="1600" height="850" fill="#f7f8fa"/>
+  <text x="800" y="62" text-anchor="middle" class="title">同一模型下，KV head 数直接决定缓存宽度</text>
+  <text x="800" y="100" text-anchor="middle" class="sub">示例：32 层、4096 tokens、Dₕ=128、FP16、B=1</text>
+  <line x1="330" y1="170" x2="1450" y2="170" class="grid"/><line x1="330" y1="690" x2="1450" y2="690" class="grid"/>
+  <text x="330" y="730" text-anchor="middle" class="axis">0</text><text x="610" y="730" text-anchor="middle" class="axis">512 MiB</text><text x="890" y="730" text-anchor="middle" class="axis">1024 MiB</text><text x="1170" y="730" text-anchor="middle" class="axis">1536 MiB</text><text x="1450" y="730" text-anchor="middle" class="axis">2048 MiB</text>
+  <line x1="610" y1="170" x2="610" y2="690" class="grid"/><line x1="890" y1="170" x2="890" y2="690" class="grid"/><line x1="1170" y1="170" x2="1170" y2="690" class="grid"/><line x1="1450" y1="170" x2="1450" y2="690" class="grid"/>
+  <text x="80" y="270" class="name">MHA</text><text x="80" y="302" class="sub">32 KV heads</text><rect x="330" y="230" width="1120" height="90" rx="8" class="base"/><rect x="330" y="230" width="1120" height="90" rx="8" class="mha"/><text x="1418" y="285" text-anchor="end" fill="#fff" class="value">2048 MiB</text>
+  <text x="80" y="455" class="name">GQA</text><text x="80" y="487" class="sub">8 KV heads</text><rect x="330" y="415" width="1120" height="90" rx="8" class="base"/><rect x="330" y="415" width="280" height="90" rx="8" class="gqa"/><text x="632" y="470" class="value">512 MiB（MHA 的 1/4）</text>
+  <text x="80" y="640" class="name">MQA</text><text x="80" y="672" class="sub">1 KV head</text><rect x="330" y="600" width="1120" height="90" rx="8" class="base"/><rect x="330" y="600" width="35" height="90" rx="8" class="mqa"/><text x="390" y="655" class="value">64 MiB（MHA 的 1/32）</text>
+  <text x="800" y="805" text-anchor="middle" class="sub">更小的 Cache 同时意味着更少的 HBM 容量占用和每步历史 KV 读取</text>
+</svg>

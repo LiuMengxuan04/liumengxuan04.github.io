@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="980" viewBox="0 0 1600 980" role="img" aria-labelledby="title desc">
+  <title id="title">MHA、GQA 与 MQA 的 head 共享关系</title>
+  <desc id="desc">三行分别展示八个 Query heads 如何连接八个、两个和一个 KV heads。</desc>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#55708f"/></marker>
+    <style>
+      text{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",Arial,sans-serif}.title{font-size:42px;font-weight:800;fill:#17233a}.sub{font-size:20px;fill:#56647a}.row-title{font-size:28px;font-weight:750;fill:#17233a}.label{font-size:18px;font-weight:700;fill:#263750}.note{font-size:17px;fill:#56647a}.panel{fill:#fff;stroke:#d2d9e3;stroke-width:2}.q{fill:#e8f1fb;stroke:#4b78a8;stroke-width:2}.kv{fill:#e9f4eb;stroke:#4d8a61;stroke-width:2}.line{stroke:#55708f;stroke-width:2;fill:none;marker-end:url(#arrow)}
+    </style>
+  </defs>
+  <rect width="1600" height="980" fill="#f7f8fa"/>
+  <text x="800" y="58" text-anchor="middle" class="title">Query heads 不变，减少的是 KV heads</text>
+  <text x="800" y="94" text-anchor="middle" class="sub">示例：8 个 Query heads；每个绿色节点代表一对 K/V head</text>
+
+  <rect x="55" y="130" width="1490" height="245" rx="14" class="panel"/>
+  <text x="90" y="180" class="row-title">MHA</text><text x="90" y="212" class="note">8 Q / 8 KV</text>
+  <g>
+    <rect x="300" y="170" width="88" height="54" rx="8" class="q"/><rect x="420" y="170" width="88" height="54" rx="8" class="q"/><rect x="540" y="170" width="88" height="54" rx="8" class="q"/><rect x="660" y="170" width="88" height="54" rx="8" class="q"/><rect x="780" y="170" width="88" height="54" rx="8" class="q"/><rect x="900" y="170" width="88" height="54" rx="8" class="q"/><rect x="1020" y="170" width="88" height="54" rx="8" class="q"/><rect x="1140" y="170" width="88" height="54" rx="8" class="q"/>
+    <text x="344" y="204" text-anchor="middle" class="label">Q1</text><text x="464" y="204" text-anchor="middle" class="label">Q2</text><text x="584" y="204" text-anchor="middle" class="label">Q3</text><text x="704" y="204" text-anchor="middle" class="label">Q4</text><text x="824" y="204" text-anchor="middle" class="label">Q5</text><text x="944" y="204" text-anchor="middle" class="label">Q6</text><text x="1064" y="204" text-anchor="middle" class="label">Q7</text><text x="1184" y="204" text-anchor="middle" class="label">Q8</text>
+    <rect x="300" y="290" width="88" height="54" rx="8" class="kv"/><rect x="420" y="290" width="88" height="54" rx="8" class="kv"/><rect x="540" y="290" width="88" height="54" rx="8" class="kv"/><rect x="660" y="290" width="88" height="54" rx="8" class="kv"/><rect x="780" y="290" width="88" height="54" rx="8" class="kv"/><rect x="900" y="290" width="88" height="54" rx="8" class="kv"/><rect x="1020" y="290" width="88" height="54" rx="8" class="kv"/><rect x="1140" y="290" width="88" height="54" rx="8" class="kv"/>
+    <text x="344" y="324" text-anchor="middle" class="label">KV1</text><text x="464" y="324" text-anchor="middle" class="label">KV2</text><text x="584" y="324" text-anchor="middle" class="label">KV3</text><text x="704" y="324" text-anchor="middle" class="label">KV4</text><text x="824" y="324" text-anchor="middle" class="label">KV5</text><text x="944" y="324" text-anchor="middle" class="label">KV6</text><text x="1064" y="324" text-anchor="middle" class="label">KV7</text><text x="1184" y="324" text-anchor="middle" class="label">KV8</text>
+    <path d="M344 230V282M464 230V282M584 230V282M704 230V282M824 230V282M944 230V282M1064 230V282M1184 230V282" class="line"/>
+  </g>
+
+  <rect x="55" y="400" width="1490" height="245" rx="14" class="panel"/>
+  <text x="90" y="450" class="row-title">GQA</text><text x="90" y="482" class="note">8 Q / 2 KV</text>
+  <g>
+    <rect x="300" y="440" width="88" height="54" rx="8" class="q"/><rect x="420" y="440" width="88" height="54" rx="8" class="q"/><rect x="540" y="440" width="88" height="54" rx="8" class="q"/><rect x="660" y="440" width="88" height="54" rx="8" class="q"/><rect x="780" y="440" width="88" height="54" rx="8" class="q"/><rect x="900" y="440" width="88" height="54" rx="8" class="q"/><rect x="1020" y="440" width="88" height="54" rx="8" class="q"/><rect x="1140" y="440" width="88" height="54" rx="8" class="q"/>
+    <text x="344" y="474" text-anchor="middle" class="label">Q1</text><text x="464" y="474" text-anchor="middle" class="label">Q2</text><text x="584" y="474" text-anchor="middle" class="label">Q3</text><text x="704" y="474" text-anchor="middle" class="label">Q4</text><text x="824" y="474" text-anchor="middle" class="label">Q5</text><text x="944" y="474" text-anchor="middle" class="label">Q6</text><text x="1064" y="474" text-anchor="middle" class="label">Q7</text><text x="1184" y="474" text-anchor="middle" class="label">Q8</text>
+    <rect x="480" y="560" width="160" height="54" rx="8" class="kv"/><rect x="888" y="560" width="160" height="54" rx="8" class="kv"/>
+    <text x="560" y="594" text-anchor="middle" class="label">KV 组 1</text><text x="968" y="594" text-anchor="middle" class="label">KV 组 2</text>
+    <path d="M344 502L520 552M464 502L540 552M584 502L580 552M704 502L600 552M824 502L928 552M944 502L956 552M1064 502L984 552M1184 502L1012 552" class="line"/>
+  </g>
+
+  <rect x="55" y="670" width="1490" height="245" rx="14" class="panel"/>
+  <text x="90" y="720" class="row-title">MQA</text><text x="90" y="752" class="note">8 Q / 1 KV</text>
+  <g>
+    <rect x="300" y="710" width="88" height="54" rx="8" class="q"/><rect x="420" y="710" width="88" height="54" rx="8" class="q"/><rect x="540" y="710" width="88" height="54" rx="8" class="q"/><rect x="660" y="710" width="88" height="54" rx="8" class="q"/><rect x="780" y="710" width="88" height="54" rx="8" class="q"/><rect x="900" y="710" width="88" height="54" rx="8" class="q"/><rect x="1020" y="710" width="88" height="54" rx="8" class="q"/><rect x="1140" y="710" width="88" height="54" rx="8" class="q"/>
+    <text x="344" y="744" text-anchor="middle" class="label">Q1</text><text x="464" y="744" text-anchor="middle" class="label">Q2</text><text x="584" y="744" text-anchor="middle" class="label">Q3</text><text x="704" y="744" text-anchor="middle" class="label">Q4</text><text x="824" y="744" text-anchor="middle" class="label">Q5</text><text x="944" y="744" text-anchor="middle" class="label">Q6</text><text x="1064" y="744" text-anchor="middle" class="label">Q7</text><text x="1184" y="744" text-anchor="middle" class="label">Q8</text>
+    <rect x="670" y="830" width="240" height="54" rx="8" class="kv"/><text x="790" y="864" text-anchor="middle" class="label">同一组 K/V</text>
+    <path d="M344 772L710 822M464 772L730 822M584 772L750 822M704 772L775 822M824 772L805 822M944 772L830 822M1064 772L850 822M1184 772L870 822" class="line"/>
+  </g>
+  <text x="800" y="955" text-anchor="middle" class="sub">共享程度越高，KV Cache 越小；Query heads 始终保留各自的查询能力</text>
+</svg>
