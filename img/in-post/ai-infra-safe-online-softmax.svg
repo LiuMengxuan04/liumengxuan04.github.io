@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="980" viewBox="0 0 1600 980" role="img" aria-labelledby="title desc">
+  <title id="title">从 Safe Softmax 到 Online Softmax</title>
+  <desc id="desc">Safe Softmax 通过减去最大值避免指数溢出，Online Softmax 用最大值和指数和两个状态合并不同数据块。</desc>
+  <defs>
+    <marker id="arrow" markerWidth="11" markerHeight="11" refX="9" refY="5.5" orient="auto"><path d="M0 0L11 5.5L0 11Z" fill="#536d8b"/></marker>
+    <style>
+      text{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",Arial,sans-serif}
+      .title{font-size:38px;font-weight:800;fill:#17233a}.section{font-size:28px;font-weight:800;fill:#17233a}.label{font-size:20px;font-weight:750;fill:#263750}
+      .small{font-size:17px;fill:#56647a}.formula{font-size:25px;font-weight:650;fill:#17233a}.panel{fill:#fff;stroke:#d2d9e3;stroke-width:2}
+      .blue{fill:#e8f1fb;stroke:#4b78a8;stroke-width:2}.green{fill:#e9f4eb;stroke:#4c8a61;stroke-width:2}.orange{fill:#fff0df;stroke:#b86e30;stroke-width:2}
+      .line{stroke:#536d8b;stroke-width:3;fill:none;marker-end:url(#arrow)}
+    </style>
+  </defs>
+  <rect width="1600" height="980" fill="#f7f8fa"/>
+  <text x="800" y="55" text-anchor="middle" class="title">同一个 Softmax，先换参考值，再逐块合并</text>
+  <rect x="55" y="100" width="1490" height="315" rx="16" class="panel"/>
+  <text x="110" y="150" class="section">Safe Softmax：整条向量先找一个稳定的零点</text>
+  <rect x="115" y="205" width="260" height="68" rx="10" class="blue"/><text x="245" y="247" text-anchor="middle" class="label">a = [1, 2, 3]</text>
+  <path d="M390 239H465" class="line"/>
+  <rect x="485" y="190" width="250" height="98" rx="10" class="orange"/><text x="610" y="227" text-anchor="middle" class="label">m = max(a) = 3</text><text x="610" y="262" text-anchor="middle" class="small">把最大值当作指数零点</text>
+  <path d="M750 239H825" class="line"/>
+  <rect x="845" y="185" width="285" height="108" rx="10" class="green"/><text x="987" y="224" text-anchor="middle" class="label">e^(a - m) = [e⁻²,e⁻¹,1]</text><text x="987" y="260" text-anchor="middle" class="small">所有指数都不大于 1</text>
+  <path d="M1145 239H1220" class="line"/>
+  <rect x="1240" y="185" width="245" height="108" rx="10" class="blue"/><text x="1362" y="224" text-anchor="middle" class="label">ℓ = 1.5032</text><text x="1362" y="260" text-anchor="middle" class="small">y = e^(a-m) / ℓ</text>
+  <text x="800" y="355" text-anchor="middle" class="formula">e^aᵢ / Σⱼe^aⱼ = e^(aᵢ-c) / Σⱼe^(aⱼ-c)</text>
+  <text x="800" y="390" text-anchor="middle" class="small">减去 m 只是更换指数的参考系，分子和分母同时乘同一个因子，结果不变</text>
+
+  <rect x="55" y="445" width="1490" height="475" rx="16" class="panel"/>
+  <text x="110" y="495" class="section">Online Softmax：每次来一块，只保存 (m, ℓ)</text>
+  <rect x="115" y="555" width="250" height="88" rx="10" class="blue"/><text x="240" y="592" text-anchor="middle" class="label">第 1 块 [1, 2]</text><text x="240" y="622" text-anchor="middle" class="small">m₁ = 2，ℓ₁ = e⁻¹ + 1</text>
+  <path d="M380 599H455" class="line"/>
+  <rect x="475" y="540" width="290" height="118" rx="10" class="green"/><text x="620" y="578" text-anchor="middle" class="label">保存状态 (m₁, ℓ₁)</text><text x="620" y="612" text-anchor="middle" class="small">不保存整条 softmax 向量</text><text x="620" y="638" text-anchor="middle" class="small">ℓ₁ ≈ 1.3679</text>
+  <path d="M780 599H855" class="line"/>
+  <rect x="875" y="555" width="250" height="88" rx="10" class="orange"/><text x="1000" y="592" text-anchor="middle" class="label">第 2 块 [3]</text><text x="1000" y="622" text-anchor="middle" class="small">m₂ = 3，ℓ₂ = 1</text>
+  <path d="M1140 599H1215" class="line"/>
+  <rect x="1235" y="520" width="250" height="158" rx="10" class="green"/><text x="1360" y="558" text-anchor="middle" class="label">更新到统一尺度</text><text x="1360" y="594" text-anchor="middle" class="small">m = max(2,3) = 3</text><text x="1360" y="630" text-anchor="middle" class="small">ℓ = ℓ₁e^(2-3)+ℓ₂</text><text x="1360" y="660" text-anchor="middle" class="small">≈ 0.5032 + 1 = 1.5032</text>
+  <text x="800" y="755" text-anchor="middle" class="formula">m′ = max(m, m_b)</text>
+  <text x="800" y="795" text-anchor="middle" class="formula">ℓ′ = ℓ · e^(m-m′) + ℓ_b · e^(m_b-m′)</text>
+  <text x="800" y="850" text-anchor="middle" class="small">旧块的指数和也要乘一个重缩放因子，因为旧块原来以 m 为零点，新块以 m_b 为零点</text>
+  <text x="800" y="885" text-anchor="middle" class="label">FlashAttention 把这两个状态扩展为每个 Query 行的状态，并在每个 K/V tile 到来时更新它</text>
+</svg>

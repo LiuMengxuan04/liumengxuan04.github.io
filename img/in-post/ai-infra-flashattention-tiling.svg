@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1000" viewBox="0 0 1600 1000" role="img" aria-labelledby="title desc">
+  <title id="title">FlashAttention 的分块计算全貌</title>
+  <desc id="desc">每个 Query block 依次读取多个 Key/Value block，在片上计算局部分数、在线 Softmax 和 Value 汇总，维护每行的 m、l、O 状态。</desc>
+  <defs>
+    <marker id="arrow" markerWidth="11" markerHeight="11" refX="9" refY="5.5" orient="auto"><path d="M0 0L11 5.5L0 11Z" fill="#536d8b"/></marker>
+    <style>
+      text{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",Arial,sans-serif}
+      .title{font-size:38px;font-weight:800;fill:#17233a}.section{font-size:26px;font-weight:800;fill:#17233a}.label{font-size:19px;font-weight:750;fill:#263750}.small{font-size:16px;fill:#56647a}
+      .matrix{fill:#e8f1fb;stroke:#4b78a8;stroke-width:2}.selected{fill:#ffdf9e;stroke:#b86e30;stroke-width:3}.state{fill:#e9f4eb;stroke:#4c8a61;stroke-width:2}.compute{fill:#f0eafe;stroke:#7657a8;stroke-width:2}.border{fill:#fff;stroke:#d2d9e3;stroke-width:2}.line{stroke:#536d8b;stroke-width:3;fill:none;marker-end:url(#arrow)}
+    </style>
+  </defs>
+  <rect width="1600" height="1000" fill="#f7f8fa"/>
+  <text x="800" y="55" text-anchor="middle" class="title">FlashAttention：一个 Q block，流过所有 K/V blocks</text>
+  <text x="800" y="89" text-anchor="middle" class="small">完整注意力仍然覆盖全部历史位置，只是每次只把当前 tile 搬到片上</text>
+  <rect x="50" y="125" width="560" height="780" rx="16" class="border"/>
+  <text x="330" y="170" text-anchor="middle" class="section">逻辑上的大矩阵</text>
+  <text x="330" y="202" text-anchor="middle" class="small">每个格子代表一个 Query-Key 分数</text>
+  <rect x="130" y="265" width="350" height="350" class="matrix"/>
+  <path d="M200 265V615M270 265V615M340 265V615M410 265V615M130 335H480M130 405H480M130 475H480M130 545H480" stroke="#fff" stroke-width="3"/>
+  <rect x="340" y="335" width="140" height="140" class="selected"/>
+  <text x="305" y="652" text-anchor="middle" class="label">K/V 的第 j 个 tile</text>
+  <text x="95" y="443" transform="rotate(-90 95 443)" text-anchor="middle" class="label">Query rows</text>
+  <text x="305" y="705" text-anchor="middle" class="small">当前 Q block 固定后，依次选择黄色的 K block</text>
+  <path d="M340 730V790" class="line"/>
+  <rect x="175" y="805" width="260" height="60" rx="10" class="state"/><text x="305" y="842" text-anchor="middle" class="label">只保留每行 m、ℓ、O</text>
+
+  <rect x="650" y="125" width="900" height="780" rx="16" class="border"/>
+  <text x="1100" y="170" text-anchor="middle" class="section">片上的一次 tile 闭环</text>
+  <rect x="700" y="230" width="190" height="72" rx="10" class="matrix"/><text x="795" y="274" text-anchor="middle" class="label">Qᵢ block</text>
+  <path d="M900 266H955" class="line"/>
+  <rect x="975" y="210" width="260" height="112" rx="11" class="compute"/><text x="1105" y="248" text-anchor="middle" class="label">读取 Kⱼ、Vⱼ tile</text><text x="1105" y="281" text-anchor="middle" class="small">从 HBM → SRAM / registers</text><text x="1105" y="305" text-anchor="middle" class="small">本 tile 内反复复用</text>
+  <path d="M1245 266H1300" class="line"/>
+  <rect x="1320" y="220" width="180" height="92" rx="10" class="compute"/><text x="1410" y="255" text-anchor="middle" class="label">Sᵢⱼ = QᵢKⱼᵀ</text><text x="1410" y="285" text-anchor="middle" class="small">scale + causal mask</text>
+  <path d="M1410 322V461H1255" class="line"/>
+  <rect x="975" y="405" width="260" height="112" rx="11" class="compute"/><text x="1105" y="443" text-anchor="middle" class="label">局部 Safe Softmax</text><text x="1105" y="476" text-anchor="middle" class="small">找到本 tile 的局部最大值</text><text x="1105" y="500" text-anchor="middle" class="small">与旧 m、ℓ 合并</text>
+  <rect x="700" y="405" width="220" height="112" rx="11" class="state"/><text x="810" y="443" text-anchor="middle" class="label">旧状态</text><text x="810" y="477" text-anchor="middle" class="small">mᵢ、ℓᵢ、Oᵢ</text><text x="810" y="501" text-anchor="middle" class="small">每个 Query 行一份</text>
+  <path d="M930 461H955" class="line"/>
+  <path d="M1105 527V585" class="line"/>
+  <rect x="975" y="605" width="260" height="112" rx="11" class="compute"/><text x="1105" y="643" text-anchor="middle" class="label">Pᵢⱼ Vⱼ</text><text x="1105" y="676" text-anchor="middle" class="small">局部权重加权 Value</text><text x="1105" y="700" text-anchor="middle" class="small">更新 Oᵢ 与新 ℓᵢ</text>
+  <path d="M1260 661H1320" class="line"/>
+  <rect x="1340" y="605" width="160" height="112" rx="11" class="state"/><text x="1420" y="643" text-anchor="middle" class="label">新状态</text><text x="1420" y="677" text-anchor="middle" class="small">mᵢ′、ℓᵢ′、Oᵢ′</text><text x="1420" y="701" text-anchor="middle" class="small">进入下一 tile</text>
+  <path d="M1420 735V805H810V535" class="line"/>
+  <text x="1110" y="790" text-anchor="middle" class="small">循环读取下一个 K/V tile；Sᵢⱼ、Pᵢⱼ 在片上用完即释放</text>
+  <rect x="700" y="835" width="800" height="42" rx="9" class="state"/><text x="1100" y="863" text-anchor="middle" class="label">所有 K/V tile 处理完后，Oᵢ 才写回 HBM；没有 N × N 中间矩阵落地</text>
+</svg>

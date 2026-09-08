@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="760" viewBox="0 0 1600 760" role="img" aria-labelledby="title desc">
+  <title id="title">FlashAttention V1 V2 V3 的优化重点</title>
+  <desc id="desc">FlashAttention V1 解决 IO 与中间矩阵物化问题，V2 改进并行和工作划分，V3 针对 Hopper 使用异步流水线和低精度硬件。</desc>
+  <defs>
+    <marker id="arrow" markerWidth="11" markerHeight="11" refX="9" refY="5.5" orient="auto"><path d="M0 0L11 5.5L0 11Z" fill="#536d8b"/></marker>
+    <style>
+      text{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",Arial,sans-serif}.title{font-size:38px;font-weight:800;fill:#17233a}.sub{font-size:19px;fill:#56647a}.head{font-size:27px;font-weight:800;fill:#17233a}.label{font-size:19px;font-weight:750;fill:#263750}.small{font-size:16px;fill:#56647a}.card{fill:#fff;stroke:#d2d9e3;stroke-width:2}.v1{fill:#e8f1fb;stroke:#4b78a8;stroke-width:2}.v2{fill:#fff0df;stroke:#b86e30;stroke-width:2}.v3{fill:#e9f4eb;stroke:#4c8a61;stroke-width:2}.line{stroke:#536d8b;stroke-width:3;fill:none;marker-end:url(#arrow)}</style>
+  </defs>
+  <rect width="1600" height="760" fill="#f7f8fa"/>
+  <text x="800" y="55" text-anchor="middle" class="title">FlashAttention 系列：同一条数学主线，逐代贴近硬件</text>
+  <text x="800" y="90" text-anchor="middle" class="sub">下面是优化重点的概览，不代表每一代只做了这一件事</text>
+  <rect x="85" y="150" width="390" height="430" rx="16" class="card"/><rect x="85" y="150" width="390" height="76" rx="16" class="v1"/>
+  <text x="280" y="199" text-anchor="middle" class="head">FlashAttention-1</text>
+  <text x="125" y="280" class="label">核心问题</text><text x="125" y="317" class="small">N × N 的分数 / 概率矩阵</text><text x="125" y="345" class="small">反复写回 HBM，显存占用大</text>
+  <text x="125" y="405" class="label">关键办法</text><text x="125" y="442" class="small">Tiling + Online Softmax</text><text x="125" y="470" class="small">片上完成 QKᵀ → softmax → PV</text>
+  <text x="125" y="530" class="label">结果</text><text x="125" y="557" class="small">IO-aware，精确 Attention</text>
+  <path d="M500 365H570" class="line"/>
+  <rect x="605" y="150" width="390" height="430" rx="16" class="card"/><rect x="605" y="150" width="390" height="76" rx="16" class="v2"/>
+  <text x="800" y="199" text-anchor="middle" class="head">FlashAttention-2</text>
+  <text x="645" y="280" class="label">继续解决</text><text x="645" y="317" class="small">V1 中并行度与线程协作的开销</text><text x="645" y="345" class="small">部分非矩阵乘运算占比偏高</text>
+  <text x="645" y="405" class="label">关键办法</text><text x="645" y="442" class="small">沿序列 / Query 维度更好地并行</text><text x="645" y="470" class="small">优化 warp 内工作划分与通信</text>
+  <text x="645" y="530" class="label">结果</text><text x="645" y="557" class="small">更高 GPU 利用率，更少同步</text>
+  <path d="M1020 365H1090" class="line"/>
+  <rect x="1125" y="150" width="390" height="430" rx="16" class="card"/><rect x="1125" y="150" width="390" height="76" rx="16" class="v3"/>
+  <text x="1320" y="199" text-anchor="middle" class="head">FlashAttention-3</text>
+  <text x="1165" y="280" class="label">面向 Hopper</text><text x="1165" y="317" class="small">数据搬运与 Tensor Core 计算</text><text x="1165" y="345" class="small">需要更积极地重叠起来</text>
+  <text x="1165" y="405" class="label">关键办法</text><text x="1165" y="442" class="small">异步流水线、warp specialization</text><text x="1165" y="470" class="small">TMA / WGMMA，以及 FP8 路径</text>
+  <text x="1165" y="530" class="label">结果</text><text x="1165" y="557" class="small">更充分利用新一代硬件特性</text>
+  <rect x="180" y="635" width="1240" height="48" rx="10" fill="#fff6df" stroke="#bd8732" stroke-width="2"/><text x="800" y="667" text-anchor="middle" class="label">不要把 V2 / V3 理解成换了 Attention 公式：主线仍是精确计算，变化主要在 IO、并行、流水线和硬件映射</text>
+</svg>

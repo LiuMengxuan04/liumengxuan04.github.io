@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" role="img" aria-labelledby="title desc">
+  <title id="title">朴素 Attention 与 FlashAttention 的 HBM 访问对比</title>
+  <desc id="desc">朴素 Attention 将 N 乘 N 的分数和概率矩阵写回 HBM，FlashAttention 在片上 SRAM 中完成分块计算，只写回最终输出和少量状态。</desc>
+  <defs>
+    <marker id="arrow" markerWidth="11" markerHeight="11" refX="9" refY="5.5" orient="auto"><path d="M0 0L11 5.5L0 11Z" fill="#536d8b"/></marker>
+    <style>
+      text{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",Arial,sans-serif}
+      .title{font-size:38px;font-weight:800;fill:#17233a}.sub{font-size:19px;fill:#56647a}
+      .section{font-size:27px;font-weight:800;fill:#17233a}.label{font-size:20px;font-weight:750;fill:#263750}
+      .small{font-size:16px;fill:#56647a}.box{fill:#e8f1fb;stroke:#4b78a8;stroke-width:2}
+      .bad{fill:#fff0f0;stroke:#c05252;stroke-width:2}.good{fill:#e9f4eb;stroke:#4c8a61;stroke-width:2}
+      .chip{fill:#fff6df;stroke:#bd8732;stroke-width:2}.line{stroke:#536d8b;stroke-width:3;fill:none;marker-end:url(#arrow)}
+      .dash{stroke:#c05252;stroke-width:3;stroke-dasharray:8 7;fill:none;marker-end:url(#arrow)}
+      .border{fill:#fff;stroke:#d2d9e3;stroke-width:2}
+    </style>
+  </defs>
+  <rect width="1600" height="900" fill="#f7f8fa"/>
+  <text x="800" y="55" text-anchor="middle" class="title">FlashAttention 的第一件事：不让中间矩阵往返 HBM</text>
+  <text x="800" y="89" text-anchor="middle" class="sub">计算结果不变，改变的是中间结果的保存位置与生命周期</text>
+  <rect x="45" y="125" width="720" height="690" rx="16" class="border"/>
+  <rect x="835" y="125" width="720" height="690" rx="16" class="border"/>
+  <text x="405" y="172" text-anchor="middle" class="section">朴素 Attention</text>
+  <text x="1195" y="172" text-anchor="middle" class="section">FlashAttention</text>
+  <text x="405" y="204" text-anchor="middle" class="sub">每个阶段都可能把中间结果写回 HBM</text>
+  <text x="1195" y="204" text-anchor="middle" class="sub">tile 在 SRAM / registers 中完成一条小闭环</text>
+
+  <rect x="85" y="255" width="120" height="62" rx="9" class="box"/><text x="145" y="294" text-anchor="middle" class="label">Q、K、V</text>
+  <path d="M210 286H275" class="line"/>
+  <rect x="290" y="240" width="175" height="92" rx="10" class="bad"/><text x="377" y="276" text-anchor="middle" class="label">S = QKᵀ</text><text x="377" y="306" text-anchor="middle" class="small">N × N 分数矩阵</text>
+  <path d="M470 286H535" class="dash"/>
+  <rect x="550" y="240" width="155" height="92" rx="10" class="bad"/><text x="627" y="276" text-anchor="middle" class="label">写回 HBM</text><text x="627" y="306" text-anchor="middle" class="small">保存 S</text>
+  <path d="M377 342V390" class="line"/>
+  <rect x="290" y="405" width="175" height="92" rx="10" class="bad"/><text x="377" y="441" text-anchor="middle" class="label">P = softmax(S)</text><text x="377" y="471" text-anchor="middle" class="small">N × N 概率矩阵</text>
+  <path d="M470 451H535" class="dash"/>
+  <rect x="550" y="405" width="155" height="92" rx="10" class="bad"/><text x="627" y="441" text-anchor="middle" class="label">再次写回 HBM</text><text x="627" y="471" text-anchor="middle" class="small">保存 P</text>
+  <path d="M377 507V555" class="line"/>
+  <rect x="290" y="570" width="175" height="92" rx="10" class="box"/><text x="377" y="606" text-anchor="middle" class="label">O = PV</text><text x="377" y="636" text-anchor="middle" class="small">读 P、读 V</text>
+  <path d="M377 672V722" class="line"/>
+  <rect x="290" y="737" width="175" height="45" rx="9" class="good"/><text x="377" y="766" text-anchor="middle" class="label">最终输出 O</text>
+  <text x="90" y="735" class="small" fill="#a33a3a">红色路径：N × N 中间量反复读写 HBM</text>
+
+  <rect x="875" y="255" width="120" height="62" rx="9" class="box"/><text x="935" y="294" text-anchor="middle" class="label">Q block</text>
+  <path d="M1000 286H1050" class="line"/>
+  <rect x="1065" y="230" width="250" height="145" rx="12" class="good"/><text x="1190" y="268" text-anchor="middle" class="label">片上 SRAM / registers</text><text x="1190" y="303" text-anchor="middle" class="small">K block、V block</text><text x="1190" y="332" text-anchor="middle" class="small">Sᵢⱼ、Pᵢⱼ 只短暂存在</text><text x="1190" y="359" text-anchor="middle" class="small">m、ℓ、O 累加器持续更新</text>
+  <path d="M1320 302H1370" class="line"/>
+  <rect x="1385" y="255" width="120" height="62" rx="9" class="chip"/><text x="1445" y="294" text-anchor="middle" class="label">下一个 KV tile</text>
+  <path d="M1445 328V438H1315" class="line"/>
+  <text x="1315" y="427" text-anchor="end" class="small">online softmax 合并旧状态</text>
+  <rect x="1065" y="460" width="250" height="112" rx="12" class="good"/><text x="1190" y="499" text-anchor="middle" class="label">同一 tile 内完成</text><text x="1190" y="533" text-anchor="middle" class="small">QKᵀ → scale/mask → softmax → PV</text><text x="1190" y="560" text-anchor="middle" class="small">不生成完整 N × N 矩阵</text>
+  <path d="M1190 580V635" class="line"/>
+  <rect x="1065" y="650" width="250" height="82" rx="11" class="box"/><text x="1190" y="686" text-anchor="middle" class="label">输出 O block</text><text x="1190" y="714" text-anchor="middle" class="small">最终才写回 HBM</text>
+  <rect x="875" y="740" width="630" height="42" rx="9" class="chip"/><text x="1190" y="768" text-anchor="middle" class="label">省掉的是中间矩阵的 HBM 往返，不是 QKᵀ 的数学计算</text>
+</svg>
