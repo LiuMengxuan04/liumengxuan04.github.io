@@ -12,7 +12,7 @@ tags:       [技术, AI Infra, Transformer, FFN, SwiGLU, 激活函数]
 
 前面梳理 Transformer 时，Attention、KV Cache 和 FlashAttention 占据了很多篇幅。但在一个 Transformer Block 中，Attention 后面的 FFN 同样值得拆开来看：它不直接混合不同 token，却往往占据 Block 中很大一部分参数和矩阵乘计算。
 
-这篇笔记对应 AIInfraGuide「3.4 Transformer 前馈网络 FFN 深入理解」的前六节，围绕三个问题展开：**FFN 在加工什么？激活函数和门控改变了什么？为什么中间维度常见 4 倍和 8/3 倍？**
+这篇笔记围绕三个问题展开：**FFN 在加工什么？激活函数和门控改变了什么？为什么中间维度常见 4 倍和 8/3 倍？**
 
 ## 1. FFN 在 Transformer 中负责什么？
 
@@ -376,7 +376,6 @@ SwiGLU：两条 D → M 投影，SiLU 门控 × 内容，再 M → D
 
 ## 参考资料
 
-- [AIInfraGuide：3.4 Transformer 前馈网络 FFN 深入理解](https://caomaolufei.github.io/AIInfraGuide/guides/模块一-前置知识/transformer/34-transformer前馈网络ffn深入理解/)：本文整理范围为第 1～6 节。
 - [Attention Is All You Need](https://arxiv.org/abs/1706.03762)
 - [Gaussian Error Linear Units (GELUs)](https://arxiv.org/abs/1606.08415)
 - [Searching for Activation Functions](https://arxiv.org/abs/1710.05941)
