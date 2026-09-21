@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="560" viewBox="0 0 1200 560" role="img" aria-labelledby="title desc"><title id="title">FFN 张量并行：列切 W_up，行切 W_down</title><desc id="desc">两张 GPU 各自计算一半中间特征对应的输出贡献，最后通过 AllReduce 求和。</desc><defs><marker id="a" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#64748b"/></marker></defs><style>text{font-family:Arial,"Noto Sans CJK JP",sans-serif;fill:#26364e} .b{stroke:#b8c9de;stroke-width:2} .a{stroke:#64748b;stroke-width:3;fill:none;marker-end:url(#a)} .s{font-size:17px} .h{font-size:27px;font-weight:bold}</style><rect width="1200" height="560" fill="#f7f9fc"/><text x="600" y="45" text-anchor="middle" class="h">FFN 张量并行：列切 W_up，行切 W_down</text>
+<rect x="490" y="75" width="220" height="60" rx="12" fill="#e8f1fb" class="b"/>
+<text x="600.0" y="102.0" text-anchor="middle" font-size="20">完整输入 x</text>
+<text x="600.0" y="129.0" text-anchor="middle" class="s">[N, d_model]</text>
+<rect x="120" y="190" width="270" height="80" rx="12" fill="#e5f3ed" class="b"/>
+<text x="255.0" y="227.0" text-anchor="middle" font-size="20">GPU 0</text>
+<text x="255.0" y="254.0" text-anchor="middle" class="s">W_up,0：前半列</text>
+<rect x="810" y="190" width="270" height="80" rx="12" fill="#e5f3ed" class="b"/>
+<text x="945.0" y="227.0" text-anchor="middle" font-size="20">GPU 1</text>
+<text x="945.0" y="254.0" text-anchor="middle" class="s">W_up,1：后半列</text>
+<path d="M490 105H255V180" class="a"/>
+<path d="M710 105H945V180" class="a"/>
+<rect x="120" y="325" width="270" height="80" rx="12" fill="#e8f1fb" class="b"/>
+<text x="255.0" y="362.0" text-anchor="middle" font-size="20">h₀ = φ(xW_up,0)</text>
+<text x="255.0" y="389.0" text-anchor="middle" class="s">[N, d_ff/2]</text>
+<rect x="810" y="325" width="270" height="80" rx="12" fill="#e8f1fb" class="b"/>
+<text x="945.0" y="362.0" text-anchor="middle" font-size="20">h₁ = φ(xW_up,1)</text>
+<text x="945.0" y="389.0" text-anchor="middle" class="s">[N, d_ff/2]</text>
+<path d="M255 270V315" class="a"/>
+<path d="M945 270V315" class="a"/>
+<rect x="120" y="440" width="270" height="70" rx="12" fill="#f1eafa" class="b"/>
+<text x="255.0" y="472.0" text-anchor="middle" font-size="20">y₀ = h₀W_down,0</text>
+<text x="255.0" y="499.0" text-anchor="middle" class="s">W_down 前半行</text>
+<rect x="810" y="440" width="270" height="70" rx="12" fill="#f1eafa" class="b"/>
+<text x="945.0" y="472.0" text-anchor="middle" font-size="20">y₁ = h₁W_down,1</text>
+<text x="945.0" y="499.0" text-anchor="middle" class="s">W_down 后半行</text>
+<path d="M255 405V430" class="a"/>
+<path d="M945 405V430" class="a"/>
+<rect x="465" y="440" width="270" height="70" rx="12" fill="#ffe9c2" class="b"/>
+<text x="600.0" y="472.0" text-anchor="middle" font-size="20">AllReduce</text>
+<text x="600.0" y="499.0" text-anchor="middle" class="s">y = y₀ + y₁</text>
+<path d="M390 475H455" class="a"/>
+<path d="M810 475H745" class="a"/>
+<text x="600" y="555" text-anchor="middle" font-size="19">中间特征始终分开保存；只在最终输出处求和</text>
+</svg>
