@@ -1,0 +1,92 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="550" viewBox="0 0 1000 550" role="img" aria-labelledby="title desc"><title id="title">同一个向量：移动中心，或缩小幅度</title><desc id="desc">四种颜色和编号对应四个特征；数轴展示原始值及两种归一化结果，gamma 为一，beta 为零，忽略 epsilon。</desc><defs><marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0L8 4L0 8Z" fill="#64748b"/></marker></defs><style>text{font-family:"Noto Sans CJK SC","Noto Sans CJK JP","Microsoft YaHei",sans-serif;fill:#24354a} text.small{font-size:17px}</style><rect width="1000" height="550" fill="#f7f9fc"/>
+<text x="500" y="48" text-anchor="middle" font-size="28" font-weight="bold">同一个向量：移动中心，或缩小幅度</text>
+<text x="500" y="89" text-anchor="middle" font-size="18">示例 x = [1, 2, 3, 4]；γ = 1，β = 0，忽略 ε</text>
+<text x="30" y="152" text-anchor="start" font-size="22">原始 x</text>
+<text x="30" y="187" text-anchor="start" font-size="16">均值 2.5</text>
+<path d="M260 180L965 180" stroke="#aebdcd" stroke-width="2" fill="none"/>
+<path d="M260.0 174L260.0 186" stroke="#aebdcd" stroke-width="2" fill="none"/>
+<text x="260.0" y="210" text-anchor="middle" font-size="16">-2</text>
+<path d="M375.0 174L375.0 186" stroke="#aebdcd" stroke-width="2" fill="none"/>
+<text x="375.0" y="210" text-anchor="middle" font-size="16">-1</text>
+<path d="M490.0 174L490.0 186" stroke="#aebdcd" stroke-width="2" fill="none"/>
+<text x="490.0" y="210" text-anchor="middle" font-size="16">0</text>
+<path d="M605.0 174L605.0 186" stroke="#aebdcd" stroke-width="2" fill="none"/>
+<text x="605.0" y="210" text-anchor="middle" font-size="16">1</text>
+<path d="M720.0 174L720.0 186" stroke="#aebdcd" stroke-width="2" fill="none"/>
+<text x="720.0" y="210" text-anchor="middle" font-size="16">2</text>
+<path d="M835.0 174L835.0 186" stroke="#aebdcd" stroke-width="2" fill="none"/>
+<text x="835.0" y="210" text-anchor="middle" font-size="16">3</text>
+<path d="M950.0 174L950.0 186" stroke="#aebdcd" stroke-width="2" fill="none"/>
+<text x="950.0" y="210" text-anchor="middle" font-size="16">4</text>
+<path d="M605.0 145L605.0 180" stroke="#377ac0" stroke-width="2" fill="none"/>
+<circle cx="605.0" cy="145" r="13" fill="#377ac0"/>
+<text x="605.0" y="150" text-anchor="middle" font-size="14" style="fill:white">0</text>
+<path d="M720.0 145L720.0 180" stroke="#d37a32" stroke-width="2" fill="none"/>
+<circle cx="720.0" cy="145" r="13" fill="#d37a32"/>
+<text x="720.0" y="150" text-anchor="middle" font-size="14" style="fill:white">1</text>
+<path d="M835.0 145L835.0 180" stroke="#218578" stroke-width="2" fill="none"/>
+<circle cx="835.0" cy="145" r="13" fill="#218578"/>
+<text x="835.0" y="150" text-anchor="middle" font-size="14" style="fill:white">2</text>
+<path d="M950.0 145L950.0 180" stroke="#8860ae" stroke-width="2" fill="none"/>
+<circle cx="950.0" cy="145" r="13" fill="#8860ae"/>
+<text x="950.0" y="150" text-anchor="middle" font-size="14" style="fill:white">3</text>
+<text x="30" y="282" text-anchor="start" font-size="22">LayerNorm</text>
+<text x="30" y="317" text-anchor="start" font-size="16">减去均值，再缩放</text>
+<path d="M260 310L965 310" stroke="#aebdcd" stroke-width="2" fill="none"/>
+<path d="M260.0 304L260.0 316" stroke="#aebdcd" stroke-width="2" fill="none"/>
+<text x="260.0" y="340" text-anchor="middle" font-size="16">-2</text>
+<path d="M375.0 304L375.0 316" stroke="#aebdcd" stroke-width="2" fill="none"/>
+<text x="375.0" y="340" text-anchor="middle" font-size="16">-1</text>
+<path d="M490.0 304L490.0 316" stroke="#aebdcd" stroke-width="2" fill="none"/>
+<text x="490.0" y="340" text-anchor="middle" font-size="16">0</text>
+<path d="M605.0 304L605.0 316" stroke="#aebdcd" stroke-width="2" fill="none"/>
+<text x="605.0" y="340" text-anchor="middle" font-size="16">1</text>
+<path d="M720.0 304L720.0 316" stroke="#aebdcd" stroke-width="2" fill="none"/>
+<text x="720.0" y="340" text-anchor="middle" font-size="16">2</text>
+<path d="M835.0 304L835.0 316" stroke="#aebdcd" stroke-width="2" fill="none"/>
+<text x="835.0" y="340" text-anchor="middle" font-size="16">3</text>
+<path d="M950.0 304L950.0 316" stroke="#aebdcd" stroke-width="2" fill="none"/>
+<text x="950.0" y="340" text-anchor="middle" font-size="16">4</text>
+<path d="M335.66999999999996 275L335.66999999999996 310" stroke="#377ac0" stroke-width="2" fill="none"/>
+<circle cx="335.66999999999996" cy="275" r="13" fill="#377ac0"/>
+<text x="335.66999999999996" y="280" text-anchor="middle" font-size="14" style="fill:white">0</text>
+<path d="M438.59499999999997 275L438.59499999999997 310" stroke="#d37a32" stroke-width="2" fill="none"/>
+<circle cx="438.59499999999997" cy="275" r="13" fill="#d37a32"/>
+<text x="438.59499999999997" y="280" text-anchor="middle" font-size="14" style="fill:white">1</text>
+<path d="M541.405 275L541.405 310" stroke="#218578" stroke-width="2" fill="none"/>
+<circle cx="541.405" cy="275" r="13" fill="#218578"/>
+<text x="541.405" y="280" text-anchor="middle" font-size="14" style="fill:white">2</text>
+<path d="M644.33 275L644.33 310" stroke="#8860ae" stroke-width="2" fill="none"/>
+<circle cx="644.33" cy="275" r="13" fill="#8860ae"/>
+<text x="644.33" y="280" text-anchor="middle" font-size="14" style="fill:white">3</text>
+<text x="30" y="412" text-anchor="start" font-size="22">RMSNorm</text>
+<text x="30" y="447" text-anchor="start" font-size="16">只缩放，保留比例</text>
+<path d="M260 440L965 440" stroke="#aebdcd" stroke-width="2" fill="none"/>
+<path d="M260.0 434L260.0 446" stroke="#aebdcd" stroke-width="2" fill="none"/>
+<text x="260.0" y="470" text-anchor="middle" font-size="16">-2</text>
+<path d="M375.0 434L375.0 446" stroke="#aebdcd" stroke-width="2" fill="none"/>
+<text x="375.0" y="470" text-anchor="middle" font-size="16">-1</text>
+<path d="M490.0 434L490.0 446" stroke="#aebdcd" stroke-width="2" fill="none"/>
+<text x="490.0" y="470" text-anchor="middle" font-size="16">0</text>
+<path d="M605.0 434L605.0 446" stroke="#aebdcd" stroke-width="2" fill="none"/>
+<text x="605.0" y="470" text-anchor="middle" font-size="16">1</text>
+<path d="M720.0 434L720.0 446" stroke="#aebdcd" stroke-width="2" fill="none"/>
+<text x="720.0" y="470" text-anchor="middle" font-size="16">2</text>
+<path d="M835.0 434L835.0 446" stroke="#aebdcd" stroke-width="2" fill="none"/>
+<text x="835.0" y="470" text-anchor="middle" font-size="16">3</text>
+<path d="M950.0 434L950.0 446" stroke="#aebdcd" stroke-width="2" fill="none"/>
+<text x="950.0" y="470" text-anchor="middle" font-size="16">4</text>
+<path d="M531.975 405L531.975 440" stroke="#377ac0" stroke-width="2" fill="none"/>
+<circle cx="531.975" cy="405" r="13" fill="#377ac0"/>
+<text x="531.975" y="410" text-anchor="middle" font-size="14" style="fill:white">0</text>
+<path d="M573.95 405L573.95 440" stroke="#d37a32" stroke-width="2" fill="none"/>
+<circle cx="573.95" cy="405" r="13" fill="#d37a32"/>
+<text x="573.95" y="410" text-anchor="middle" font-size="14" style="fill:white">1</text>
+<path d="M615.925 405L615.925 440" stroke="#218578" stroke-width="2" fill="none"/>
+<circle cx="615.925" cy="405" r="13" fill="#218578"/>
+<text x="615.925" y="410" text-anchor="middle" font-size="14" style="fill:white">2</text>
+<path d="M658.0150000000001 405L658.0150000000001 440" stroke="#8860ae" stroke-width="2" fill="none"/>
+<circle cx="658.0150000000001" cy="405" r="13" fill="#8860ae"/>
+<text x="658.0150000000001" y="410" text-anchor="middle" font-size="14" style="fill:white">3</text>
+<text x="500" y="524" text-anchor="middle" font-size="18">圆点编号对应特征 0、1、2、3；三行使用同一数轴尺度</text>
+</svg>

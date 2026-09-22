@@ -1,0 +1,73 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="760" viewBox="0 0 1000 760" role="img" aria-labelledby="title desc"><title id="title">追踪残差里的数值，而不只看 Norm 的位置</title><desc id="desc">假设某次残差相加得到 h 等于 1 2 3 4；Pre-Norm 保留原 h 和归一化副本 z，Post-Norm 把归一化结果作为后续表示。</desc><defs><marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0L8 4L0 8Z" fill="#64748b"/></marker></defs><style>text{font-family:"Noto Sans CJK SC","Noto Sans CJK JP","Microsoft YaHei",sans-serif;fill:#24354a} text.small{font-size:17px}</style><rect width="1000" height="760" fill="#f7f9fc"/>
+<text x="500" y="48" text-anchor="middle" font-size="28" font-weight="bold">追踪残差里的数值，而不只看 Norm 的位置</text>
+<text x="500" y="89" text-anchor="middle" font-size="17">假设上一次相加得到 [1, 2, 3, 4]；使用 LayerNorm，γ=1、β=0</text>
+<rect x="30" y="120" width="455" height="580" rx="14" fill="#fff" stroke="#dbe3ec"/>
+<rect x="515" y="120" width="455" height="580" rx="14" fill="#fff" stroke="#dbe3ec"/>
+<text x="255" y="160" text-anchor="middle" font-size="24">Pre-Norm：保留原始 h</text>
+<text x="740" y="160" text-anchor="middle" font-size="24">Post-Norm：相加后归一化</text>
+<rect x="110" y="192" width="61" height="46" rx="6" fill="#fff" stroke="#d37a32"/>
+<text x="140.5" y="222" text-anchor="middle" font-size="18">1</text>
+<rect x="175" y="192" width="61" height="46" rx="6" fill="#fff" stroke="#d37a32"/>
+<text x="205.5" y="222" text-anchor="middle" font-size="18">2</text>
+<rect x="240" y="192" width="61" height="46" rx="6" fill="#fff" stroke="#d37a32"/>
+<text x="270.5" y="222" text-anchor="middle" font-size="18">3</text>
+<rect x="305" y="192" width="61" height="46" rx="6" fill="#fff" stroke="#d37a32"/>
+<text x="335.5" y="222" text-anchor="middle" font-size="18">4</text>
+<rect x="590" y="192" width="61" height="46" rx="6" fill="#fff" stroke="#d37a32"/>
+<text x="620.5" y="222" text-anchor="middle" font-size="18">1</text>
+<rect x="655" y="192" width="61" height="46" rx="6" fill="#fff" stroke="#d37a32"/>
+<text x="685.5" y="222" text-anchor="middle" font-size="18">2</text>
+<rect x="720" y="192" width="61" height="46" rx="6" fill="#fff" stroke="#d37a32"/>
+<text x="750.5" y="222" text-anchor="middle" font-size="18">3</text>
+<rect x="785" y="192" width="61" height="46" rx="6" fill="#fff" stroke="#d37a32"/>
+<text x="815.5" y="222" text-anchor="middle" font-size="18">4</text>
+<text x="255" y="275" text-anchor="middle" font-size="18">原始 h 继续留在残差分支</text>
+<path d="M130 244L80 320" stroke="#d37a32" stroke-width="2" fill="none"/>
+<path d="M80 320L80 603" stroke="#d37a32" stroke-width="2" fill="none"/>
+<path d="M80 603L104 603" stroke="#d37a32" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+<text x="295" y="323" text-anchor="middle" font-size="17">为加工分支生成 z = Norm(h)</text>
+<rect x="150" y="345" width="68" height="46" rx="6" fill="#fff" stroke="#377ac0"/>
+<text x="184.0" y="375" text-anchor="middle" font-size="18">−1.34</text>
+<rect x="222" y="345" width="68" height="46" rx="6" fill="#fff" stroke="#377ac0"/>
+<text x="256.0" y="375" text-anchor="middle" font-size="18">−0.45</text>
+<rect x="294" y="345" width="68" height="46" rx="6" fill="#fff" stroke="#377ac0"/>
+<text x="328.0" y="375" text-anchor="middle" font-size="18">0.45</text>
+<rect x="366" y="345" width="68" height="46" rx="6" fill="#fff" stroke="#377ac0"/>
+<text x="400.0" y="375" text-anchor="middle" font-size="18">1.34</text>
+<text x="290" y="425" text-anchor="middle" font-size="18">FFN(z) 的示例输出</text>
+<rect x="150" y="446" width="68" height="46" rx="6" fill="#fff" stroke="#218578"/>
+<text x="184.0" y="476" text-anchor="middle" font-size="18">0.1</text>
+<rect x="222" y="446" width="68" height="46" rx="6" fill="#fff" stroke="#218578"/>
+<text x="256.0" y="476" text-anchor="middle" font-size="18">0.2</text>
+<rect x="294" y="446" width="68" height="46" rx="6" fill="#fff" stroke="#218578"/>
+<text x="328.0" y="476" text-anchor="middle" font-size="18">0.3</text>
+<rect x="366" y="446" width="68" height="46" rx="6" fill="#fff" stroke="#218578"/>
+<text x="400.0" y="476" text-anchor="middle" font-size="18">0.4</text>
+<text x="255" y="552" text-anchor="middle" font-size="19">最后加回的仍是 [1, 2, 3, 4]</text>
+<rect x="110" y="580" width="61" height="46" rx="6" fill="#fff" stroke="#d37a32"/>
+<text x="140.5" y="610" text-anchor="middle" font-size="18">1.1</text>
+<rect x="175" y="580" width="61" height="46" rx="6" fill="#fff" stroke="#d37a32"/>
+<text x="205.5" y="610" text-anchor="middle" font-size="18">2.2</text>
+<rect x="240" y="580" width="61" height="46" rx="6" fill="#fff" stroke="#d37a32"/>
+<text x="270.5" y="610" text-anchor="middle" font-size="18">3.3</text>
+<rect x="305" y="580" width="61" height="46" rx="6" fill="#fff" stroke="#d37a32"/>
+<text x="335.5" y="610" text-anchor="middle" font-size="18">4.4</text>
+<text x="255" y="669" text-anchor="middle" font-size="23">y = h + FFN(z)</text>
+<path d="M740 244L740 315" stroke="#aebdcd" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+<text x="740" y="294" text-anchor="middle" font-size="20">Norm</text>
+<rect x="580" y="345" width="74" height="46" rx="6" fill="#fff" stroke="#377ac0"/>
+<text x="617.0" y="375" text-anchor="middle" font-size="18">−1.34</text>
+<rect x="658" y="345" width="74" height="46" rx="6" fill="#fff" stroke="#377ac0"/>
+<text x="695.0" y="375" text-anchor="middle" font-size="18">−0.45</text>
+<rect x="736" y="345" width="74" height="46" rx="6" fill="#fff" stroke="#377ac0"/>
+<text x="773.0" y="375" text-anchor="middle" font-size="18">0.45</text>
+<rect x="814" y="345" width="74" height="46" rx="6" fill="#fff" stroke="#377ac0"/>
+<text x="851.0" y="375" text-anchor="middle" font-size="18">1.34</text>
+<text x="740" y="431" text-anchor="middle" font-size="20">归一化后的向量成为新 h</text>
+<text x="740" y="473" text-anchor="middle" font-size="20">后续计算分支和残差分支</text>
+<text x="740" y="508" text-anchor="middle" font-size="20">都从这个蓝色向量出发</text>
+<rect x="568" y="558" width="345" height="70" rx="6" fill="#edf4fc" stroke="none"/>
+<text x="740" y="600" text-anchor="middle" font-size="20">原始 [1, 2, 3, 4] 不再直通</text>
+<text x="740" y="669" text-anchor="middle" font-size="21">h = Norm(上一次残差之和)</text>
+<text x="500" y="738" text-anchor="middle" font-size="18">橙色：未归一化的残差表示　蓝色：归一化后的表示</text>
+</svg>

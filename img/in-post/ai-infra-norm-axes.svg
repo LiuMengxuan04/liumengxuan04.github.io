@@ -1,0 +1,71 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="470" viewBox="0 0 1000 470" role="img" aria-labelledby="title desc"><title id="title">同一张特征矩阵，两种统计方向</title><desc id="desc">二维输入中 BatchNorm 沿样本轴统计一列，LayerNorm 沿特征轴统计一行。</desc><defs><marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0L8 4L0 8Z" fill="#64748b"/></marker></defs><style>text{font-family:"Noto Sans CJK SC","Noto Sans CJK JP","Microsoft YaHei",sans-serif;fill:#24354a} text.small{font-size:17px}</style><rect width="1000" height="470" fill="#f7f9fc"/>
+<text x="500" y="48" text-anchor="middle" font-size="28" font-weight="bold">同一张特征矩阵，两种统计方向</text>
+<text x="255" y="104" text-anchor="middle" font-size="21">BatchNorm：同一特征，跨样本</text>
+<text x="138" y="152" text-anchor="middle" font-size="17">特征 0</text>
+<text x="214" y="152" text-anchor="middle" font-size="17">特征 1</text>
+<text x="290" y="152" text-anchor="middle" font-size="17">特征 2</text>
+<text x="366" y="152" text-anchor="middle" font-size="17">特征 3</text>
+<text x="68" y="202" text-anchor="middle" font-size="18">A</text>
+<rect x="102" y="172" width="71" height="51" rx="6" fill="#d8e9fa" stroke="none"/>
+<text x="138" y="205" text-anchor="middle" font-size="20">1</text>
+<rect x="178" y="172" width="71" height="51" rx="6" fill="#e8edf3" stroke="none"/>
+<text x="214" y="205" text-anchor="middle" font-size="20">2</text>
+<rect x="254" y="172" width="71" height="51" rx="6" fill="#e8edf3" stroke="none"/>
+<text x="290" y="205" text-anchor="middle" font-size="20">3</text>
+<rect x="330" y="172" width="71" height="51" rx="6" fill="#e8edf3" stroke="none"/>
+<text x="366" y="205" text-anchor="middle" font-size="20">4</text>
+<text x="68" y="262" text-anchor="middle" font-size="18">B</text>
+<rect x="102" y="232" width="71" height="51" rx="6" fill="#d8e9fa" stroke="none"/>
+<text x="138" y="265" text-anchor="middle" font-size="20">10</text>
+<rect x="178" y="232" width="71" height="51" rx="6" fill="#e8edf3" stroke="none"/>
+<text x="214" y="265" text-anchor="middle" font-size="20">20</text>
+<rect x="254" y="232" width="71" height="51" rx="6" fill="#e8edf3" stroke="none"/>
+<text x="290" y="265" text-anchor="middle" font-size="20">30</text>
+<rect x="330" y="232" width="71" height="51" rx="6" fill="#e8edf3" stroke="none"/>
+<text x="366" y="265" text-anchor="middle" font-size="20">40</text>
+<text x="68" y="322" text-anchor="middle" font-size="18">C</text>
+<rect x="102" y="292" width="71" height="51" rx="6" fill="#d8e9fa" stroke="none"/>
+<text x="138" y="325" text-anchor="middle" font-size="20">100</text>
+<rect x="178" y="292" width="71" height="51" rx="6" fill="#e8edf3" stroke="none"/>
+<text x="214" y="325" text-anchor="middle" font-size="20">200</text>
+<rect x="254" y="292" width="71" height="51" rx="6" fill="#e8edf3" stroke="none"/>
+<text x="290" y="325" text-anchor="middle" font-size="20">300</text>
+<rect x="330" y="292" width="71" height="51" rx="6" fill="#e8edf3" stroke="none"/>
+<text x="366" y="325" text-anchor="middle" font-size="20">400</text>
+<text x="255" y="390" text-anchor="middle" font-size="22">统计 [1, 10, 100]</text>
+<text x="255" y="425" text-anchor="middle" font-size="18">每列一组均值、方差</text>
+<text x="740" y="104" text-anchor="middle" font-size="21">LayerNorm：同一样本，跨特征</text>
+<text x="623" y="152" text-anchor="middle" font-size="17">特征 0</text>
+<text x="699" y="152" text-anchor="middle" font-size="17">特征 1</text>
+<text x="775" y="152" text-anchor="middle" font-size="17">特征 2</text>
+<text x="851" y="152" text-anchor="middle" font-size="17">特征 3</text>
+<text x="553" y="202" text-anchor="middle" font-size="18">A</text>
+<rect x="587" y="172" width="71" height="51" rx="6" fill="#d8e9fa" stroke="none"/>
+<text x="623" y="205" text-anchor="middle" font-size="20">1</text>
+<rect x="663" y="172" width="71" height="51" rx="6" fill="#d8e9fa" stroke="none"/>
+<text x="699" y="205" text-anchor="middle" font-size="20">2</text>
+<rect x="739" y="172" width="71" height="51" rx="6" fill="#d8e9fa" stroke="none"/>
+<text x="775" y="205" text-anchor="middle" font-size="20">3</text>
+<rect x="815" y="172" width="71" height="51" rx="6" fill="#d8e9fa" stroke="none"/>
+<text x="851" y="205" text-anchor="middle" font-size="20">4</text>
+<text x="553" y="262" text-anchor="middle" font-size="18">B</text>
+<rect x="587" y="232" width="71" height="51" rx="6" fill="#e8edf3" stroke="none"/>
+<text x="623" y="265" text-anchor="middle" font-size="20">10</text>
+<rect x="663" y="232" width="71" height="51" rx="6" fill="#e8edf3" stroke="none"/>
+<text x="699" y="265" text-anchor="middle" font-size="20">20</text>
+<rect x="739" y="232" width="71" height="51" rx="6" fill="#e8edf3" stroke="none"/>
+<text x="775" y="265" text-anchor="middle" font-size="20">30</text>
+<rect x="815" y="232" width="71" height="51" rx="6" fill="#e8edf3" stroke="none"/>
+<text x="851" y="265" text-anchor="middle" font-size="20">40</text>
+<text x="553" y="322" text-anchor="middle" font-size="18">C</text>
+<rect x="587" y="292" width="71" height="51" rx="6" fill="#e8edf3" stroke="none"/>
+<text x="623" y="325" text-anchor="middle" font-size="20">100</text>
+<rect x="663" y="292" width="71" height="51" rx="6" fill="#e8edf3" stroke="none"/>
+<text x="699" y="325" text-anchor="middle" font-size="20">200</text>
+<rect x="739" y="292" width="71" height="51" rx="6" fill="#e8edf3" stroke="none"/>
+<text x="775" y="325" text-anchor="middle" font-size="20">300</text>
+<rect x="815" y="292" width="71" height="51" rx="6" fill="#e8edf3" stroke="none"/>
+<text x="851" y="325" text-anchor="middle" font-size="20">400</text>
+<text x="740" y="390" text-anchor="middle" font-size="22">统计 [1, 2, 3, 4]</text>
+<text x="740" y="425" text-anchor="middle" font-size="18">每行一组均值、方差</text>
+</svg>
