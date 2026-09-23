@@ -1,0 +1,112 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="690" viewBox="0 0 1000 690" role="img" aria-labelledby="title desc"><title id="title">6.74B 参数主要存在哪里</title><desc id="desc">三十二个等大的 Block，每个包含约三分之一 Attention 投影与三分之二 FFN，整体约百分之九十六点一参数位于 Block。</desc><style>text{font-family:"Noto Sans CJK SC","Noto Sans CJK JP","Microsoft YaHei",sans-serif;fill:#24354a}</style><rect width="1000" height="690" fill="#f7f9fc"/>
+<text x="500" y="48" text-anchor="middle" font-size="28" font-weight="bold">6.74B 参数主要存在哪里</text>
+<text x="500" y="88" text-anchor="middle" font-size="19">LLaMA-2-7B：d=4096，d_ff=11008，32 个 Block</text>
+<rect x="65" y="132" width="34" height="43" rx="4" fill="#377ac0"/>
+<rect x="99" y="132" width="68" height="43" rx="4" fill="#218578"/>
+<text x="116" y="196" text-anchor="middle" font-size="15">Block 1</text>
+<rect x="175" y="132" width="34" height="43" rx="4" fill="#377ac0"/>
+<rect x="209" y="132" width="68" height="43" rx="4" fill="#218578"/>
+<text x="226" y="196" text-anchor="middle" font-size="15">Block 2</text>
+<rect x="285" y="132" width="34" height="43" rx="4" fill="#377ac0"/>
+<rect x="319" y="132" width="68" height="43" rx="4" fill="#218578"/>
+<text x="336" y="196" text-anchor="middle" font-size="15">Block 3</text>
+<rect x="395" y="132" width="34" height="43" rx="4" fill="#377ac0"/>
+<rect x="429" y="132" width="68" height="43" rx="4" fill="#218578"/>
+<text x="446" y="196" text-anchor="middle" font-size="15">Block 4</text>
+<rect x="505" y="132" width="34" height="43" rx="4" fill="#377ac0"/>
+<rect x="539" y="132" width="68" height="43" rx="4" fill="#218578"/>
+<text x="556" y="196" text-anchor="middle" font-size="15">Block 5</text>
+<rect x="615" y="132" width="34" height="43" rx="4" fill="#377ac0"/>
+<rect x="649" y="132" width="68" height="43" rx="4" fill="#218578"/>
+<text x="666" y="196" text-anchor="middle" font-size="15">Block 6</text>
+<rect x="725" y="132" width="34" height="43" rx="4" fill="#377ac0"/>
+<rect x="759" y="132" width="68" height="43" rx="4" fill="#218578"/>
+<text x="776" y="196" text-anchor="middle" font-size="15">Block 7</text>
+<rect x="835" y="132" width="34" height="43" rx="4" fill="#377ac0"/>
+<rect x="869" y="132" width="68" height="43" rx="4" fill="#218578"/>
+<text x="886" y="196" text-anchor="middle" font-size="15">Block 8</text>
+<rect x="65" y="210" width="34" height="43" rx="4" fill="#377ac0"/>
+<rect x="99" y="210" width="68" height="43" rx="4" fill="#218578"/>
+<text x="116" y="274" text-anchor="middle" font-size="15">Block 9</text>
+<rect x="175" y="210" width="34" height="43" rx="4" fill="#377ac0"/>
+<rect x="209" y="210" width="68" height="43" rx="4" fill="#218578"/>
+<text x="226" y="274" text-anchor="middle" font-size="15">Block 10</text>
+<rect x="285" y="210" width="34" height="43" rx="4" fill="#377ac0"/>
+<rect x="319" y="210" width="68" height="43" rx="4" fill="#218578"/>
+<text x="336" y="274" text-anchor="middle" font-size="15">Block 11</text>
+<rect x="395" y="210" width="34" height="43" rx="4" fill="#377ac0"/>
+<rect x="429" y="210" width="68" height="43" rx="4" fill="#218578"/>
+<text x="446" y="274" text-anchor="middle" font-size="15">Block 12</text>
+<rect x="505" y="210" width="34" height="43" rx="4" fill="#377ac0"/>
+<rect x="539" y="210" width="68" height="43" rx="4" fill="#218578"/>
+<text x="556" y="274" text-anchor="middle" font-size="15">Block 13</text>
+<rect x="615" y="210" width="34" height="43" rx="4" fill="#377ac0"/>
+<rect x="649" y="210" width="68" height="43" rx="4" fill="#218578"/>
+<text x="666" y="274" text-anchor="middle" font-size="15">Block 14</text>
+<rect x="725" y="210" width="34" height="43" rx="4" fill="#377ac0"/>
+<rect x="759" y="210" width="68" height="43" rx="4" fill="#218578"/>
+<text x="776" y="274" text-anchor="middle" font-size="15">Block 15</text>
+<rect x="835" y="210" width="34" height="43" rx="4" fill="#377ac0"/>
+<rect x="869" y="210" width="68" height="43" rx="4" fill="#218578"/>
+<text x="886" y="274" text-anchor="middle" font-size="15">Block 16</text>
+<rect x="65" y="288" width="34" height="43" rx="4" fill="#377ac0"/>
+<rect x="99" y="288" width="68" height="43" rx="4" fill="#218578"/>
+<text x="116" y="352" text-anchor="middle" font-size="15">Block 17</text>
+<rect x="175" y="288" width="34" height="43" rx="4" fill="#377ac0"/>
+<rect x="209" y="288" width="68" height="43" rx="4" fill="#218578"/>
+<text x="226" y="352" text-anchor="middle" font-size="15">Block 18</text>
+<rect x="285" y="288" width="34" height="43" rx="4" fill="#377ac0"/>
+<rect x="319" y="288" width="68" height="43" rx="4" fill="#218578"/>
+<text x="336" y="352" text-anchor="middle" font-size="15">Block 19</text>
+<rect x="395" y="288" width="34" height="43" rx="4" fill="#377ac0"/>
+<rect x="429" y="288" width="68" height="43" rx="4" fill="#218578"/>
+<text x="446" y="352" text-anchor="middle" font-size="15">Block 20</text>
+<rect x="505" y="288" width="34" height="43" rx="4" fill="#377ac0"/>
+<rect x="539" y="288" width="68" height="43" rx="4" fill="#218578"/>
+<text x="556" y="352" text-anchor="middle" font-size="15">Block 21</text>
+<rect x="615" y="288" width="34" height="43" rx="4" fill="#377ac0"/>
+<rect x="649" y="288" width="68" height="43" rx="4" fill="#218578"/>
+<text x="666" y="352" text-anchor="middle" font-size="15">Block 22</text>
+<rect x="725" y="288" width="34" height="43" rx="4" fill="#377ac0"/>
+<rect x="759" y="288" width="68" height="43" rx="4" fill="#218578"/>
+<text x="776" y="352" text-anchor="middle" font-size="15">Block 23</text>
+<rect x="835" y="288" width="34" height="43" rx="4" fill="#377ac0"/>
+<rect x="869" y="288" width="68" height="43" rx="4" fill="#218578"/>
+<text x="886" y="352" text-anchor="middle" font-size="15">Block 24</text>
+<rect x="65" y="366" width="34" height="43" rx="4" fill="#377ac0"/>
+<rect x="99" y="366" width="68" height="43" rx="4" fill="#218578"/>
+<text x="116" y="430" text-anchor="middle" font-size="15">Block 25</text>
+<rect x="175" y="366" width="34" height="43" rx="4" fill="#377ac0"/>
+<rect x="209" y="366" width="68" height="43" rx="4" fill="#218578"/>
+<text x="226" y="430" text-anchor="middle" font-size="15">Block 26</text>
+<rect x="285" y="366" width="34" height="43" rx="4" fill="#377ac0"/>
+<rect x="319" y="366" width="68" height="43" rx="4" fill="#218578"/>
+<text x="336" y="430" text-anchor="middle" font-size="15">Block 27</text>
+<rect x="395" y="366" width="34" height="43" rx="4" fill="#377ac0"/>
+<rect x="429" y="366" width="68" height="43" rx="4" fill="#218578"/>
+<text x="446" y="430" text-anchor="middle" font-size="15">Block 28</text>
+<rect x="505" y="366" width="34" height="43" rx="4" fill="#377ac0"/>
+<rect x="539" y="366" width="68" height="43" rx="4" fill="#218578"/>
+<text x="556" y="430" text-anchor="middle" font-size="15">Block 29</text>
+<rect x="615" y="366" width="34" height="43" rx="4" fill="#377ac0"/>
+<rect x="649" y="366" width="68" height="43" rx="4" fill="#218578"/>
+<text x="666" y="430" text-anchor="middle" font-size="15">Block 30</text>
+<rect x="725" y="366" width="34" height="43" rx="4" fill="#377ac0"/>
+<rect x="759" y="366" width="68" height="43" rx="4" fill="#218578"/>
+<text x="776" y="430" text-anchor="middle" font-size="15">Block 31</text>
+<rect x="835" y="366" width="34" height="43" rx="4" fill="#377ac0"/>
+<rect x="869" y="366" width="68" height="43" rx="4" fill="#218578"/>
+<text x="886" y="430" text-anchor="middle" font-size="15">Block 32</text>
+<text x="500" y="471" text-anchor="middle" font-size="19">每个 Block：Attention 67.11M　+　FFN 135.27M　+　Norm 0.008M</text>
+<rect x="140" y="494" width="15" height="15" rx="4" fill="#377ac0"/>
+<text x="169" y="508" text-anchor="start" font-size="18">Attention</text>
+<rect x="350" y="494" width="15" height="15" rx="4" fill="#218578"/>
+<text x="379" y="508" text-anchor="start" font-size="18">FFN</text>
+<text x="695" y="508" text-anchor="middle" font-size="17">Norm 太小，未单独绘制</text>
+<rect x="65" y="552" width="16.92276738306787" height="43" rx="4" fill="#d37a32"/>
+<rect x="81.92276738306788" y="552" width="836.1539363973835" height="43" rx="4" fill="#218578"/>
+<rect x="918.0767037804515" y="552" width="0.000528836480720871" height="43" rx="4" fill="#8860ae"/>
+<rect x="918.0772326169322" y="552" width="16.92276738306787" height="43" rx="4" fill="#d37a32"/>
+<text x="500" y="626" text-anchor="middle" font-size="20">32 个 Block：96.11%　|　Embedding + LM Head：3.89%</text>
+<text x="500" y="662" text-anchor="middle" font-size="17">上方每个块的面积表示参数组成；下方按全模型参数量比例绘制</text>
+</svg>

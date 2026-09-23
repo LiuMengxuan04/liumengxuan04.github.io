@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="430" viewBox="0 0 1000 430" role="img" aria-labelledby="title desc"><title id="title">单 token Decode：算得少，也可能搬得久</title><desc id="desc">相同零到七毫秒轴比较峰值算术时间零点零四三毫秒与权重搬运时间六点七毫秒，使用理想算力带宽估算并非实测。</desc><style>text{font-family:"Noto Sans CJK SC","Noto Sans CJK JP","Microsoft YaHei",sans-serif;fill:#24354a}</style><rect width="1000" height="430" fill="#f7f9fc"/>
+<text x="500" y="48" text-anchor="middle" font-size="28" font-weight="bold">单 token Decode：算得少，也可能搬得久</text>
+<text x="500" y="90" text-anchor="middle" font-size="18">粗略假设：13.4 GFLOPs，13.4 GB 权重，312 TFLOP/s，2 TB/s</text>
+<path d="M255 130V310" stroke="#dce4ed"/>
+<text x="255" y="342" text-anchor="middle" font-size="17">0</text>
+<path d="M345 130V310" stroke="#dce4ed"/>
+<text x="345" y="342" text-anchor="middle" font-size="17">1</text>
+<path d="M435 130V310" stroke="#dce4ed"/>
+<text x="435" y="342" text-anchor="middle" font-size="17">2</text>
+<path d="M525 130V310" stroke="#dce4ed"/>
+<text x="525" y="342" text-anchor="middle" font-size="17">3</text>
+<path d="M615 130V310" stroke="#dce4ed"/>
+<text x="615" y="342" text-anchor="middle" font-size="17">4</text>
+<path d="M705 130V310" stroke="#dce4ed"/>
+<text x="705" y="342" text-anchor="middle" font-size="17">5</text>
+<path d="M795 130V310" stroke="#dce4ed"/>
+<text x="795" y="342" text-anchor="middle" font-size="17">6</text>
+<path d="M885 130V310" stroke="#dce4ed"/>
+<text x="885" y="342" text-anchor="middle" font-size="17">7</text>
+<text x="225" y="179" text-anchor="end" font-size="20">峰值算术时间</text>
+<rect x="255" y="151" width="3.8699999999999997" height="40" rx="4" fill="#377ac0"/>
+<text x="270" y="179" text-anchor="start" font-size="20">0.043 ms</text>
+<text x="225" y="270" text-anchor="end" font-size="20">权重搬运时间</text>
+<rect x="255" y="242" width="603.0" height="40" rx="4" fill="#d37a32"/>
+<text x="870" y="270" text-anchor="start" font-size="20">6.7 ms</text>
+<text x="575" y="374" text-anchor="middle" font-size="18">时间 / ms（同一线性刻度）</text>
+<text x="500" y="410" text-anchor="middle" font-size="17">仅比较两种理想约束，不是实测延迟；KV Cache 与其他开销未计入</text>
+</svg>
