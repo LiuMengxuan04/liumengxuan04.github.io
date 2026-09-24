@@ -474,3 +474,8 @@ Decode：一次处理一个新 token
 3. Q 是一次性的查询，K/V 是会被未来反复访问的历史记忆。
 
 理解这三点之后，KV Cache、Prefill/Decode、GEMM/GEMV、GQA/MQA 以及长上下文显存压力就会落在同一条因果链上。
+
+
+## 系列补充
+
+[KV Cache 补充：从最后一行到下一个 Token]({% post_url 2026-09-24-技术-KV Cache补充从最后一行到下一个Token %}) 继续展开历史 Attention 分数是否需要保留、最后位置的隐藏向量如何送入 LM Head，以及新 token 何时进入缓存。
