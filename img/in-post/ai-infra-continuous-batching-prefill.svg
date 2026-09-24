@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="620" viewBox="0 0 900 620" role="img" aria-labelledby="title desc">
+<title id="title">新请求先完成 Prefill，再进入 Decode</title><desc id="desc">混合调度示意：A、B 每轮 Decode 一个 token；C 第一轮等待，第二三轮分块 Prefill，第三轮结束产生首个 token，第四轮 Decode。各轮并非等长时间。</desc>
+<style>text{font-family:"Noto Sans CJK SC","Noto Sans CJK JP","Microsoft YaHei",sans-serif;fill:#24354a;font-size:24px}.title{font-size:30px;font-weight:700}.subtitle{font-size:22px;fill:#526479}.label{font-size:25px;font-weight:700}.small{font-size:21px}.a{fill:#d9eafa}.b{fill:#f8dfbf}.c{fill:#ccece6}.d{fill:#e8def4}.idle{fill:#e9edf2}.panel{fill:#fff;stroke:#c9d3df;stroke-width:1.5}.line{fill:none;stroke:#687d94;stroke-width:2;marker-end:url(#arrow)}</style>
+<defs><marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#687d94"/></marker></defs>
+<rect width="900" height="620" fill="#f7f9fc"/>
+<text x="450" y="45" text-anchor="middle" class="title">新请求先建立缓存，再参与 Decode</text>
+<text x="450" y="85" text-anchor="middle" class="subtitle">支持混合批次的引擎：已有请求 Decode + 新请求 Prefill 块</text>
+<text x="245" y="141" text-anchor="middle" class="label">第 1 轮</text>
+<text x="418" y="141" text-anchor="middle" class="label">第 2 轮</text>
+<text x="591" y="141" text-anchor="middle" class="label">第 3 轮</text>
+<text x="764" y="141" text-anchor="middle" class="label">第 4 轮</text>
+<text x="65" y="220" text-anchor="middle" class="small">请求 A</text>
+<rect x="164" y="174" width="160" height="80" rx="8" class="a"/>
+<text x="244" y="207" text-anchor="middle" class="small">Decode</text>
+<text x="244" y="238" text-anchor="middle" class="small">1 token</text>
+<rect x="337" y="174" width="160" height="80" rx="8" class="a"/>
+<text x="417" y="207" text-anchor="middle" class="small">Decode</text>
+<text x="417" y="238" text-anchor="middle" class="small">1 token</text>
+<rect x="510" y="174" width="160" height="80" rx="8" class="a"/>
+<text x="590" y="207" text-anchor="middle" class="small">Decode</text>
+<text x="590" y="238" text-anchor="middle" class="small">1 token</text>
+<rect x="683" y="174" width="160" height="80" rx="8" class="a"/>
+<text x="763" y="207" text-anchor="middle" class="small">Decode</text>
+<text x="763" y="238" text-anchor="middle" class="small">1 token</text>
+<text x="65" y="322" text-anchor="middle" class="small">请求 B</text>
+<rect x="164" y="276" width="160" height="80" rx="8" class="a"/>
+<text x="244" y="309" text-anchor="middle" class="small">Decode</text>
+<text x="244" y="340" text-anchor="middle" class="small">1 token</text>
+<rect x="337" y="276" width="160" height="80" rx="8" class="a"/>
+<text x="417" y="309" text-anchor="middle" class="small">Decode</text>
+<text x="417" y="340" text-anchor="middle" class="small">1 token</text>
+<rect x="510" y="276" width="160" height="80" rx="8" class="a"/>
+<text x="590" y="309" text-anchor="middle" class="small">Decode</text>
+<text x="590" y="340" text-anchor="middle" class="small">1 token</text>
+<rect x="683" y="276" width="160" height="80" rx="8" class="a"/>
+<text x="763" y="309" text-anchor="middle" class="small">Decode</text>
+<text x="763" y="340" text-anchor="middle" class="small">1 token</text>
+<text x="65" y="424" text-anchor="middle" class="small">请求 C</text>
+<rect x="164" y="378" width="160" height="80" rx="8" class="idle"/>
+<text x="244" y="411" text-anchor="middle" class="small">等待</text>
+<text x="244" y="442" text-anchor="middle" class="small">尚未建立缓存</text>
+<rect x="337" y="378" width="160" height="80" rx="8" class="c"/>
+<text x="417" y="411" text-anchor="middle" class="small">Prefill</text>
+<text x="417" y="442" text-anchor="middle" class="small">块 1</text>
+<rect x="510" y="378" width="160" height="80" rx="8" class="c"/>
+<text x="590" y="411" text-anchor="middle" class="small">Prefill</text>
+<text x="590" y="442" text-anchor="middle" class="small">块 2 · 完成</text>
+<rect x="683" y="378" width="160" height="80" rx="8" class="a"/>
+<text x="763" y="411" text-anchor="middle" class="small">Decode</text>
+<text x="763" y="442" text-anchor="middle" class="small">1 token</text>
+<path d="M590,461 V495 H690" class="line"/>
+<text x="450" y="532" text-anchor="middle" class="small">C 在第 3 轮末得到首个输出 token，第 4 轮开始 Decode</text>
+<text x="450" y="574" text-anchor="middle" class="subtitle">色块表示工作类型：Decode / Prefill / 等待</text>
+<text x="450" y="606" text-anchor="middle" class="small">每轮受 token 预算与显存限制；图中轮次不是等长时间</text>
+</svg>

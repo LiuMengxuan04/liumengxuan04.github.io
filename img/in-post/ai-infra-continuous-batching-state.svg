@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="650" viewBox="0 0 900 650" role="img" aria-labelledby="title desc">
+<title id="title">共享模型权重，各自查询自己的缓存</title><desc id="desc">A 与 C 的隐藏向量一起投影，分别产生 Query。A 只读取自己的 K/V，C 只读取自己的 K/V；上下文长度和位置可以不同。图示一个层、一个头，省略本轮 K/V 的追加。</desc>
+<style>text{font-family:"Noto Sans CJK SC","Noto Sans CJK JP","Microsoft YaHei",sans-serif;fill:#24354a;font-size:24px}.title{font-size:30px;font-weight:700}.subtitle{font-size:22px;fill:#526479}.label{font-size:25px;font-weight:700}.small{font-size:21px}.a{fill:#d9eafa}.b{fill:#f8dfbf}.c{fill:#ccece6}.d{fill:#e8def4}.idle{fill:#e9edf2}.panel{fill:#fff;stroke:#c9d3df;stroke-width:1.5}.line{fill:none;stroke:#687d94;stroke-width:2;marker-end:url(#arrow)}</style>
+<defs><marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#687d94"/></marker></defs>
+<rect width="900" height="650" fill="#f7f9fc"/>
+<text x="450" y="45" text-anchor="middle" class="title">计算可以合批，上下文保持独立</text>
+<rect x="85" y="85" width="270" height="60" rx="8" class="a"/>
+<text x="220" y="125" text-anchor="middle" class="small">xA：当前 token 的隐藏向量</text>
+<path d="M220,145 V180" class="line"/>
+<rect x="545" y="85" width="270" height="60" rx="8" class="c"/>
+<text x="680" y="125" text-anchor="middle" class="small">xC：当前 token 的隐藏向量</text>
+<path d="M680,145 V180" class="line"/>
+<rect x="85" y="184" width="730" height="76" rx="8" class="panel"/>
+<text x="450" y="216" text-anchor="middle" class="label">共享投影权重 W</text>
+<text x="450" y="246" text-anchor="middle" class="small">X = [xA; xC]     →     一起计算 Q / K / V</text>
+<path d="M150,260 V301" class="line"/>
+<rect x="70" y="305" width="165" height="58" rx="8" class="a"/>
+<text x="152" y="344" text-anchor="middle" class="">qA</text>
+<path d="M152,363 V407" class="line"/>
+<rect x="70" y="411" width="165" height="70" rx="8" class="a"/>
+<text x="152" y="454" text-anchor="middle" class="small">Attention</text>
+<rect x="270" y="372" width="160" height="111" rx="8" class="a"/>
+<text x="350" y="405" text-anchor="middle" class="small">A 的 KV Cache</text>
+<text x="350" y="438" text-anchor="middle" class="small">KA / VA</text>
+<text x="350" y="467" text-anchor="middle" class="small">上下文较长</text>
+<path d="M270,446 H239" class="line"/>
+<path d="M152,481 V520" class="line"/>
+<text x="152" y="551" text-anchor="middle" class="small">oA：独立结果</text>
+<path d="M610,260 V301" class="line"/>
+<rect x="530" y="305" width="165" height="58" rx="8" class="c"/>
+<text x="612" y="344" text-anchor="middle" class="">qC</text>
+<path d="M612,363 V407" class="line"/>
+<rect x="530" y="411" width="165" height="70" rx="8" class="c"/>
+<text x="612" y="454" text-anchor="middle" class="small">Attention</text>
+<rect x="730" y="372" width="160" height="111" rx="8" class="c"/>
+<text x="810" y="405" text-anchor="middle" class="small">C 的 KV Cache</text>
+<text x="810" y="438" text-anchor="middle" class="small">KC / VC</text>
+<text x="810" y="467" text-anchor="middle" class="small">上下文较短</text>
+<path d="M730,446 H699" class="line"/>
+<path d="M612,481 V520" class="line"/>
+<text x="612" y="551" text-anchor="middle" class="small">oC：独立结果</text>
+<text x="450" y="597" text-anchor="middle" class="subtitle">同一层、一个 head 的示意；省略本轮 K/V 的追加</text>
+<text x="450" y="630" text-anchor="middle" class="subtitle">batch 行号可以变化，请求与缓存的对应关系不能变</text>
+</svg>

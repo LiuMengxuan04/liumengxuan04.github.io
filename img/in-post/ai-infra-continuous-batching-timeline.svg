@@ -1,0 +1,97 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="650" viewBox="0 0 900 650" role="img" aria-labelledby="title desc">
+<title id="title">每轮结束后，让等待中的请求补位</title><desc id="desc">只比较 Decode 调度。A 六步，B、C、D 各两步；静态批处理八轮完成，连续批处理六轮完成。行表示逻辑名额，列表示轮次，不代表固定核心或等长时间。</desc>
+<style>text{font-family:"Noto Sans CJK SC","Noto Sans CJK JP","Microsoft YaHei",sans-serif;fill:#24354a;font-size:24px}.title{font-size:30px;font-weight:700}.subtitle{font-size:22px;fill:#526479}.label{font-size:25px;font-weight:700}.small{font-size:21px}.a{fill:#d9eafa}.b{fill:#f8dfbf}.c{fill:#ccece6}.d{fill:#e8def4}.idle{fill:#e9edf2}.panel{fill:#fff;stroke:#c9d3df;stroke-width:1.5}.line{fill:none;stroke:#687d94;stroke-width:2;marker-end:url(#arrow)}</style>
+<defs><marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#687d94"/></marker></defs>
+<rect width="900" height="650" fill="#f7f9fc"/>
+<text x="450" y="46" text-anchor="middle" class="title">同样的请求，不同的组批方式</text>
+<text x="450" y="86" text-anchor="middle" class="subtitle">只看 Decode：A 还需 6 步，B / C / D 各需 2 步</text>
+<text x="35" y="133" text-anchor="start" class="label">静态批处理：整批结束后再接纳新成员</text>
+<text x="187" y="170" text-anchor="middle" class="small">1</text>
+<text x="272" y="170" text-anchor="middle" class="small">2</text>
+<text x="357" y="170" text-anchor="middle" class="small">3</text>
+<text x="442" y="170" text-anchor="middle" class="small">4</text>
+<text x="527" y="170" text-anchor="middle" class="small">5</text>
+<text x="612" y="170" text-anchor="middle" class="small">6</text>
+<text x="697" y="170" text-anchor="middle" class="small">7</text>
+<text x="782" y="170" text-anchor="middle" class="small">8</text>
+<text x="35" y="221" text-anchor="start" class="small">名额 1</text>
+<rect x="150" y="186" width="75" height="52" rx="8" class="a"/>
+<text x="187" y="221" text-anchor="middle" class="">A1</text>
+<rect x="235" y="186" width="75" height="52" rx="8" class="a"/>
+<text x="272" y="221" text-anchor="middle" class="">A2</text>
+<rect x="320" y="186" width="75" height="52" rx="8" class="a"/>
+<text x="357" y="221" text-anchor="middle" class="">A3</text>
+<rect x="405" y="186" width="75" height="52" rx="8" class="a"/>
+<text x="442" y="221" text-anchor="middle" class="">A4</text>
+<rect x="490" y="186" width="75" height="52" rx="8" class="a"/>
+<text x="527" y="221" text-anchor="middle" class="">A5</text>
+<rect x="575" y="186" width="75" height="52" rx="8" class="a"/>
+<text x="612" y="221" text-anchor="middle" class="">A6</text>
+<rect x="660" y="186" width="75" height="52" rx="8" class="c"/>
+<text x="697" y="221" text-anchor="middle" class="">C1</text>
+<rect x="745" y="186" width="75" height="52" rx="8" class="c"/>
+<text x="782" y="221" text-anchor="middle" class="">C2</text>
+<text x="35" y="286" text-anchor="start" class="small">名额 2</text>
+<rect x="150" y="251" width="75" height="52" rx="8" class="b"/>
+<text x="187" y="286" text-anchor="middle" class="">B1</text>
+<rect x="235" y="251" width="75" height="52" rx="8" class="b"/>
+<text x="272" y="286" text-anchor="middle" class="">B2</text>
+<rect x="320" y="251" width="75" height="52" rx="8" class="idle"/>
+<text x="357" y="286" text-anchor="middle" class="">—</text>
+<rect x="405" y="251" width="75" height="52" rx="8" class="idle"/>
+<text x="442" y="286" text-anchor="middle" class="">—</text>
+<rect x="490" y="251" width="75" height="52" rx="8" class="idle"/>
+<text x="527" y="286" text-anchor="middle" class="">—</text>
+<rect x="575" y="251" width="75" height="52" rx="8" class="idle"/>
+<text x="612" y="286" text-anchor="middle" class="">—</text>
+<rect x="660" y="251" width="75" height="52" rx="8" class="d"/>
+<text x="697" y="286" text-anchor="middle" class="">D1</text>
+<rect x="745" y="251" width="75" height="52" rx="8" class="d"/>
+<text x="782" y="286" text-anchor="middle" class="">D2</text>
+<text x="450" y="338" text-anchor="middle" class="small">迭代轮次 →</text>
+<text x="35" y="382" text-anchor="start" class="label">连续批处理：B 结束补 C，C 结束补 D</text>
+<text x="187" y="419" text-anchor="middle" class="small">1</text>
+<text x="272" y="419" text-anchor="middle" class="small">2</text>
+<text x="357" y="419" text-anchor="middle" class="small">3</text>
+<text x="442" y="419" text-anchor="middle" class="small">4</text>
+<text x="527" y="419" text-anchor="middle" class="small">5</text>
+<text x="612" y="419" text-anchor="middle" class="small">6</text>
+<text x="697" y="419" text-anchor="middle" class="small">7</text>
+<text x="782" y="419" text-anchor="middle" class="small">8</text>
+<text x="35" y="470" text-anchor="start" class="small">名额 1</text>
+<rect x="150" y="435" width="75" height="52" rx="8" class="a"/>
+<text x="187" y="470" text-anchor="middle" class="">A1</text>
+<rect x="235" y="435" width="75" height="52" rx="8" class="a"/>
+<text x="272" y="470" text-anchor="middle" class="">A2</text>
+<rect x="320" y="435" width="75" height="52" rx="8" class="a"/>
+<text x="357" y="470" text-anchor="middle" class="">A3</text>
+<rect x="405" y="435" width="75" height="52" rx="8" class="a"/>
+<text x="442" y="470" text-anchor="middle" class="">A4</text>
+<rect x="490" y="435" width="75" height="52" rx="8" class="a"/>
+<text x="527" y="470" text-anchor="middle" class="">A5</text>
+<rect x="575" y="435" width="75" height="52" rx="8" class="a"/>
+<text x="612" y="470" text-anchor="middle" class="">A6</text>
+<rect x="660" y="435" width="75" height="52" rx="8" class="idle"/>
+<text x="697" y="470" text-anchor="middle" class="">—</text>
+<rect x="745" y="435" width="75" height="52" rx="8" class="idle"/>
+<text x="782" y="470" text-anchor="middle" class="">—</text>
+<text x="35" y="535" text-anchor="start" class="small">名额 2</text>
+<rect x="150" y="500" width="75" height="52" rx="8" class="b"/>
+<text x="187" y="535" text-anchor="middle" class="">B1</text>
+<rect x="235" y="500" width="75" height="52" rx="8" class="b"/>
+<text x="272" y="535" text-anchor="middle" class="">B2</text>
+<rect x="320" y="500" width="75" height="52" rx="8" class="c"/>
+<text x="357" y="535" text-anchor="middle" class="">C1</text>
+<rect x="405" y="500" width="75" height="52" rx="8" class="c"/>
+<text x="442" y="535" text-anchor="middle" class="">C2</text>
+<rect x="490" y="500" width="75" height="52" rx="8" class="d"/>
+<text x="527" y="535" text-anchor="middle" class="">D1</text>
+<rect x="575" y="500" width="75" height="52" rx="8" class="d"/>
+<text x="612" y="535" text-anchor="middle" class="">D2</text>
+<rect x="660" y="500" width="75" height="52" rx="8" class="idle"/>
+<text x="697" y="535" text-anchor="middle" class="">—</text>
+<rect x="745" y="500" width="75" height="52" rx="8" class="idle"/>
+<text x="782" y="535" text-anchor="middle" class="">—</text>
+<text x="450" y="587" text-anchor="middle" class="small">迭代轮次 →</text>
+<text x="450" y="621" text-anchor="middle" class="subtitle">两行是逻辑并发名额；每一轮的实际耗时可以不同</text>
+</svg>
