@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 380" font-family="PingFang SC, Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="14">
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#555"/></marker>
+  </defs>
+  <rect width="800" height="380" fill="#fff"/>
+  <text x="400" y="30" text-anchor="middle" font-size="18" font-weight="bold" fill="#222">图 11　在线服务：API 服务器 + 多个引擎副本</text>
+
+  <rect x="30" y="150" width="110" height="60" rx="8" fill="#f3f3f3" stroke="#999"/>
+  <text x="85" y="176" text-anchor="middle">用户请求</text>
+  <text x="85" y="196" text-anchor="middle" font-size="11" fill="#555">HTTP / OpenAI 格式</text>
+
+  <rect x="180" y="110" width="200" height="140" rx="10" fill="#eef3ff" stroke="#4a6fd1" stroke-width="1.5"/>
+  <text x="280" y="137" text-anchor="middle" font-weight="bold" fill="#223a80">API 服务器进程</text>
+  <text x="280" y="162" text-anchor="middle" font-size="12" fill="#444">FastAPI 接收请求、分词</text>
+  <text x="280" y="184" text-anchor="middle" font-size="12" fill="#444">按负载挑一个副本</text>
+  <text x="280" y="206" text-anchor="middle" font-size="12" fill="#444">把生成结果流式返回</text>
+  <text x="280" y="232" text-anchor="middle" font-size="11" fill="#888">（异步，不阻塞）</text>
+
+  <rect x="180" y="285" width="200" height="60" rx="8" fill="#fffbe6" stroke="#d4b106"/>
+  <text x="280" y="310" text-anchor="middle" font-size="13" fill="#7a6400">DP 协调器</text>
+  <text x="280" y="330" text-anchor="middle" font-size="11" fill="#7a6400">汇总各副本排队/运行数量</text>
+  <line x1="280" y1="283" x2="280" y2="253" stroke="#d4b106" stroke-width="1.4" marker-end="url(#a)"/>
+
+  <g font-size="13" text-anchor="middle">
+    <rect x="470" y="55" width="290" height="60" rx="8" fill="#eefaf0" stroke="#3a9a52"/><text x="615" y="80">引擎副本 0</text><text x="615" y="100" font-size="11" fill="#555">自己的调度器 + 4 张卡张量并行</text>
+    <rect x="470" y="130" width="290" height="60" rx="8" fill="#eefaf0" stroke="#3a9a52"/><text x="615" y="155">引擎副本 1</text><text x="615" y="175" font-size="11" fill="#555">自己的调度器 + 4 张卡张量并行</text>
+    <rect x="470" y="205" width="290" height="60" rx="8" fill="#eefaf0" stroke="#3a9a52"/><text x="615" y="230">引擎副本 2</text><text x="615" y="250" font-size="11" fill="#555">可以在另一台机器上</text>
+    <rect x="470" y="280" width="290" height="60" rx="8" fill="#eefaf0" stroke="#3a9a52"/><text x="615" y="305">引擎副本 3</text><text x="615" y="325" font-size="11" fill="#555">可以在另一台机器上</text>
+  </g>
+
+  <line x1="140" y1="180" x2="177" y2="180" stroke="#555" stroke-width="1.6" marker-end="url(#a)"/>
+  <g stroke="#555" stroke-width="1.4">
+    <line x1="380" y1="160" x2="467" y2="85" marker-end="url(#a)"/>
+    <line x1="380" y1="170" x2="467" y2="160" marker-end="url(#a)"/>
+    <line x1="380" y1="190" x2="467" y2="235" marker-end="url(#a)"/>
+    <line x1="380" y1="200" x2="467" y2="310" marker-end="url(#a)"/>
+  </g>
+  <text x="428" y="194" text-anchor="middle" font-size="11" fill="#555">ZMQ</text>
+</svg>

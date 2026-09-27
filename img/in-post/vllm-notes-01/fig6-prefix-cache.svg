@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 380" font-family="PingFang SC, Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="14">
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#555"/></marker>
+  </defs>
+  <rect width="800" height="380" fill="#fff"/>
+  <text x="400" y="30" text-anchor="middle" font-size="18" font-weight="bold" fill="#222">图 6　前缀缓存：用"链式哈希"认出算过的块</text>
+
+  <text x="40" y="70" font-weight="bold" fill="#333">请求 1：系统提示词（32 个 token）+ 问题甲（10 个 token）</text>
+  <g font-size="12" text-anchor="middle">
+    <rect x="40" y="82" width="160" height="34" fill="#eef3ff" stroke="#4a6fd1"/><text x="120" y="104">第 1 块（系统提示 1~16）</text>
+    <rect x="215" y="82" width="160" height="34" fill="#eef3ff" stroke="#4a6fd1"/><text x="295" y="104">第 2 块（系统提示 17~32）</text>
+    <rect x="390" y="82" width="120" height="34" fill="#f3f3f3" stroke="#bbb"/><text x="450" y="104">问题甲（未满）</text>
+  </g>
+  <g font-size="12" fill="#223a80" text-anchor="middle">
+    <text x="120" y="140">h1 = 哈希(空, 第 1 块内容)</text>
+    <text x="295" y="140">h2 = 哈希(h1, 第 2 块内容)</text>
+    <text x="450" y="140" fill="#888">未满不算哈希</text>
+  </g>
+
+  <rect x="560" y="82" width="200" height="70" rx="8" fill="#fffbe6" stroke="#d4b106"/>
+  <text x="660" y="104" text-anchor="middle" font-weight="bold" fill="#7a6400">哈希表</text>
+  <text x="660" y="124" text-anchor="middle" font-size="12">h1 → 显存块 2</text>
+  <text x="660" y="142" text-anchor="middle" font-size="12">h2 → 显存块 7</text>
+
+  <text x="40" y="200" font-weight="bold" fill="#333">请求 2：同样的系统提示词 + 问题乙</text>
+  <g font-size="12" text-anchor="middle">
+    <rect x="40" y="212" width="160" height="34" fill="#dff5e3" stroke="#3a9a52"/><text x="120" y="234">第 1 块 → 命中 h1</text>
+    <rect x="215" y="212" width="160" height="34" fill="#dff5e3" stroke="#3a9a52"/><text x="295" y="234">第 2 块 → 命中 h2</text>
+    <rect x="390" y="212" width="120" height="34" fill="#eef3ff" stroke="#4a6fd1"/><text x="450" y="234">问题乙：要算</text>
+  </g>
+  <path d="M600,152 C600,190 380,180 300,210" fill="none" stroke="#3a9a52" stroke-width="1.5" stroke-dasharray="5 3" marker-end="url(#a)"/>
+  <text x="560" y="185" font-size="12" fill="#1d5e2e">直接复用块 2、块 7</text>
+
+  <text x="40" y="290" font-size="13" fill="#444">· 为什么要把"前一块的哈希"也算进去？因为同样的 16 个字，前文不同时算出的 K/V 也不同。链式哈希保证</text>
+  <text x="52" y="310" font-size="13" fill="#444">"第 k 块命中"就意味着"从开头到第 k 块全都一样"。</text>
+  <text x="40" y="336" font-size="13" fill="#444">· 请求 1 结束后，块 2、7 回到空闲池但内容和哈希先留着；只有当它们被别的请求拿去覆盖时才真正失效。</text>
+  <text x="40" y="360" font-size="13" fill="#444">· 同一个块可能被多个请求同时引用，所以每个块都有引用计数，降到 0 才算"空闲"。</text>
+</svg>

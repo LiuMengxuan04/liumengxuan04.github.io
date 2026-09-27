@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 360" font-family="PingFang SC, Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="14">
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#555"/></marker>
+  </defs>
+  <rect width="800" height="360" fill="#fff"/>
+  <text x="400" y="30" text-anchor="middle" font-size="18" font-weight="bold" fill="#222">图 8　投机解码：先猜几个，再让大模型一次性批改</text>
+
+  <text x="40" y="70" font-weight="bold" fill="#333">① 起草：便宜的方法一口气猜 3 个词</text>
+  <g font-size="13" text-anchor="middle">
+    <rect x="40" y="82" width="190" height="34" fill="#f3f3f3" stroke="#bbb"/><text x="135" y="104">已有：今天天气</text>
+    <rect x="235" y="82" width="70" height="34" fill="#fff4e5" stroke="#e39b2d"/><text x="270" y="104">很</text>
+    <rect x="310" y="82" width="70" height="34" fill="#fff4e5" stroke="#e39b2d"/><text x="345" y="104">好</text>
+    <rect x="385" y="82" width="70" height="34" fill="#fff4e5" stroke="#e39b2d"/><text x="420" y="104">啊</text>
+  </g>
+  <text x="480" y="104" font-size="12" fill="#555">起草者：n-gram 查表、EAGLE、Medusa 等</text>
+
+  <text x="40" y="160" font-weight="bold" fill="#333">② 验证：大模型把 3 个猜测一起放进一次前向，逐个打分</text>
+  <g font-size="13" text-anchor="middle">
+    <rect x="235" y="172" width="70" height="34" fill="#dff5e3" stroke="#3a9a52"/><text x="270" y="194">很 ✓</text>
+    <rect x="310" y="172" width="70" height="34" fill="#dff5e3" stroke="#3a9a52"/><text x="345" y="194">好 ✓</text>
+    <rect x="385" y="172" width="70" height="34" fill="#fde2e0" stroke="#c0392b"/><text x="420" y="194">啊 ✗</text>
+    <rect x="460" y="172" width="70" height="34" fill="#eef3ff" stroke="#4a6fd1"/><text x="495" y="194">。</text>
+  </g>
+  <text x="545" y="194" font-size="12" fill="#555">← 在拒绝处由大模型重新采样</text>
+
+  <text x="40" y="250" font-weight="bold" fill="#333">③ 结果：这一步拿到 3 个词（很、好、。），而普通解码只能拿到 1 个</text>
+
+  <text x="40" y="290" font-size="13" fill="#444">· 为什么值？解码阶段 GPU 大部分时间在搬权重，多算几个位置几乎不花额外时间。</text>
+  <text x="40" y="314" font-size="13" fill="#444">· 接受/拒绝按一套概率规则进行，数学上保证输出分布和只用大模型时完全一样，不是"近似"。</text>
+  <text x="40" y="338" font-size="13" fill="#444">· 猜得越准越赚；全被拒绝时也至少得到 1 个词，不会比普通解码更差（只多一点起草开销）。</text>
+</svg>

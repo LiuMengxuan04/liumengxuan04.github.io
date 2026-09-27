@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 470" font-family="PingFang SC, Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="14">
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#555"/></marker>
+  </defs>
+  <rect width="820" height="470" fill="#fff"/>
+  <text x="410" y="30" text-anchor="middle" font-size="18" font-weight="bold" fill="#222">图 1　vLLM 离线推理的主要组件</text>
+
+  <!-- user -->
+  <rect x="30" y="60" width="160" height="50" rx="8" fill="#eef3ff" stroke="#4a6fd1"/>
+  <text x="110" y="82" text-anchor="middle" fill="#222">你的代码</text>
+  <text x="110" y="100" text-anchor="middle" font-size="12" fill="#555">llm.generate(prompts)</text>
+
+  <!-- LLMEngine box -->
+  <rect x="230" y="50" width="560" height="400" rx="10" fill="#fafafa" stroke="#999" stroke-dasharray="6 4"/>
+  <text x="250" y="74" fill="#444" font-weight="bold">LLMEngine（引擎外壳）</text>
+
+  <rect x="250" y="90" width="160" height="60" rx="8" fill="#fff4e5" stroke="#e39b2d"/>
+  <text x="330" y="115" text-anchor="middle" fill="#222">输入处理器</text>
+  <text x="330" y="135" text-anchor="middle" font-size="12" fill="#555">校验参数 · 分词</text>
+
+  <rect x="610" y="90" width="160" height="60" rx="8" fill="#fff4e5" stroke="#e39b2d"/>
+  <text x="690" y="115" text-anchor="middle" fill="#222">输出处理器</text>
+  <text x="690" y="135" text-anchor="middle" font-size="12" fill="#555">反分词 · 拼装结果</text>
+
+  <!-- EngineCore -->
+  <rect x="250" y="175" width="520" height="255" rx="10" fill="#eefaf0" stroke="#3a9a52"/>
+  <text x="270" y="198" fill="#1d5e2e" font-weight="bold">EngineCore（引擎核心，循环调用 step）</text>
+
+  <rect x="270" y="215" width="230" height="195" rx="8" fill="#fff" stroke="#3a9a52"/>
+  <text x="385" y="240" text-anchor="middle" fill="#222" font-weight="bold">调度器 Scheduler</text>
+  <rect x="285" y="255" width="95" height="40" rx="6" fill="#f3f3f3" stroke="#aaa"/>
+  <text x="332" y="280" text-anchor="middle" font-size="12">等待队列</text>
+  <rect x="390" y="255" width="95" height="40" rx="6" fill="#f3f3f3" stroke="#aaa"/>
+  <text x="437" y="280" text-anchor="middle" font-size="12">运行队列</text>
+  <rect x="285" y="310" width="200" height="85" rx="6" fill="#f0f6ff" stroke="#4a6fd1"/>
+  <text x="385" y="333" text-anchor="middle" font-size="13">KV 缓存管理器</text>
+  <text x="385" y="352" text-anchor="middle" font-size="12" fill="#555">管理一池子"空闲块"</text>
+  <g fill="#cfe0ff" stroke="#4a6fd1">
+    <rect x="305" y="362" width="22" height="18"/><rect x="331" y="362" width="22" height="18"/><rect x="357" y="362" width="22" height="18"/><rect x="383" y="362" width="22" height="18"/><rect x="409" y="362" width="22" height="18"/><rect x="435" y="362" width="22" height="18"/>
+  </g>
+
+  <rect x="530" y="215" width="220" height="195" rx="8" fill="#fff" stroke="#3a9a52"/>
+  <text x="640" y="240" text-anchor="middle" fill="#222" font-weight="bold">执行器 Executor</text>
+  <rect x="550" y="255" width="180" height="140" rx="6" fill="#f7f0ff" stroke="#8a5cc7"/>
+  <text x="640" y="278" text-anchor="middle" font-size="13">Worker（管一张 GPU）</text>
+  <rect x="565" y="290" width="150" height="90" rx="6" fill="#fff" stroke="#8a5cc7"/>
+  <text x="640" y="312" text-anchor="middle" font-size="13">ModelRunner</text>
+  <text x="640" y="332" text-anchor="middle" font-size="12" fill="#555">准备输入</text>
+  <text x="640" y="350" text-anchor="middle" font-size="12" fill="#555">跑模型前向</text>
+  <text x="640" y="368" text-anchor="middle" font-size="12" fill="#555">采样出下一个 token</text>
+
+  <!-- arrows -->
+  <line x1="190" y1="90" x2="248" y2="115" stroke="#555" stroke-width="1.6" marker-end="url(#a)"/>
+  <line x1="330" y1="150" x2="330" y2="212" stroke="#555" stroke-width="1.6" marker-end="url(#a)"/>
+  <text x="338" y="185" font-size="12" fill="#555">请求进队</text>
+  <line x1="500" y1="300" x2="527" y2="300" stroke="#555" stroke-width="1.6" marker-end="url(#a)"/>
+  <text x="503" y="290" font-size="11" fill="#555">计划</text>
+  <line x1="690" y1="212" x2="690" y2="153" stroke="#555" stroke-width="1.6" marker-end="url(#a)"/>
+  <text x="698" y="185" font-size="12" fill="#555">新 token</text>
+</svg>

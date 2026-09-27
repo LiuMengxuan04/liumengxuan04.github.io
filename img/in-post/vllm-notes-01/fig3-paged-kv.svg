@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400" font-family="PingFang SC, Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="14">
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#555"/></marker>
+  </defs>
+  <rect width="800" height="400" fill="#fff"/>
+  <text x="400" y="30" text-anchor="middle" font-size="18" font-weight="bold" fill="#222">图 3　分页式 KV 缓存：请求只持有"块号列表"</text>
+
+  <!-- block tables -->
+  <text x="40" y="75" font-weight="bold" fill="#333">每个请求的块表</text>
+  <rect x="40" y="90" width="250" height="44" rx="6" fill="#eef3ff" stroke="#4a6fd1"/>
+  <text x="55" y="117" fill="#223a80">请求 A（40 个 token）→ [ 2, 7, 5 ]</text>
+  <rect x="40" y="150" width="250" height="44" rx="6" fill="#fff4e5" stroke="#e39b2d"/>
+  <text x="55" y="177" fill="#8a5a10">请求 B（20 个 token）→ [ 0, 9 ]</text>
+  <rect x="40" y="210" width="250" height="44" rx="6" fill="#eefaf0" stroke="#3a9a52"/>
+  <text x="55" y="237" fill="#1d5e2e">请求 C（10 个 token）→ [ 3 ]</text>
+
+  <!-- GPU pool -->
+  <text x="360" y="75" font-weight="bold" fill="#333">GPU 显存里的 KV 块池（每块装 16 个 token）</text>
+  <g font-size="13" text-anchor="middle">
+    <rect x="360" y="90" width="80" height="60" rx="4" fill="#fff4e5" stroke="#e39b2d"/><text x="400" y="116">块 0</text><text x="400" y="136" font-size="11" fill="#8a5a10">B 满</text>
+    <rect x="445" y="90" width="80" height="60" rx="4" fill="#f3f3f3" stroke="#bbb"/><text x="485" y="116">块 1</text><text x="485" y="136" font-size="11" fill="#888">空闲</text>
+    <rect x="530" y="90" width="80" height="60" rx="4" fill="#eef3ff" stroke="#4a6fd1"/><text x="570" y="116">块 2</text><text x="570" y="136" font-size="11" fill="#223a80">A 满</text>
+    <rect x="615" y="90" width="80" height="60" rx="4" fill="#eefaf0" stroke="#3a9a52"/><text x="655" y="116">块 3</text><text x="655" y="136" font-size="11" fill="#1d5e2e">C 10/16</text>
+    <rect x="360" y="160" width="80" height="60" rx="4" fill="#f3f3f3" stroke="#bbb"/><text x="400" y="186">块 4</text><text x="400" y="206" font-size="11" fill="#888">空闲</text>
+    <rect x="445" y="160" width="80" height="60" rx="4" fill="#eef3ff" stroke="#4a6fd1"/><text x="485" y="186">块 5</text><text x="485" y="206" font-size="11" fill="#223a80">A 8/16</text>
+    <rect x="530" y="160" width="80" height="60" rx="4" fill="#f3f3f3" stroke="#bbb"/><text x="570" y="186">块 6</text><text x="570" y="206" font-size="11" fill="#888">空闲</text>
+    <rect x="615" y="160" width="80" height="60" rx="4" fill="#eef3ff" stroke="#4a6fd1"/><text x="655" y="186">块 7</text><text x="655" y="206" font-size="11" fill="#223a80">A 满</text>
+    <rect x="360" y="230" width="80" height="60" rx="4" fill="#f3f3f3" stroke="#bbb"/><text x="400" y="256">块 8</text><text x="400" y="276" font-size="11" fill="#888">空闲</text>
+    <rect x="445" y="230" width="80" height="60" rx="4" fill="#fff4e5" stroke="#e39b2d"/><text x="485" y="256">块 9</text><text x="485" y="276" font-size="11" fill="#8a5a10">B 4/16</text>
+  </g>
+
+  <text x="40" y="330" font-size="13" fill="#444">· 块在显存里不必连续，逻辑上按块表的顺序拼起来就行，所以几乎没有"碎片"。</text>
+  <text x="40" y="354" font-size="13" fill="#444">· 请求变长了，就从空闲块里再拿一块；请求结束，块还回池子。浪费最多只有每个请求最后那半块。</text>
+  <text x="40" y="378" font-size="13" fill="#444">· 这就是 PagedAttention 的思路，和操作系统用页表管理内存是一回事。</text>
+</svg>

@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 340" font-family="PingFang SC, Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="14">
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#555"/></marker>
+  </defs>
+  <rect width="800" height="340" fill="#fff"/>
+  <text x="400" y="30" text-anchor="middle" font-size="18" font-weight="bold" fill="#222">图 10　一台机器多张卡：张量并行 + 多进程执行器</text>
+
+  <rect x="290" y="55" width="220" height="60" rx="10" fill="#eefaf0" stroke="#3a9a52" stroke-width="1.5"/>
+  <text x="400" y="80" text-anchor="middle" font-weight="bold" fill="#1d5e2e">EngineCore + 调度器</text>
+  <text x="400" y="100" text-anchor="middle" font-size="12" fill="#444">和单卡时完全一样</text>
+
+  <rect x="250" y="140" width="300" height="40" rx="8" fill="#fffbe6" stroke="#d4b106"/>
+  <text x="400" y="165" text-anchor="middle" font-size="13" fill="#7a6400">共享内存广播队列：同一份"本步计划"发给所有人</text>
+  <line x1="400" y1="115" x2="400" y2="137" stroke="#555" stroke-width="1.6" marker-end="url(#a)"/>
+
+  <g font-size="13" text-anchor="middle">
+    <rect x="60" y="215" width="150" height="70" rx="8" fill="#f7f0ff" stroke="#8a5cc7"/><text x="135" y="243">Worker 0（GPU 0）</text><text x="135" y="265" font-size="11" fill="#555">权重的第 1/4</text>
+    <rect x="240" y="215" width="150" height="70" rx="8" fill="#f7f0ff" stroke="#8a5cc7"/><text x="315" y="243">Worker 1（GPU 1）</text><text x="315" y="265" font-size="11" fill="#555">权重的第 2/4</text>
+    <rect x="420" y="215" width="150" height="70" rx="8" fill="#f7f0ff" stroke="#8a5cc7"/><text x="495" y="243">Worker 2（GPU 2）</text><text x="495" y="265" font-size="11" fill="#555">权重的第 3/4</text>
+    <rect x="600" y="215" width="150" height="70" rx="8" fill="#f7f0ff" stroke="#8a5cc7"/><text x="675" y="243">Worker 3（GPU 3）</text><text x="675" y="265" font-size="11" fill="#555">权重的第 4/4</text>
+  </g>
+  <g stroke="#555" stroke-width="1.4">
+    <line x1="300" y1="180" x2="150" y2="212" marker-end="url(#a)"/>
+    <line x1="360" y1="180" x2="315" y2="212" marker-end="url(#a)"/>
+    <line x1="440" y1="180" x2="495" y2="212" marker-end="url(#a)"/>
+    <line x1="500" y1="180" x2="660" y2="212" marker-end="url(#a)"/>
+  </g>
+  <line x1="210" y1="300" x2="600" y2="300" stroke="#8a5cc7" stroke-width="2" stroke-dasharray="6 4"/>
+  <text x="405" y="322" text-anchor="middle" font-size="12" fill="#5a2f94">每一层算完，卡之间用 NCCL 交换部分结果（all-reduce），拼出完整答案</text>
+</svg>

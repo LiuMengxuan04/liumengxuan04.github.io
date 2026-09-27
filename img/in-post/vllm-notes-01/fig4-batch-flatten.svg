@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 380" font-family="PingFang SC, Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="14">
+  <rect width="800" height="380" fill="#fff"/>
+  <text x="400" y="30" text-anchor="middle" font-size="18" font-weight="bold" fill="#222">图 4　不补齐的批处理：把所有请求首尾相接</text>
+
+  <text x="40" y="70" font-weight="bold" fill="#333">传统做法：补齐到同样长度（灰色是浪费的算力）</text>
+  <g font-size="12" text-anchor="middle">
+    <g fill="#eef3ff" stroke="#4a6fd1"><rect x="40" y="82" width="300" height="26"/></g><text x="190" y="100">A 的 6 个 token</text>
+    <rect x="40" y="112" width="100" height="26" fill="#fff4e5" stroke="#e39b2d"/><text x="90" y="130">B 的 2 个</text>
+    <rect x="140" y="112" width="200" height="26" fill="#e5e5e5" stroke="#bbb"/><text x="240" y="130" fill="#777">补齐</text>
+    <rect x="40" y="142" width="50" height="26" fill="#eefaf0" stroke="#3a9a52"/><text x="65" y="160">C</text>
+    <rect x="90" y="142" width="250" height="26" fill="#e5e5e5" stroke="#bbb"/><text x="215" y="160" fill="#777">补齐</text>
+  </g>
+
+  <text x="40" y="215" font-weight="bold" fill="#333">vLLM 的做法：拼成一条"超长序列"，一次前向算完</text>
+  <g font-size="12" text-anchor="middle">
+    <rect x="40" y="228" width="300" height="30" fill="#eef3ff" stroke="#4a6fd1"/><text x="190" y="248">A：6 个 token（预填充）</text>
+    <rect x="340" y="228" width="100" height="30" fill="#fff4e5" stroke="#e39b2d"/><text x="390" y="248">B：2 个</text>
+    <rect x="440" y="228" width="50" height="30" fill="#eefaf0" stroke="#3a9a52"/><text x="465" y="248">C：1</text>
+  </g>
+  <text x="510" y="248" font-size="12" fill="#555">← 共 9 个 token，零浪费</text>
+
+  <g font-size="12" fill="#555">
+    <text x="40" y="285">位置编号：0 1 2 3 4 5 │ 17 18 │ 42 　　 ← 每段各自接着自己的历史往下数</text>
+    <text x="40" y="308">注意力范围：每个 token 只能看到"自己那一段"之前的内容，互相看不到</text>
+  </g>
+  <text x="40" y="345" font-size="13" fill="#444">B 和 C 在做解码（接着之前的历史，这一步只算 1~2 个新 token），它们的历史 K/V 早就存在 KV 块里，</text>
+  <text x="40" y="367" font-size="13" fill="#444">注意力算子根据块表去显存里取，所以同一批里可以同时混着"预填充"和"解码"。</text>
+</svg>

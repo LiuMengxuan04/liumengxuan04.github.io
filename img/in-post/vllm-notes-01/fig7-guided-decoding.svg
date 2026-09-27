@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 340" font-family="PingFang SC, Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="14">
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#555"/></marker>
+  </defs>
+  <rect width="800" height="340" fill="#fff"/>
+  <text x="400" y="30" text-anchor="middle" font-size="18" font-weight="bold" fill="#222">图 7　约束解码：用掩码把"不合规"的词直接划掉</text>
+  <text x="40" y="64" font-size="13" fill="#555">例子：要求模型只能回答"是"或"否"。词表里假设只有 6 个词：</text>
+
+  <g font-size="13" text-anchor="middle">
+    <text x="90" y="105" font-weight="bold">词</text>
+    <text x="90" y="140" font-weight="bold">原始分数</text>
+    <text x="90" y="175" font-weight="bold">掩码</text>
+    <text x="90" y="210" font-weight="bold">处理后</text>
+    <g>
+      <text x="200" y="105">好的</text><text x="200" y="140">3.1</text><text x="200" y="175" fill="#c0392b">0</text><text x="200" y="210" fill="#c0392b">−∞</text>
+      <text x="290" y="105">是</text><text x="290" y="140">2.4</text><text x="290" y="175" fill="#1d5e2e">1</text><text x="290" y="210" fill="#1d5e2e">2.4</text>
+      <text x="380" y="105">我</text><text x="380" y="140">1.9</text><text x="380" y="175" fill="#c0392b">0</text><text x="380" y="210" fill="#c0392b">−∞</text>
+      <text x="470" y="105">否</text><text x="470" y="140">1.2</text><text x="470" y="175" fill="#1d5e2e">1</text><text x="470" y="210" fill="#1d5e2e">1.2</text>
+      <text x="560" y="105">嗯</text><text x="560" y="140">0.8</text><text x="560" y="175" fill="#c0392b">0</text><text x="560" y="210" fill="#c0392b">−∞</text>
+      <text x="650" y="105">。</text><text x="650" y="140">0.3</text><text x="650" y="175" fill="#c0392b">0</text><text x="650" y="210" fill="#c0392b">−∞</text>
+    </g>
+  </g>
+  <line x1="150" y1="118" x2="700" y2="118" stroke="#ddd"/>
+  <line x1="150" y1="153" x2="700" y2="153" stroke="#ddd"/>
+  <line x1="150" y1="188" x2="700" y2="188" stroke="#ddd"/>
+
+  <text x="40" y="260" font-size="13" fill="#444">· 掩码由一个"有限状态机"根据语法实时给出：现在处于哪个状态，下一个允许出现哪些词。</text>
+  <text x="40" y="284" font-size="13" fill="#444">· 分数变成 −∞ 的词，softmax 之后概率就是 0，采样永远不可能选到它。模型本身完全不用改。</text>
+  <text x="40" y="308" font-size="13" fill="#444">· 采到一个词后状态机前进一步，下一步再给新的掩码。JSON Schema、正则表达式都能这样约束。</text>
+</svg>

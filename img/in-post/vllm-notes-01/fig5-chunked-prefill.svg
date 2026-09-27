@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 320" font-family="PingFang SC, Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="14">
+  <rect width="800" height="320" fill="#fff"/>
+  <text x="400" y="30" text-anchor="middle" font-size="18" font-weight="bold" fill="#222">图 5　分块预填充：长提示词分几步喂进去</text>
+  <text x="40" y="64" font-size="13" fill="#555">假设每一步的 token 预算是 8，其他三个请求正在解码（每步各要 1 个 token），新来一个 12 个 token 的长提示词 L：</text>
+
+  <g font-size="12" text-anchor="middle">
+    <text x="80" y="110" font-weight="bold">第 1 步</text>
+    <rect x="130" y="92" width="45" height="28" fill="#eefaf0" stroke="#3a9a52"/><text x="152" y="111">解码</text>
+    <rect x="175" y="92" width="45" height="28" fill="#eefaf0" stroke="#3a9a52"/><text x="197" y="111">解码</text>
+    <rect x="220" y="92" width="45" height="28" fill="#eefaf0" stroke="#3a9a52"/><text x="242" y="111">解码</text>
+    <rect x="265" y="92" width="225" height="28" fill="#eef3ff" stroke="#4a6fd1"/><text x="377" y="111">L 的第 1~5 个 token</text>
+    <text x="600" y="111" fill="#888">不采样（L 还没读完）</text>
+
+    <text x="80" y="160" font-weight="bold">第 2 步</text>
+    <rect x="130" y="142" width="45" height="28" fill="#eefaf0" stroke="#3a9a52"/><text x="152" y="161">解码</text>
+    <rect x="175" y="142" width="45" height="28" fill="#eefaf0" stroke="#3a9a52"/><text x="197" y="161">解码</text>
+    <rect x="220" y="142" width="45" height="28" fill="#eefaf0" stroke="#3a9a52"/><text x="242" y="161">解码</text>
+    <rect x="265" y="142" width="225" height="28" fill="#eef3ff" stroke="#4a6fd1"/><text x="377" y="161">L 的第 6~10 个 token</text>
+    <text x="600" y="161" fill="#888">不采样</text>
+
+    <text x="80" y="210" font-weight="bold">第 3 步</text>
+    <rect x="130" y="192" width="45" height="28" fill="#eefaf0" stroke="#3a9a52"/><text x="152" y="211">解码</text>
+    <rect x="175" y="192" width="45" height="28" fill="#eefaf0" stroke="#3a9a52"/><text x="197" y="211">解码</text>
+    <rect x="220" y="192" width="45" height="28" fill="#eefaf0" stroke="#3a9a52"/><text x="242" y="211">解码</text>
+    <rect x="265" y="192" width="90" height="28" fill="#eef3ff" stroke="#4a6fd1"/><text x="310" y="211">L 的 11~12</text>
+    <text x="600" y="211" fill="#1d5e2e" font-weight="bold">采样出 L 的第一个输出</text>
+  </g>
+
+  <text x="40" y="262" font-size="13" fill="#444">好处：正在聊天的三个用户每一步都照常拿到新字，不会因为一个超长提示词卡住好几百毫秒。</text>
+  <text x="40" y="286" font-size="13" fill="#444">代价：L 自己的首字要晚一点出来。预算大小就是在"别人不卡"和"自己早出"之间取平衡。</text>
+</svg>

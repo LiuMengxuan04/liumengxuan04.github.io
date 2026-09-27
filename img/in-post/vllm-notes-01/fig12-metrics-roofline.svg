@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400" font-family="PingFang SC, Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="14">
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#555"/></marker>
+  </defs>
+  <rect width="800" height="400" fill="#fff"/>
+  <text x="400" y="30" text-anchor="middle" font-size="18" font-weight="bold" fill="#222">图 12　看性能的两把尺子：延迟指标 与 批大小的拐点</text>
+
+  <!-- left: timeline -->
+  <text x="40" y="70" font-weight="bold" fill="#333">一个请求的时间线</text>
+  <line x1="40" y1="130" x2="370" y2="130" stroke="#555" stroke-width="1.5" marker-end="url(#a)"/>
+  <text x="372" y="134" font-size="11" fill="#555">时间</text>
+  <circle cx="50" cy="130" r="5" fill="#555"/><text x="50" y="152" text-anchor="middle" font-size="11">发出</text>
+  <g fill="#4a6fd1">
+    <rect x="150" y="118" width="10" height="24"/><rect x="195" y="118" width="10" height="24"/><rect x="240" y="118" width="10" height="24"/><rect x="285" y="118" width="10" height="24"/><rect x="330" y="118" width="10" height="24"/>
+  </g>
+  <text x="245" y="112" text-anchor="middle" font-size="11" fill="#223a80">每个竖条 = 收到一个字</text>
+  <path d="M50,165 L155,165" stroke="#e39b2d" stroke-width="2"/><text x="102" y="185" text-anchor="middle" font-size="12" fill="#8a5a10">首字延迟 TTFT</text>
+  <path d="M155,200 L200,200" stroke="#3a9a52" stroke-width="2"/><text x="178" y="220" text-anchor="middle" font-size="12" fill="#1d5e2e">字间隔 ITL</text>
+  <path d="M50,240 L335,240" stroke="#8a5cc7" stroke-width="2"/><text x="192" y="260" text-anchor="middle" font-size="12" fill="#5a2f94">端到端延迟 E2E</text>
+  <text x="40" y="300" font-size="12" fill="#444">吞吐量 = 单位时间内全系统吐出的 token 数</text>
+  <text x="40" y="322" font-size="12" fill="#444">有效吞吐 = 只算满足延迟目标的那部分</text>
+
+  <!-- right: roofline -->
+  <text x="430" y="70" font-weight="bold" fill="#333">解码一步的耗时 vs 批里有多少请求</text>
+  <line x1="450" y1="330" x2="770" y2="330" stroke="#555" stroke-width="1.5" marker-end="url(#a)"/>
+  <line x1="450" y1="330" x2="450" y2="90" stroke="#555" stroke-width="1.5" marker-end="url(#a)"/>
+  <text x="760" y="352" text-anchor="end" font-size="12" fill="#555">批大小</text>
+  <text x="440" y="100" text-anchor="end" font-size="12" fill="#555">每步耗时</text>
+  <path d="M450,250 L600,250 L760,120" fill="none" stroke="#c0392b" stroke-width="2.5"/>
+  <line x1="600" y1="250" x2="600" y2="330" stroke="#999" stroke-dasharray="4 3"/>
+  <text x="600" y="346" text-anchor="middle" font-size="11" fill="#555">拐点</text>
+  <text x="525" y="240" text-anchor="middle" font-size="12" fill="#223a80">带宽受限区</text>
+  <text x="525" y="275" text-anchor="middle" font-size="11" fill="#555">多塞请求几乎白送</text>
+  <text x="690" y="200" text-anchor="middle" font-size="12" fill="#8a5a10">算力受限区</text>
+  <text x="705" y="220" text-anchor="middle" font-size="11" fill="#555">请求越多每步越慢</text>
+</svg>

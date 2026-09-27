@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 300" font-family="PingFang SC, Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="14">
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#555"/></marker>
+  </defs>
+  <rect width="800" height="300" fill="#fff"/>
+  <text x="400" y="30" text-anchor="middle" font-size="18" font-weight="bold" fill="#222">图 9　预填充 / 解码分离：两类活交给两拨机器</text>
+
+  <rect x="30" y="100" width="120" height="60" rx="8" fill="#f3f3f3" stroke="#999"/>
+  <text x="90" y="135" text-anchor="middle">新请求</text>
+
+  <rect x="200" y="70" width="200" height="120" rx="10" fill="#eef3ff" stroke="#4a6fd1" stroke-width="1.5"/>
+  <text x="300" y="100" text-anchor="middle" font-weight="bold" fill="#223a80">预填充实例</text>
+  <text x="300" y="125" text-anchor="middle" font-size="12" fill="#444">一次读完整个提示词</text>
+  <text x="300" y="145" text-anchor="middle" font-size="12" fill="#444">算力密集</text>
+  <text x="300" y="165" text-anchor="middle" font-size="12" fill="#444">产出：整段 KV 缓存</text>
+
+  <rect x="560" y="70" width="200" height="120" rx="10" fill="#eefaf0" stroke="#3a9a52" stroke-width="1.5"/>
+  <text x="660" y="100" text-anchor="middle" font-weight="bold" fill="#1d5e2e">解码实例</text>
+  <text x="660" y="125" text-anchor="middle" font-size="12" fill="#444">一个字一个字往外吐</text>
+  <text x="660" y="145" text-anchor="middle" font-size="12" fill="#444">显存带宽密集</text>
+  <text x="660" y="165" text-anchor="middle" font-size="12" fill="#444">直接接着 KV 往下算</text>
+
+  <line x1="150" y1="130" x2="197" y2="130" stroke="#555" stroke-width="1.6" marker-end="url(#a)"/>
+  <line x1="400" y1="130" x2="557" y2="130" stroke="#8a5cc7" stroke-width="2.2" marker-end="url(#a)"/>
+  <text x="478" y="120" text-anchor="middle" font-size="12" fill="#5a2f94">KV 连接器</text>
+  <text x="478" y="150" text-anchor="middle" font-size="11" fill="#5a2f94">（共享存储 / 网络传输）</text>
+
+  <text x="40" y="238" font-size="13" fill="#444">· 混在一起时，新来的长提示词会拖慢正在输出的用户（字卡顿）；分开后两边各自调优、互不干扰。</text>
+  <text x="40" y="262" font-size="13" fill="#444">· 首字延迟主要看预填充实例，后续每字的间隔主要看解码实例，于是可以分别加机器、分别设目标。</text>
+</svg>
