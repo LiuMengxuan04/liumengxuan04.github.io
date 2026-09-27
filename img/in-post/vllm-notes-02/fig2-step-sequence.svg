@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 470" font-family="PingFang SC, Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="14">
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#555"/></marker>
+  </defs>
+  <rect width="800" height="470" fill="#fff"/>
+  <text x="400" y="30" text-anchor="middle" font-size="18" font-weight="bold" fill="#222">图 2　一次 LLMEngine.step() 里依次调用了谁</text>
+
+  <!-- lifelines -->
+  <g font-size="13" text-anchor="middle">
+    <rect x="30" y="50" width="130" height="36" rx="6" fill="#eef3ff" stroke="#4a6fd1"/><text x="95" y="73" fill="#223a80">LLMEngine</text>
+    <rect x="190" y="50" width="130" height="36" rx="6" fill="#eefaf0" stroke="#3a9a52"/><text x="255" y="73" fill="#1d5e2e">Scheduler</text>
+    <rect x="350" y="50" width="130" height="36" rx="6" fill="#eefaf0" stroke="#3a9a52"/><text x="415" y="73" fill="#1d5e2e">BlockManager</text>
+    <rect x="510" y="50" width="130" height="36" rx="6" fill="#f7f0ff" stroke="#8a5cc7"/><text x="575" y="73" fill="#5a2f94">ModelRunner</text>
+    <rect x="670" y="50" width="110" height="36" rx="6" fill="#fff4e0" stroke="#e39b2d"/><text x="725" y="73" fill="#8a5a10">模型 / 注意力</text>
+  </g>
+  <g stroke="#bbb" stroke-dasharray="4 4">
+    <line x1="95" y1="86" x2="95" y2="450"/><line x1="255" y1="86" x2="255" y2="450"/><line x1="415" y1="86" x2="415" y2="450"/><line x1="575" y1="86" x2="575" y2="450"/><line x1="725" y1="86" x2="725" y2="450"/>
+  </g>
+
+  <g font-size="12" fill="#333" stroke-width="1.4">
+    <line x1="95" y1="115" x2="252" y2="115" stroke="#555" marker-end="url(#a)"/><text x="175" y="108" text-anchor="middle">① schedule()</text>
+    <line x1="255" y1="145" x2="412" y2="145" stroke="#555" marker-end="url(#a)"/><text x="335" y="138" text-anchor="middle">can_allocate / allocate</text>
+    <line x1="255" y1="170" x2="412" y2="170" stroke="#555" marker-end="url(#a)"/><text x="335" y="163" text-anchor="middle">或 can_append / may_append</text>
+    <line x1="252" y1="195" x2="98" y2="195" stroke="#555" stroke-dasharray="5 3" marker-end="url(#a)"/><text x="175" y="188" text-anchor="middle">seqs, is_prefill</text>
+
+    <line x1="95" y1="230" x2="572" y2="230" stroke="#555" marker-end="url(#a)"/><text x="335" y="223" text-anchor="middle">② call("run", seqs, is_prefill)</text>
+    <path d="M575,248 h40 v22 h-37" fill="none" stroke="#555" marker-end="url(#a)"/><text x="622" y="262" font-size="11">prepare_prefill/decode → set_context</text>
+    <line x1="575" y1="295" x2="722" y2="295" stroke="#555" marker-end="url(#a)"/><text x="648" y="288" text-anchor="middle">run_model</text>
+    <path d="M725,310 h40 v22 h-37" fill="none" stroke="#555" marker-end="url(#a)"/><text x="690" y="346" font-size="11" text-anchor="middle">写 KV、算注意力</text>
+    <line x1="722" y1="362" x2="578" y2="362" stroke="#555" stroke-dasharray="5 3" marker-end="url(#a)"/><text x="648" y="378" text-anchor="middle">logits → Sampler</text>
+    <line x1="572" y1="395" x2="98" y2="395" stroke="#555" stroke-dasharray="5 3" marker-end="url(#a)"/><text x="335" y="388" text-anchor="middle">token_ids（每个 seq 一个）</text>
+
+    <line x1="95" y1="425" x2="252" y2="425" stroke="#555" marker-end="url(#a)"/><text x="175" y="418" text-anchor="middle">③ postprocess()</text>
+    <line x1="255" y1="445" x2="412" y2="445" stroke="#555" marker-end="url(#a)"/><text x="335" y="440" text-anchor="middle">hash_blocks / deallocate</text>
+  </g>
+</svg>

@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 440" font-family="PingFang SC, Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="13">
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#555"/></marker>
+  </defs>
+  <rect width="800" height="440" fill="#fff"/>
+  <text x="400" y="30" text-anchor="middle" font-size="18" font-weight="bold" fill="#222">图 8　两卡张量并行：注意力块里的权重怎么切</text>
+
+  <!-- QKV -->
+  <text x="30" y="68" font-weight="bold" fill="#333">qkv_proj（按列切 = 按输出维度切）</text>
+  <text x="30" y="90" font-size="12" fill="#555">磁盘上是三个独立矩阵：</text>
+  <g text-anchor="middle" font-size="12">
+    <rect x="190" y="75" width="160" height="26" fill="#dde8ff" stroke="#4a6fd1"/><text x="230" y="93">q 前半</text><text x="310" y="93">q 后半</text><line x1="270" y1="75" x2="270" y2="101" stroke="#4a6fd1"/>
+    <rect x="360" y="75" width="80" height="26" fill="#d9f2df" stroke="#3a9a52"/><text x="380" y="93">k 前</text><text x="420" y="93">k 后</text><line x1="400" y1="75" x2="400" y2="101" stroke="#3a9a52"/>
+    <rect x="450" y="75" width="80" height="26" fill="#fff4e0" stroke="#e39b2d"/><text x="470" y="93">v 前</text><text x="510" y="93">v 后</text><line x1="490" y1="75" x2="490" y2="101" stroke="#e39b2d"/>
+  </g>
+
+  <text x="30" y="148" font-size="12" fill="#555">GPU 0 的 qkv_proj：</text>
+  <g text-anchor="middle" font-size="12">
+    <rect x="190" y="132" width="80" height="26" fill="#dde8ff" stroke="#4a6fd1"/><text x="230" y="150">q 前半</text>
+    <rect x="270" y="132" width="40" height="26" fill="#d9f2df" stroke="#3a9a52"/><text x="290" y="150">k 前</text>
+    <rect x="310" y="132" width="40" height="26" fill="#fff4e0" stroke="#e39b2d"/><text x="330" y="150">v 前</text>
+  </g>
+  <text x="30" y="188" font-size="12" fill="#555">GPU 1 的 qkv_proj：</text>
+  <g text-anchor="middle" font-size="12">
+    <rect x="190" y="172" width="80" height="26" fill="#dde8ff" stroke="#4a6fd1"/><text x="230" y="190">q 后半</text>
+    <rect x="270" y="172" width="40" height="26" fill="#d9f2df" stroke="#3a9a52"/><text x="290" y="190">k 后</text>
+    <rect x="310" y="172" width="40" height="26" fill="#fff4e0" stroke="#e39b2d"/><text x="330" y="190">v 后</text>
+  </g>
+  <text x="380" y="150" font-size="12" fill="#333">weight_loader 按 shard_id（q/k/v）找到偏移，</text>
+  <text x="380" y="168" font-size="12" fill="#333">再从磁盘权重里切出属于本卡的那一份拷进去</text>
+  <text x="380" y="190" font-size="12" fill="#333">每张卡算出自己那一半注意力头，互不通信</text>
+
+  <!-- flow -->
+  <line x1="30" y1="220" x2="770" y2="220" stroke="#ddd"/>
+  <text x="30" y="250" font-weight="bold" fill="#333">一层注意力的数据流</text>
+  <g text-anchor="middle" font-size="12">
+    <rect x="30" y="280" width="110" height="60" rx="6" fill="#f3f3f3" stroke="#999"/><text x="85" y="305">隐藏状态 x</text><text x="85" y="324" font-size="11" fill="#555">两卡都有完整一份</text>
+
+    <rect x="190" y="262" width="150" height="40" rx="6" fill="#eef3ff" stroke="#4a6fd1"/><text x="265" y="287">GPU 0：头 0–7</text>
+    <rect x="190" y="318" width="150" height="40" rx="6" fill="#eef3ff" stroke="#4a6fd1"/><text x="265" y="343">GPU 1：头 8–15</text>
+
+    <rect x="390" y="262" width="150" height="40" rx="6" fill="#f7f0ff" stroke="#8a5cc7"/><text x="465" y="280">o_proj 前半行</text><text x="465" y="296" font-size="11" fill="#555">得到部分和 y0</text>
+    <rect x="390" y="318" width="150" height="40" rx="6" fill="#f7f0ff" stroke="#8a5cc7"/><text x="465" y="336">o_proj 后半行</text><text x="465" y="352" font-size="11" fill="#555">得到部分和 y1</text>
+
+    <rect x="590" y="280" width="170" height="60" rx="6" fill="#fffbe6" stroke="#d4b106"/><text x="675" y="305">all_reduce 求和</text><text x="675" y="324" font-size="11" fill="#555">两卡都拿到 y0 + y1</text>
+  </g>
+  <g stroke="#555" stroke-width="1.3">
+    <line x1="140" y1="300" x2="187" y2="283" marker-end="url(#a)"/>
+    <line x1="140" y1="320" x2="187" y2="337" marker-end="url(#a)"/>
+    <line x1="340" y1="282" x2="387" y2="282" marker-end="url(#a)"/>
+    <line x1="340" y1="338" x2="387" y2="338" marker-end="url(#a)"/>
+    <line x1="540" y1="282" x2="587" y2="300" marker-end="url(#a)"/>
+    <line x1="540" y1="338" x2="587" y2="320" marker-end="url(#a)"/>
+  </g>
+  <text x="265" y="385" text-anchor="middle" font-size="12" fill="#223a80">列切：输入完整，输出各一半</text>
+  <text x="465" y="385" text-anchor="middle" font-size="12" fill="#5a2f94">行切：输入各一半，输出是部分和</text>
+  <text x="400" y="420" text-anchor="middle" font-size="12" fill="#555">列切接行切，中间不用通信，一层只在末尾做一次 all_reduce；MLP 的 gate_up_proj / down_proj 也是同样的套路</text>
+</svg>

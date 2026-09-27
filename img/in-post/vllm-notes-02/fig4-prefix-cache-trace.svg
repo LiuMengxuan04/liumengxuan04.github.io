@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 430" font-family="PingFang SC, Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="13">
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#555"/></marker>
+  </defs>
+  <rect width="800" height="430" fill="#fff"/>
+  <text x="400" y="30" text-anchor="middle" font-size="18" font-weight="bold" fill="#222">图 4　实测：C 复用了 B 留下的两个块</text>
+  <text x="400" y="52" text-anchor="middle" font-size="12" fill="#555">B = 600 个公共前缀 + 10 个 token；C = 同样的 600 个前缀 + 20 个 token；块大小 256</text>
+
+  <!-- B -->
+  <text x="30" y="95" font-weight="bold" fill="#333">请求 B（已结束）</text>
+  <g text-anchor="middle">
+    <rect x="160" y="75" width="170" height="36" rx="4" fill="#dde8ff" stroke="#4a6fd1"/><text x="245" y="98">块 6：token 0–255</text>
+    <rect x="335" y="75" width="170" height="36" rx="4" fill="#dde8ff" stroke="#4a6fd1"/><text x="420" y="98">块 7：token 256–511</text>
+    <rect x="510" y="75" width="170" height="36" rx="4" fill="#f3f3f3" stroke="#999"/><text x="595" y="98" fill="#666">块 8：只装了 100 个</text>
+  </g>
+  <g font-size="11" fill="#223a80" text-anchor="middle">
+    <text x="245" y="130">h6 = H(-1, 块内 token)</text>
+    <text x="420" y="130">h7 = H(h6, 块内 token)</text>
+  </g>
+  <text x="595" y="130" font-size="11" fill="#666" text-anchor="middle">没满，不算哈希</text>
+  <path d="M290,124 C320,140 330,140 360,126" fill="none" stroke="#4a6fd1" stroke-width="1.2" marker-end="url(#a)"/>
+
+  <rect x="160" y="150" width="520" height="44" rx="6" fill="#fffbe6" stroke="#d4b106"/>
+  <text x="420" y="170" text-anchor="middle" fill="#7a6400">B 结束后块 6、7、8 回到空闲队列，但 hash_to_block_id 里还有 h6→6、h7→7</text>
+  <text x="420" y="186" text-anchor="middle" font-size="11" fill="#7a6400">块里的 KV 数据也没被清掉，谁来领走并写新内容时才作废</text>
+
+  <!-- C -->
+  <text x="30" y="245" font-weight="bold" fill="#333">请求 C（新来）</text>
+  <g text-anchor="middle">
+    <rect x="160" y="225" width="170" height="36" rx="4" fill="#d9f2df" stroke="#3a9a52"/><text x="245" y="248">命中 → 块 6</text>
+    <rect x="335" y="225" width="170" height="36" rx="4" fill="#d9f2df" stroke="#3a9a52"/><text x="420" y="248">命中 → 块 7</text>
+    <rect x="510" y="225" width="170" height="36" rx="4" fill="#fff4e0" stroke="#e39b2d"/><text x="595" y="248">新领 → 块 9</text>
+  </g>
+  <line x1="245" y1="196" x2="245" y2="222" stroke="#3a9a52" stroke-width="1.4" marker-end="url(#a)"/>
+  <line x1="420" y1="196" x2="420" y2="222" stroke="#3a9a52" stroke-width="1.4" marker-end="url(#a)"/>
+  <text x="595" y="280" font-size="11" fill="#8a5a10" text-anchor="middle">第 3 块内容和 B 不同（token 512 开始就不一样了）</text>
+
+  <rect x="30" y="300" width="740" height="112" rx="8" fill="#f7f7f7" stroke="#ccc"/>
+  <text x="50" y="324" font-weight="bold" fill="#333">追踪输出</text>
+  <g font-family="Menlo, Consolas, monospace" font-size="12" fill="#333">
+    <text x="50" y="348">step 3 P  s2(cached=0,  sched=610, len=610, blocks=[6, 7, 8])      ← B 完整预填充</text>
+    <text x="50" y="370">step 6 P  s3(cached=512, sched=108, len=620, blocks=[6, 7, 9])     ← C 只算 108 个</text>
+  </g>
+  <text x="50" y="398" font-size="12" fill="#555">cached=512 就是两个命中块 × 256；620 − 512 = 108，这一步只需要为这 108 个 token 跑模型。</text>
+</svg>

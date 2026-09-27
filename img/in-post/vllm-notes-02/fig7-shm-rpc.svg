@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 380" font-family="PingFang SC, Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="13">
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#555"/></marker>
+  </defs>
+  <rect width="800" height="380" fill="#fff"/>
+  <text x="400" y="30" text-anchor="middle" font-size="18" font-weight="bold" fill="#222">图 7　多卡时 rank 0 怎么让其他进程“一起跑”</text>
+
+  <rect x="30" y="60" width="230" height="110" rx="10" fill="#eef3ff" stroke="#4a6fd1" stroke-width="1.5"/>
+  <text x="145" y="84" text-anchor="middle" font-weight="bold" fill="#223a80">主进程（rank 0）</text>
+  <text x="145" y="108" text-anchor="middle" font-size="12">LLMEngine + Scheduler</text>
+  <text x="145" y="128" text-anchor="middle" font-size="12">ModelRunner(rank=0)</text>
+  <text x="145" y="152" text-anchor="middle" font-size="11" fill="#555">call("run", seqs, True)</text>
+
+  <rect x="310" y="60" width="200" height="110" rx="10" fill="#fffbe6" stroke="#d4b106"/>
+  <text x="410" y="84" text-anchor="middle" fill="#7a6400">共享内存 "nanovllm"（1 MiB）</text>
+  <g font-size="11" text-anchor="middle">
+    <rect x="325" y="100" width="50" height="30" fill="#fff" stroke="#d4b106"/><text x="350" y="119">长度 n</text>
+    <rect x="375" y="100" width="120" height="30" fill="#fff" stroke="#d4b106"/><text x="435" y="119">pickle 后的数据</text>
+  </g>
+  <text x="350" y="148" text-anchor="middle" font-size="10" fill="#7a6400">4 字节</text>
+  <text x="435" y="148" text-anchor="middle" font-size="10" fill="#7a6400">["run", seqs, True]</text>
+  <line x1="260" y1="115" x2="307" y2="115" stroke="#555" stroke-width="1.4" marker-end="url(#a)"/>
+  <text x="283" y="105" text-anchor="middle" font-size="11">① 写</text>
+
+  <g text-anchor="middle">
+    <rect x="570" y="50" width="200" height="60" rx="8" fill="#f7f0ff" stroke="#8a5cc7"/><text x="670" y="74">子进程 rank 1</text><text x="670" y="94" font-size="11" fill="#555">loop() 里等 event</text>
+    <rect x="570" y="125" width="200" height="60" rx="8" fill="#f7f0ff" stroke="#8a5cc7"/><text x="670" y="149">子进程 rank 2、3 …</text><text x="670" y="169" font-size="11" fill="#555">同上</text>
+  </g>
+  <line x1="510" y1="100" x2="567" y2="80" stroke="#555" stroke-width="1.4" marker-end="url(#a)"/>
+  <line x1="510" y1="130" x2="567" y2="155" stroke="#555" stroke-width="1.4" marker-end="url(#a)"/>
+  <text x="540" y="75" text-anchor="middle" font-size="11">③ 读</text>
+
+  <path d="M145,170 C145,215 670,215 670,188" fill="none" stroke="#c0392b" stroke-width="1.4" stroke-dasharray="6 3" marker-end="url(#a)"/>
+  <text x="400" y="222" text-anchor="middle" font-size="12" fill="#8b1a1a">② 对每个子进程的 Event 调 set()，把它们叫醒</text>
+
+  <rect x="30" y="250" width="740" height="112" rx="8" fill="#f7f7f7" stroke="#ccc"/>
+  <text x="50" y="274" font-weight="bold" fill="#333">要点</text>
+  <text x="50" y="298" font-size="12" fill="#333">· 这条通道是单向的：只下发“调用哪个方法、参数是什么”，子进程的返回值不回传。</text>
+  <text x="50" y="320" font-size="12" fill="#333">· 各进程在前向里靠 NCCL 的 all_reduce / gather 自然对齐步调；最后 logits 汇集到 rank 0，只在 rank 0 采样。</text>
+  <text x="50" y="342" font-size="12" fill="#333">· 解码时 Sequence 只序列化最后一个 token，不传整段历史，数据量很小。</text>
+</svg>

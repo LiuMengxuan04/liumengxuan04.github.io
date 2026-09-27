@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450" font-family="PingFang SC, Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="14">
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#555"/></marker>
+  </defs>
+  <rect width="800" height="450" fill="#fff"/>
+  <text x="400" y="30" text-anchor="middle" font-size="18" font-weight="bold" fill="#222">图 1　nano-vllm 的 1385 行代码地图（括号里是行数）</text>
+
+  <!-- entry -->
+  <rect x="30" y="55" width="220" height="56" rx="8" fill="#f3f3f3" stroke="#999"/>
+  <text x="140" y="78" text-anchor="middle" font-size="13">配置与采样参数</text>
+  <text x="140" y="98" text-anchor="middle" font-size="11" fill="#555">config.py (25) · sampling_params.py (11)</text>
+
+  <rect x="290" y="55" width="240" height="56" rx="8" fill="#eef3ff" stroke="#4a6fd1" stroke-width="1.5"/>
+  <text x="410" y="78" text-anchor="middle" font-weight="bold" fill="#223a80">LLM = LLMEngine</text>
+  <text x="410" y="98" text-anchor="middle" font-size="11" fill="#555">llm.py (5) · engine/llm_engine.py (90)</text>
+  <line x1="250" y1="83" x2="287" y2="83" stroke="#555" stroke-width="1.4" marker-end="url(#a)"/>
+
+  <!-- engine row -->
+  <rect x="60" y="150" width="220" height="56" rx="8" fill="#eefaf0" stroke="#3a9a52"/>
+  <text x="170" y="173" text-anchor="middle" font-size="13" fill="#1d5e2e">Scheduler 调度器</text>
+  <text x="170" y="193" text-anchor="middle" font-size="11" fill="#555">engine/scheduler.py (92)</text>
+
+  <rect x="470" y="150" width="300" height="56" rx="8" fill="#f7f0ff" stroke="#8a5cc7"/>
+  <text x="620" y="173" text-anchor="middle" font-size="13" fill="#5a2f94">ModelRunner 模型执行器（每张卡一个）</text>
+  <text x="620" y="193" text-anchor="middle" font-size="11" fill="#555">engine/model_runner.py (257)</text>
+
+  <line x1="350" y1="111" x2="220" y2="147" stroke="#555" stroke-width="1.4" marker-end="url(#a)"/>
+  <line x1="470" y1="111" x2="590" y2="147" stroke="#555" stroke-width="1.4" marker-end="url(#a)"/>
+
+  <rect x="30" y="245" width="170" height="56" rx="8" fill="#eefaf0" stroke="#3a9a52"/>
+  <text x="115" y="268" text-anchor="middle" font-size="13" fill="#1d5e2e">BlockManager</text>
+  <text x="115" y="288" text-anchor="middle" font-size="11" fill="#555">分页 + 前缀缓存 (120)</text>
+  <rect x="220" y="245" width="170" height="56" rx="8" fill="#fff4e0" stroke="#e39b2d"/>
+  <text x="305" y="268" text-anchor="middle" font-size="13" fill="#8a5a10">Sequence</text>
+  <text x="305" y="288" text-anchor="middle" font-size="11" fill="#555">一个请求的全部状态 (83)</text>
+  <line x1="140" y1="206" x2="115" y2="242" stroke="#555" stroke-width="1.4" marker-end="url(#a)"/>
+  <line x1="200" y1="206" x2="290" y2="242" stroke="#555" stroke-width="1.4" marker-end="url(#a)"/>
+
+  <rect x="470" y="245" width="300" height="56" rx="8" fill="#f7f0ff" stroke="#8a5cc7"/>
+  <text x="620" y="268" text-anchor="middle" font-size="13" fill="#5a2f94">Qwen3ForCausalLM 模型结构</text>
+  <text x="620" y="288" text-anchor="middle" font-size="11" fill="#555">models/qwen3.py (216)</text>
+  <line x1="620" y1="206" x2="620" y2="242" stroke="#555" stroke-width="1.4" marker-end="url(#a)"/>
+
+  <!-- utils -->
+  <rect x="30" y="340" width="360" height="90" rx="10" fill="#fffbe6" stroke="#d4b106"/>
+  <text x="210" y="362" text-anchor="middle" font-size="13" fill="#7a6400">utils/ 工具</text>
+  <text x="210" y="386" text-anchor="middle" font-size="11" fill="#555">context.py (27)：全局 Context，把批的元数据递给注意力层</text>
+  <text x="210" y="408" text-anchor="middle" font-size="11" fill="#555">loader.py (28)：读 safetensors，按分片规则拷进参数</text>
+
+  <!-- layers -->
+  <rect x="410" y="330" width="370" height="108" rx="10" fill="#fafafa" stroke="#999"/>
+  <text x="595" y="350" text-anchor="middle" font-size="13" fill="#333">layers/ 算子</text>
+  <g font-size="11" text-anchor="middle" fill="#333">
+    <rect x="422" y="360" width="110" height="30" rx="5" fill="#eef3ff" stroke="#4a6fd1"/><text x="477" y="379">attention (75)</text>
+    <rect x="540" y="360" width="110" height="30" rx="5" fill="#eef3ff" stroke="#4a6fd1"/><text x="595" y="379">linear (156)</text>
+    <rect x="658" y="360" width="110" height="30" rx="5" fill="#eef3ff" stroke="#4a6fd1"/><text x="713" y="379">embed_head (66)</text>
+    <rect x="422" y="398" width="84" height="30" rx="5" fill="#eef3ff" stroke="#4a6fd1"/><text x="464" y="417">rotary (59)</text>
+    <rect x="512" y="398" width="90" height="30" rx="5" fill="#eef3ff" stroke="#4a6fd1"/><text x="557" y="417">layernorm (50)</text>
+    <rect x="608" y="398" width="84" height="30" rx="5" fill="#eef3ff" stroke="#4a6fd1"/><text x="650" y="417">activation (11)</text>
+    <rect x="698" y="398" width="70" height="30" rx="5" fill="#eef3ff" stroke="#4a6fd1"/><text x="733" y="417">sampler (12)</text>
+  </g>
+  <line x1="620" y1="301" x2="620" y2="327" stroke="#555" stroke-width="1.4" marker-end="url(#a)"/>
+  <path d="M470,190 C420,230 400,300 395,340" fill="none" stroke="#d4b106" stroke-width="1.3" stroke-dasharray="5 3" marker-end="url(#a)"/>
+  <text x="408" y="236" font-size="11" fill="#7a6400">set_context</text>
+</svg>
