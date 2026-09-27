@@ -649,6 +649,35 @@ Q、K 的点积决定“应该关注谁”：
 
 所以 RoPE 通常旋转 Q 和 K，而不旋转 V。
 
+### 8.6 与正弦位置编码的对照
+
+正弦位置编码和 RoPE 解决的是同一个问题——让模型知道 token 的顺序，但两者的注入阶段和数学形式完全不同，可以并排对照来看：
+
+| 对比项 | 正弦位置编码（原始 Transformer） | 旋转位置编码 RoPE |
+| --- | --- | --- |
+| 注入方式 | 向量加法 | 矩阵乘法 |
+| 作用阶段 | 投影之前的 embedding 向量 $x$ | 投影之后的 $q$、$k$ 向量 |
+| 核心公式 | $\operatorname{PE}(pos,2i)=\sin(\omega_i pos)$<br>$\operatorname{PE}(pos,2i+1)=\cos(\omega_i pos)$ | $\operatorname{RoPE}(pos,i)$ 是一个二维旋转矩阵 |
+| $q$、$k$ 的写法 | $q_m=W_Q(x_m+\operatorname{PE}(m))$<br>$k_n=W_K(x_n+\operatorname{PE}(n))$ | $q'_m=\operatorname{RoPE}(m)\,(W_Qx_m)$<br>$k'_n=\operatorname{RoPE}(n)\,(W_Kx_n)$ |
+| 内积中的位置项 | $\operatorname{PE}(m)^\top\operatorname{PE}(n)=\sum_i\cos(\omega_i(n-m))$ | $\operatorname{RoPE}(m)^\top\operatorname{RoPE}(n)=\operatorname{RoPE}(n-m)$ |
+| 位置依赖 | 和绝对位置 $m$、$n$ 有关 | 只和相对位置 $n-m$ 有关 |
+
+右侧用到的旋转矩阵就是：
+
+<p align="center">$\operatorname{RoPE}(m,i)=\begin{bmatrix}\cos\omega_i m&-\sin\omega_i m\\\sin\omega_i m&\cos\omega_i m\end{bmatrix}$</p>
+
+一句话概括这个差别：正弦位置编码把位置信息**加到输入上**，RoPE 把位置信息**乘到 Q、K 上**。
+
+这里有一处需要说明。表格最后两行是在“位置信息单独拿出来看”的前提下成立的，严格来说，真正的注意力分数里还有一个 $W_Q^\top W_K$ 夹在中间：
+
+<p align="center">$q_m^\top k_n=x_m^\top W_Q^\top W_Kx_n+x_m^\top W_Q^\top W_K\operatorname{PE}(n)+\operatorname{PE}(m)^\top W_Q^\top W_Kx_n+\operatorname{PE}(m)^\top W_Q^\top W_K\operatorname{PE}(n)$</p>
+
+对正弦编码而言，只有最后一项的形式接近 $\sum_i\cos(\omega_i(n-m))$，前三项都同时依赖 $m$、$n$ 的绝对值；而 RoPE 因为旋转矩阵满足正交性，$\operatorname{RoPE}(m)^\top\operatorname{RoPE}(n)=\operatorname{RoPE}(n-m)$ 是代数上严格成立的，不依赖任何近似。这正是现代 Decoder-only 模型更倾向 RoPE 的原因：
+
+- 位置信息在投影之后注入，不会和 token 的语义表示混在同一个向量里；
+- 相对位置由旋转矩阵的正交性直接保证，不需要 $W_Q$、$W_K$ 恰好学到某种巧合；
+- 对长度外推更友好，配合 NTK-aware scaling、YaRN 等方法时只需要调整频率 $\omega_i$ 本身。
+
 ## 9. FFN：每个 token 独立加工信息
 
 Attention 负责不同 token 之间的信息交换，FFN 则对每个 token 独立执行同一套非线性变换。
