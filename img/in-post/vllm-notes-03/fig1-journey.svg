@@ -1,0 +1,87 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 640" font-family="PingFang SC, Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="14">
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#555"/></marker>
+  </defs>
+  <rect width="800" height="640" fill="#fff"/>
+  <text x="400" y="30" text-anchor="middle" font-size="18" font-weight="bold" fill="#222">图 1　一个请求的完整旅程（全文地图）</text>
+
+  <!-- column titles -->
+  <text x="200" y="62" text-anchor="middle" font-size="13" font-weight="bold" fill="#223a80">前端：你自己的 Python 进程</text>
+  <text x="600" y="62" text-anchor="middle" font-size="13" font-weight="bold" fill="#1d5e2e">引擎核心：后台进程 EngineCoreProc</text>
+  <line x1="400" y1="50" x2="400" y2="620" stroke="#bbb" stroke-dasharray="6,5"/>
+
+  <!-- 1 -->
+  <rect x="40" y="80" width="320" height="60" rx="8" fill="#dde8ff" stroke="#4a6fd1" stroke-width="1.5"/>
+  <text x="200" y="104" text-anchor="middle" font-weight="bold">① llm.generate(prompts, params)</text>
+  <text x="200" y="126" text-anchor="middle" font-size="12" fill="#555">你写的那一行代码，文字形式的提示词</text>
+  <line x1="200" y1="140" x2="200" y2="178" stroke="#555" stroke-width="1.4" marker-end="url(#a)"/>
+
+  <!-- 2 -->
+  <rect x="40" y="180" width="320" height="70" rx="8" fill="#dde8ff" stroke="#4a6fd1" stroke-width="1.5"/>
+  <text x="200" y="204" text-anchor="middle" font-weight="bold">② InputProcessor（输入处理器）</text>
+  <text x="200" y="224" text-anchor="middle" font-size="12" fill="#555">文字 → token id，补全默认参数</text>
+  <text x="200" y="241" text-anchor="middle" font-size="12" fill="#555">产出一个 EngineCoreRequest</text>
+
+  <!-- arrow 2->3 -->
+  <line x1="360" y1="215" x2="438" y2="215" stroke="#555" stroke-width="1.4" marker-end="url(#a)"/>
+  <text x="399" y="206" text-anchor="middle" font-size="11" fill="#c0392b">ZMQ 发送</text>
+
+  <!-- 3 -->
+  <rect x="440" y="180" width="320" height="70" rx="8" fill="#d9f2df" stroke="#3a9a52" stroke-width="1.5"/>
+  <text x="600" y="204" text-anchor="middle" font-weight="bold">③ 包装成 Request 对象</text>
+  <text x="600" y="224" text-anchor="middle" font-size="12" fill="#555">状态 WAITING，算好每个整块的哈希</text>
+  <text x="600" y="241" text-anchor="middle" font-size="12" fill="#555">放进调度器的 waiting 队列</text>
+  <line x1="600" y1="250" x2="600" y2="278" stroke="#555" stroke-width="1.4" marker-end="url(#a)"/>
+
+  <!-- step loop frame -->
+  <rect x="425" y="268" width="355" height="290" rx="10" fill="none" stroke="#e39b2d" stroke-width="1.5" stroke-dasharray="5,4"/>
+  <text x="768" y="290" text-anchor="end" font-size="12" fill="#b36b00">每一次 step() 都走一遍</text>
+
+  <!-- 4 -->
+  <rect x="440" y="298" width="300" height="60" rx="8" fill="#fff4e0" stroke="#e39b2d" stroke-width="1.5"/>
+  <text x="590" y="322" text-anchor="middle" font-weight="bold">④ Scheduler.schedule()</text>
+  <text x="590" y="344" text-anchor="middle" font-size="12" fill="#555">选请求、定 token 数、分 KV 块</text>
+  <line x1="590" y1="358" x2="590" y2="386" stroke="#555" stroke-width="1.4" marker-end="url(#a)"/>
+  <text x="598" y="377" font-size="11" fill="#8a5cc7">SchedulerOutput</text>
+
+  <!-- 5 -->
+  <rect x="440" y="388" width="300" height="60" rx="8" fill="#f7f0ff" stroke="#8a5cc7" stroke-width="1.5"/>
+  <text x="590" y="412" text-anchor="middle" font-weight="bold">⑤ GPU 上：拼输入 → 前向 → 采样</text>
+  <text x="590" y="434" text-anchor="middle" font-size="12" fill="#555">Executor → Worker → GPUModelRunner</text>
+  <line x1="590" y1="448" x2="590" y2="476" stroke="#555" stroke-width="1.4" marker-end="url(#a)"/>
+  <text x="598" y="467" font-size="11" fill="#8a5cc7">ModelRunnerOutput</text>
+
+  <!-- 6 -->
+  <rect x="440" y="478" width="300" height="60" rx="8" fill="#fff4e0" stroke="#e39b2d" stroke-width="1.5"/>
+  <text x="590" y="502" text-anchor="middle" font-weight="bold">⑥ update_from_output()</text>
+  <text x="590" y="524" text-anchor="middle" font-size="12" fill="#555">把新 token 记到请求上，判断停不停</text>
+
+  <!-- loop back -->
+  <path d="M740,508 L758,508 L758,328 L743,328" fill="none" stroke="#e39b2d" stroke-width="1.4" marker-end="url(#a)"/>
+  <text x="764" y="420" font-size="11" fill="#b36b00" writing-mode="tb">没结束的继续</text>
+
+  <!-- 6 -> 7 -->
+  <line x1="440" y1="508" x2="362" y2="508" stroke="#555" stroke-width="1.4" marker-end="url(#a)"/>
+  <text x="400" y="498" text-anchor="middle" font-size="11" fill="#c0392b">ZMQ 回传</text>
+  <text x="300" y="585" font-size="11" fill="#555"> </text>
+
+  <!-- 7 -->
+  <rect x="40" y="470" width="320" height="76" rx="8" fill="#dde8ff" stroke="#4a6fd1" stroke-width="1.5"/>
+  <text x="200" y="494" text-anchor="middle" font-weight="bold">⑦ OutputProcessor（输出处理器）</text>
+  <text x="200" y="514" text-anchor="middle" font-size="12" fill="#555">收到 EngineCoreOutputs（只有 token id）</text>
+  <text x="200" y="532" text-anchor="middle" font-size="12" fill="#555">token id → 文字，检查停止字符串</text>
+  <line x1="200" y1="546" x2="200" y2="574" stroke="#555" stroke-width="1.4" marker-end="url(#a)"/>
+
+  <!-- 8 -->
+  <rect x="40" y="576" width="320" height="44" rx="8" fill="#dde8ff" stroke="#4a6fd1" stroke-width="1.5"/>
+  <text x="200" y="603" text-anchor="middle" font-weight="bold">⑧ 你拿到 RequestOutput 列表</text>
+
+  <!-- note -->
+  <rect x="40" y="290" width="320" height="150" rx="8" fill="#fffbe6" stroke="#d4b106"/>
+  <text x="56" y="316" font-size="13" font-weight="bold" fill="#8a6d00">读图提示</text>
+  <text x="56" y="342" font-size="12" fill="#555">· 左边只和"文字"打交道，右边只认数字</text>
+  <text x="56" y="366" font-size="12" fill="#555">· 两边之间来回传的都是 token id</text>
+  <text x="56" y="390" font-size="12" fill="#555">· 橙色虚线框就是引擎的"心跳"，</text>
+  <text x="56" y="410" font-size="12" fill="#555">  请求生成多少个 token，就至少转多少圈</text>
+  <text x="56" y="432" font-size="12" fill="#555">· 紫色小字是步骤之间传递的数据</text>
+</svg>

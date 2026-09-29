@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400" font-family="PingFang SC, Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="14">
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#555"/></marker>
+  </defs>
+  <rect width="800" height="400" fill="#fff"/>
+  <text x="400" y="30" text-anchor="middle" font-size="18" font-weight="bold" fill="#222">图 5　一次 step 的时间线：CPU 和 GPU 谁在干活</text>
+
+  <text x="20" y="66" font-size="13" font-weight="bold">(a) 最简单的 step()：一步一步来</text>
+  <text x="20" y="100" font-size="12" fill="#555">CPU</text>
+  <text x="20" y="140" font-size="12" fill="#555">GPU</text>
+  <rect x="60" y="84" width="90" height="26" fill="#fff4e0" stroke="#e39b2d"/><text x="105" y="102" text-anchor="middle" font-size="11">schedule</text>
+  <rect x="150" y="84" width="90" height="26" fill="#fffbe6" stroke="#d4b106"/><text x="195" y="102" text-anchor="middle" font-size="11">算语法掩码</text>
+  <rect x="150" y="124" width="220" height="26" fill="#f7f0ff" stroke="#8a5cc7"/><text x="260" y="142" text-anchor="middle" font-size="11">execute_model：前向</text>
+  <rect x="370" y="124" width="70" height="26" fill="#f7f0ff" stroke="#8a5cc7"/><text x="405" y="142" text-anchor="middle" font-size="11">采样</text>
+  <rect x="240" y="84" width="200" height="26" fill="#eee" stroke="#bbb" stroke-dasharray="4,3"/><text x="340" y="102" text-anchor="middle" font-size="11" fill="#999">等 future.result()</text>
+  <rect x="440" y="84" width="110" height="26" fill="#fff4e0" stroke="#e39b2d"/><text x="495" y="102" text-anchor="middle" font-size="11">update_from_output</text>
+  <rect x="440" y="124" width="110" height="26" fill="#eee" stroke="#bbb" stroke-dasharray="4,3"/><text x="495" y="142" text-anchor="middle" font-size="11" fill="#999">GPU 空闲</text>
+  <rect x="550" y="84" width="90" height="26" fill="#fff4e0" stroke="#e39b2d"/><text x="595" y="102" text-anchor="middle" font-size="11">下一轮 schedule</text>
+  <rect x="550" y="124" width="90" height="26" fill="#eee" stroke="#bbb" stroke-dasharray="4,3"/><text x="595" y="142" text-anchor="middle" font-size="11" fill="#999">GPU 空闲</text>
+  <text x="650" y="102" font-size="11" fill="#555">注意 execute_model 是</text>
+  <text x="650" y="120" font-size="11" fill="#555">non_block=True：发出去</text>
+  <text x="650" y="138" font-size="11" fill="#555">就返回，CPU 顺手算掩码</text>
+
+  <text x="20" y="196" font-size="13" font-weight="bold">(b) 默认的 step_with_batch_queue()：队列里最多同时有 2 批</text>
+  <text x="20" y="232" font-size="12" fill="#555">CPU</text>
+  <text x="20" y="272" font-size="12" fill="#555">GPU</text>
+  <rect x="60" y="216" width="80" height="26" fill="#fff4e0" stroke="#e39b2d"/><text x="100" y="234" text-anchor="middle" font-size="11">调度 批1</text>
+  <rect x="140" y="216" width="80" height="26" fill="#dde8ff" stroke="#4a6fd1"/><text x="180" y="234" text-anchor="middle" font-size="11">调度 批2</text>
+  <rect x="140" y="256" width="240" height="26" fill="#f7f0ff" stroke="#8a5cc7"/><text x="260" y="274" text-anchor="middle" font-size="11">批1 前向 + 采样</text>
+  <rect x="380" y="216" width="100" height="26" fill="#fff4e0" stroke="#e39b2d"/><text x="430" y="234" text-anchor="middle" font-size="11">处理批1输出</text>
+  <rect x="380" y="256" width="240" height="26" fill="#e7eefc" stroke="#4a6fd1"/><text x="500" y="274" text-anchor="middle" font-size="11">批2 前向 + 采样</text>
+  <rect x="480" y="216" width="80" height="26" fill="#fff4e0" stroke="#e39b2d"/><text x="520" y="234" text-anchor="middle" font-size="11">调度 批3</text>
+  <rect x="620" y="216" width="100" height="26" fill="#dde8ff" stroke="#4a6fd1"/><text x="670" y="234" text-anchor="middle" font-size="11">处理批2输出</text>
+  <rect x="620" y="256" width="160" height="26" fill="#f7f0ff" stroke="#8a5cc7"/><text x="700" y="274" text-anchor="middle" font-size="11">批3 前向 + 采样</text>
+
+  <rect x="20" y="304" width="760" height="82" rx="8" fill="#fffbe6" stroke="#d4b106"/>
+  <text x="36" y="328" font-size="12" fill="#555">· 批队列没满时，step 调度完一批、把任务发给 GPU 后立刻返回，不等结果；满了才阻塞等最早那一批。</text>
+  <text x="36" y="350" font-size="12" fill="#555">· 这样 GPU 在算批 N 时，CPU 已经在给批 N+1 做调度，GPU 几乎不空转。</text>
+  <text x="36" y="372" font-size="12" fill="#555">· 代价：调度批 N+1 时还不知道批 N 采到了什么 token，所以要"先占位"（num_output_placeholders），出结果后再补上。</text>
+</svg>

@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 420" font-family="PingFang SC, Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="14">
+  <rect width="800" height="420" fill="#fff"/>
+  <text x="400" y="30" text-anchor="middle" font-size="18" font-weight="bold" fill="#222">图 8　allocate_slots 眼里的一条请求（block_size = 4 方便画图）</text>
+
+  <text x="20" y="66" font-size="12" fill="#555">例：请求共 17 个 token，其中前 8 个命中前缀缓存，这一步要算 6 个（分块预填充）</text>
+
+  <!-- token row: 30px per token from x=60 -->
+  <g font-size="11">
+    <!-- comp? none (new request). new_comp 8 tokens -->
+    <rect x="60" y="90" width="240" height="34" fill="#d9f2df" stroke="#3a9a52"/>
+    <text x="180" y="112" text-anchor="middle">new_comp：8 个命中的 token</text>
+    <rect x="300" y="90" width="180" height="34" fill="#fff4e0" stroke="#e39b2d"/>
+    <text x="390" y="112" text-anchor="middle">new：本步要算的 6 个</text>
+    <rect x="480" y="90" width="90" height="34" fill="#eee" stroke="#bbb"/>
+    <text x="525" y="112" text-anchor="middle" fill="#777">以后再算</text>
+    <!-- block borders -->
+    <g stroke="#222" stroke-width="2" fill="none">
+      <rect x="60" y="140" width="120" height="34"/><rect x="180" y="140" width="120" height="34"/><rect x="300" y="140" width="120" height="34"/><rect x="420" y="140" width="120" height="34"/>
+    </g>
+    <text x="120" y="162" text-anchor="middle">块 7（已有）</text>
+    <text x="240" y="162" text-anchor="middle">块 3（已有）</text>
+    <text x="360" y="162" text-anchor="middle">新块 12</text>
+    <text x="480" y="162" text-anchor="middle">新块 5</text>
+    <text x="20" y="162" font-size="11">块表</text>
+    <text x="20" y="112" font-size="11">token</text>
+  </g>
+  <text x="550" y="162" font-size="11" fill="#555">14 个 token 需要 ⌈14/4⌉ = 4 块</text>
+
+  <g font-size="12">
+    <text x="20" y="210" font-size="13" font-weight="bold">函数里按顺序做的事</text>
+    <text x="36" y="236">① 算要几个槽位：已算 + 命中 + 本步 = 0 + 8 + 6 = 14 个 token</text>
+    <text x="36" y="260">② 数一数还要新领几块：总共 4 块，命中的 2 块已经有了，只需新领 2 块</text>
+    <text x="36" y="284">③ 空闲块不够 2 块？<tspan fill="#c0392b">直接返回 None</tspan>（调度器看到 None 就去抢占或放弃）</text>
+    <text x="36" y="308">④ 命中的块 7、3：touch 一下（引用计数 +1，从空闲队列里摘出来，别被别人拿走）</text>
+    <text x="36" y="332">⑤ 新块 12、5：从空闲队列头部 get_new_blocks 领出来</text>
+    <text x="36" y="356">⑥ cache_blocks：把"已经填满"的块登记进哈希表。块 12 填满了（token 8~11），块 5 还没满，不登记</text>
+    <text x="36" y="380">⑦ 返回<tspan font-weight="bold">这次新领的块</tspan>（12、5），调度器把它们放进 SchedulerOutput 发给 Worker</text>
+  </g>
+  <text x="20" y="408" font-size="11" fill="#777">源码 docstring 里的完整布局还有两段：ext_comp（KV 连接器从外部搬来的）和 lookahead（给 EAGLE 草稿预留的），先忽略</text>
+</svg>

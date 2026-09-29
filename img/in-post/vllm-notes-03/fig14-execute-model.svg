@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 470" font-family="PingFang SC, Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="14">
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#555"/></marker>
+  </defs>
+  <rect width="800" height="470" fill="#fff"/>
+  <text x="400" y="30" text-anchor="middle" font-size="18" font-weight="bold" fill="#222">图 14　GPUModelRunner 里的两个大函数</text>
+
+  <!-- execute_model -->
+  <rect x="20" y="50" width="370" height="400" rx="10" fill="#f7f0ff" stroke="#8a5cc7" stroke-width="1.5"/>
+  <text x="205" y="74" text-anchor="middle" font-weight="bold" fill="#5a2f94">execute_model(scheduler_output)</text>
+  <g font-size="12">
+    <rect x="40" y="88" width="330" height="40" rx="6" fill="#fff" stroke="#8a5cc7"/>
+    <text x="56" y="106" font-weight="bold">_update_states</text><text x="56" y="122" fill="#555">同步影子账本（图 11）</text>
+    <rect x="40" y="136" width="330" height="40" rx="6" fill="#fff" stroke="#8a5cc7"/>
+    <text x="56" y="154" font-weight="bold">_prepare_inputs</text><text x="56" y="170" fill="#555">拼长序列、算位置和 slot（图 12、13）</text>
+    <rect x="40" y="184" width="330" height="40" rx="6" fill="#fff" stroke="#8a5cc7"/>
+    <text x="56" y="202" font-weight="bold">决定 CUDA Graph 与填充</text><text x="56" y="218" fill="#555">10 个 token 补到录好的 16，走图回放</text>
+    <rect x="40" y="232" width="330" height="40" rx="6" fill="#fff" stroke="#8a5cc7"/>
+    <text x="56" y="250" font-weight="bold">_build_attention_metadata</text><text x="56" y="266" fill="#555">把说明书打包成注意力后端要的格式</text>
+    <rect x="40" y="280" width="330" height="40" rx="6" fill="#fff4e0" stroke="#e39b2d"/>
+    <text x="56" y="298" font-weight="bold">_model_forward</text><text x="56" y="314" fill="#555">真正跑一遍 Transformer，得到 hidden_states</text>
+    <rect x="40" y="328" width="330" height="40" rx="6" fill="#fff" stroke="#8a5cc7"/>
+    <text x="56" y="346" font-weight="bold">hidden_states[logits_indices]</text><text x="56" y="362" fill="#555">只留每段最后一个 → compute_logits</text>
+    <rect x="40" y="376" width="330" height="56" rx="6" fill="#fffbe6" stroke="#d4b106"/>
+    <text x="56" y="396">把 logits 暂存起来，<tspan font-weight="bold" fill="#c0392b">返回 None</tspan></text>
+    <text x="56" y="414" fill="#555">（这样 CPU 可以趁 GPU 在跑，去算语法掩码）</text>
+  </g>
+
+  <line x1="390" y1="250" x2="428" y2="250" stroke="#555" stroke-width="1.4" marker-end="url(#a)"/>
+
+  <!-- sample_tokens -->
+  <rect x="430" y="50" width="350" height="400" rx="10" fill="#d9f2df" stroke="#3a9a52" stroke-width="1.5"/>
+  <text x="605" y="74" text-anchor="middle" font-weight="bold" fill="#1d5e2e">sample_tokens(grammar_output)</text>
+  <g font-size="12">
+    <rect x="450" y="88" width="310" height="40" rx="6" fill="#fff" stroke="#3a9a52"/>
+    <text x="466" y="106" font-weight="bold">apply_grammar_bitmask</text><text x="466" y="122" fill="#555">有格式约束的请求：屏蔽非法 token</text>
+    <rect x="450" y="136" width="310" height="40" rx="6" fill="#fff" stroke="#3a9a52"/>
+    <text x="466" y="154" font-weight="bold">_sample</text><text x="466" y="170" fill="#555">Sampler 挑 token（图 15）；投机解码用拒绝采样器</text>
+    <rect x="450" y="184" width="310" height="40" rx="6" fill="#fff" stroke="#3a9a52"/>
+    <text x="466" y="202" font-weight="bold">propose_draft_token_ids</text><text x="466" y="218" fill="#555">开了投机解码才有：起草下一轮的猜测</text>
+    <rect x="450" y="232" width="310" height="40" rx="6" fill="#fff" stroke="#3a9a52"/>
+    <text x="466" y="250" font-weight="bold">_bookkeeping_sync</text><text x="466" y="266" fill="#555">把新 token 写回 input_batch，拷回 CPU</text>
+    <rect x="450" y="280" width="310" height="80" rx="6" fill="#dde8ff" stroke="#4a6fd1"/>
+    <text x="466" y="300" font-weight="bold">返回 ModelRunnerOutput</text>
+    <text x="466" y="320" fill="#555">req_ids、sampled_token_ids（每请求一个列表）、</text>
+    <text x="466" y="338" fill="#555">logprobs 等。只有"输出 rank"的结果</text>
+    <text x="466" y="354" fill="#555">会送回 EngineCore</text>
+  </g>
+  <text x="446" y="392" font-size="11" fill="#555">调用链：Executor.collective_rpc("execute_model")</text>
+  <text x="446" y="410" font-size="11" fill="#555">→ Worker.execute_model → GPUModelRunner</text>
+  <text x="446" y="436" font-size="11" fill="#777">（新版默认是 V2 runner，结构相同，本文按 V1 讲）</text>
+</svg>

@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 520" font-family="PingFang SC, Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="14">
+  <rect width="800" height="520" fill="#fff"/>
+  <text x="400" y="30" text-anchor="middle" font-size="18" font-weight="bold" fill="#222">图 12　_prepare_inputs：三个请求拼成一条 10 token 的长序列</text>
+  <text x="400" y="54" text-anchor="middle" font-size="12" fill="#555">本步：请求 0 算 2 个（已算 5）、请求 1 算 5 个（新预填充，已算 0）、请求 2 算 3 个（已算 10）</text>
+
+  <g font-size="12">
+    <!-- header indices -->
+    <text x="20" y="92" font-weight="bold">拼接位置</text>
+    <g text-anchor="middle" fill="#777">
+      <text x="215" y="92">0</text><text x="265" y="92">1</text><text x="315" y="92">2</text><text x="365" y="92">3</text><text x="415" y="92">4</text><text x="465" y="92">5</text><text x="515" y="92">6</text><text x="565" y="92">7</text><text x="615" y="92">8</text><text x="665" y="92">9</text>
+    </g>
+
+    <!-- req_indices -->
+    <text x="20" y="126" font-weight="bold">req_indices</text>
+    <text x="20" y="142" font-size="10" fill="#777">属于哪个请求</text>
+    <g text-anchor="middle">
+      <rect x="190" y="106" width="100" height="32" fill="#dde8ff" stroke="#4a6fd1"/><text x="215" y="127">0</text><text x="265" y="127">0</text>
+      <rect x="290" y="106" width="250" height="32" fill="#d9f2df" stroke="#3a9a52"/><text x="315" y="127">1</text><text x="365" y="127">1</text><text x="415" y="127">1</text><text x="465" y="127">1</text><text x="515" y="127">1</text>
+      <rect x="540" y="106" width="150" height="32" fill="#fff4e0" stroke="#e39b2d"/><text x="565" y="127">2</text><text x="615" y="127">2</text><text x="665" y="127">2</text>
+    </g>
+
+    <!-- query_pos -->
+    <text x="20" y="176" font-weight="bold">段内序号</text>
+    <text x="20" y="192" font-size="10" fill="#777">arange 减去段起点</text>
+    <g text-anchor="middle">
+      <text x="215" y="177">0</text><text x="265" y="177">1</text><text x="315" y="177">0</text><text x="365" y="177">1</text><text x="415" y="177">2</text><text x="465" y="177">3</text><text x="515" y="177">4</text><text x="565" y="177">0</text><text x="615" y="177">1</text><text x="665" y="177">2</text>
+    </g>
+
+    <!-- positions -->
+    <text x="20" y="226" font-weight="bold">positions</text>
+    <text x="20" y="242" font-size="10" fill="#777">已算数 + 段内序号</text>
+    <g text-anchor="middle" font-weight="bold">
+      <rect x="190" y="206" width="500" height="32" fill="#fafafa" stroke="#ccc"/>
+      <text x="215" y="227" fill="#4a6fd1">5</text><text x="265" y="227" fill="#4a6fd1">6</text><text x="315" y="227" fill="#3a9a52">0</text><text x="365" y="227" fill="#3a9a52">1</text><text x="415" y="227" fill="#3a9a52">2</text><text x="465" y="227" fill="#3a9a52">3</text><text x="515" y="227" fill="#3a9a52">4</text><text x="565" y="227" fill="#e39b2d">10</text><text x="615" y="227" fill="#e39b2d">11</text><text x="665" y="227" fill="#e39b2d">12</text>
+    </g>
+    <text x="700" y="227" font-size="11" fill="#555">位置编码用它</text>
+
+    <!-- token indices -->
+    <text x="20" y="276" font-weight="bold">token_indices</text>
+    <text x="20" y="292" font-size="10" fill="#777">positions + 请求号 × M</text>
+    <g text-anchor="middle" font-size="11">
+      <text x="215" y="277">5</text><text x="265" y="277">6</text><text x="315" y="277">M</text><text x="365" y="277">M+1</text><text x="415" y="277">M+2</text><text x="465" y="277">M+3</text><text x="515" y="277">M+4</text><text x="565" y="277">2M+10</text><text x="615" y="277">2M+11</text><text x="665" y="277">2M+12</text>
+    </g>
+    <text x="190" y="310" font-size="11" fill="#555">token_ids_cpu 是 [请求数 × M] 的二维表（M = max_model_len），摊平以后用这个下标 index_select，一次取出 input_ids</text>
+  </g>
+
+  <!-- metadata -->
+  <rect x="20" y="330" width="760" height="176" rx="8" fill="#fffbe6" stroke="#d4b106"/>
+  <text x="36" y="354" font-size="13" font-weight="bold" fill="#8a6d00">顺手算出来、交给注意力算子的"说明书"</text>
+  <g font-size="12" fill="#333">
+    <text x="36" y="382" font-weight="bold">query_start_loc = [0, 2, 7, 10]</text>
+    <text x="300" y="382">每段在长序列里从哪开始（前缀和），算子靠它知道段与段的边界</text>
+    <text x="36" y="408" font-weight="bold">seq_lens = [7, 5, 13]</text>
+    <text x="300" y="408">已算 + 本步：每个请求这步要"看"多长的历史</text>
+    <text x="36" y="434" font-weight="bold">slot_mapping</text>
+    <text x="300" y="434">每个新 token 的 K、V 写到显存哪个格子（见图 13）</text>
+    <text x="36" y="460" font-weight="bold">logits_indices = [1, 6, 9]</text>
+    <text x="300" y="460">query_start_loc[1:] − 1：每段最后一个位置，只在这里算 logits</text>
+    <text x="36" y="490" font-size="11" fill="#777">这些 numpy 运算全在 CPU 上做，结果放进预先分配好的 CpuGpuBuffer（CPU、GPU 各一份），再一次性拷到 GPU。</text>
+  </g>
+</svg>

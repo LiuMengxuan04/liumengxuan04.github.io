@@ -1,0 +1,84 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 560" font-family="PingFang SC, Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="14">
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#555"/></marker>
+  </defs>
+  <rect width="800" height="560" fill="#fff"/>
+  <text x="400" y="30" text-anchor="middle" font-size="18" font-weight="bold" fill="#222">图 21　一个 curl 请求在在线服务里的来回（DP = 2）</text>
+
+  <rect x="20" y="50" width="130" height="50" rx="8" fill="#eee" stroke="#999"/>
+  <text x="85" y="72" text-anchor="middle" font-size="12" font-weight="bold">curl</text>
+  <text x="85" y="90" text-anchor="middle" font-size="11" fill="#555">POST /v1/completions</text>
+  <line x1="150" y1="75" x2="198" y2="75" stroke="#555" stroke-width="1.4" marker-end="url(#a)"/>
+  <text x="174" y="66" text-anchor="middle" font-size="11">①</text>
+
+  <!-- API server -->
+  <rect x="200" y="50" width="400" height="190" rx="10" fill="#dde8ff" stroke="#4a6fd1" stroke-width="1.5"/>
+  <text x="400" y="72" text-anchor="middle" font-weight="bold">API 服务器进程（FastAPI + AsyncLLM）</text>
+  <g font-size="12">
+    <text x="216" y="98">② create_completion → OpenAIServingCompletion</text>
+    <text x="216" y="118">③ AsyncLLM.generate：分词，为请求建一个输出队列</text>
+    <text x="216" y="138">④ DPLBAsyncMPClient 挑引擎：分数最低者胜</text>
+    <text x="232" y="156" fill="#555" font-size="11">分数 = max(自己在途数 × 客户端数, 等待 + 运行)</text>
+    <text x="232" y="172" fill="#555" font-size="11">　　 + 等待数 × 6 × max(0, KV 占用率 − 0.5)</text>
+    <text x="216" y="196">⑧ output_handler（后台协程）：收结果 → 反分词</text>
+    <text x="232" y="214" fill="#555">→ 放进该请求的队列 → generate 里 yield 出去</text>
+  </g>
+  <line x1="200" y1="210" x2="152" y2="210" stroke="#555" stroke-width="1.4" marker-end="url(#a)"/>
+  <text x="176" y="200" text-anchor="middle" font-size="11">⑨</text>
+  <rect x="20" y="186" width="130" height="50" rx="8" fill="#eee" stroke="#999"/>
+  <text x="85" y="208" text-anchor="middle" font-size="12">SSE 流式返回</text>
+  <text x="85" y="226" text-anchor="middle" font-size="11" fill="#555">data: {...}</text>
+
+  <!-- coordinator -->
+  <rect x="620" y="50" width="160" height="190" rx="10" fill="#f3f3f3" stroke="#999"/>
+  <text x="700" y="72" text-anchor="middle" font-weight="bold" font-size="13">DP 协调器进程</text>
+  <g font-size="11" fill="#555" text-anchor="middle">
+    <text x="700" y="98">收各引擎的</text>
+    <text x="700" y="114">等待数、运行数、</text>
+    <text x="700" y="130">KV 占用率</text>
+    <text x="700" y="152">最多每 100ms</text>
+    <text x="700" y="168">广播给前端</text>
+    <text x="700" y="194">管"请求波次"：</text>
+    <text x="700" y="210">唤醒休眠的引擎</text>
+  </g>
+  <line x1="620" y1="150" x2="602" y2="150" stroke="#999" stroke-width="1.3" marker-end="url(#a)"/>
+
+  <!-- engines -->
+  <line x1="330" y1="240" x2="200" y2="278" stroke="#555" stroke-width="1.4" marker-end="url(#a)"/>
+  <text x="250" y="256" font-size="11">⑤ ZMQ</text>
+  <line x1="470" y1="240" x2="580" y2="278" stroke="#bbb" stroke-width="1.4" stroke-dasharray="4,3" marker-end="url(#a)"/>
+
+  <rect x="20" y="280" width="370" height="200" rx="10" fill="#d9f2df" stroke="#3a9a52" stroke-width="1.5"/>
+  <text x="205" y="302" text-anchor="middle" font-weight="bold">引擎进程 DP rank 0（DPEngineCoreProc）</text>
+  <g font-size="12">
+    <rect x="36" y="316" width="100" height="44" rx="6" fill="#fff" stroke="#3a9a52"/>
+    <text x="86" y="334" text-anchor="middle" font-size="11">输入线程</text><text x="86" y="350" text-anchor="middle" font-size="10" fill="#555">收包、解码</text>
+    <rect x="146" y="316" width="100" height="44" rx="6" fill="#fff4e0" stroke="#e39b2d"/>
+    <text x="196" y="334" text-anchor="middle" font-size="11">主循环</text><text x="196" y="350" text-anchor="middle" font-size="10" fill="#555">⑥ 反复 step()</text>
+    <rect x="256" y="316" width="118" height="44" rx="6" fill="#fff" stroke="#3a9a52"/>
+    <text x="315" y="334" text-anchor="middle" font-size="11">输出线程</text><text x="315" y="350" text-anchor="middle" font-size="10" fill="#555">⑦ 编码、发回</text>
+    <line x1="136" y1="338" x2="144" y2="338" stroke="#555" marker-end="url(#a)"/>
+    <line x1="246" y1="338" x2="254" y2="338" stroke="#555" marker-end="url(#a)"/>
+    <text x="36" y="386" fill="#555" font-size="11">线程之间用队列传递；ZMQ 收发会释放 GIL，</text>
+    <text x="36" y="402" fill="#555" font-size="11">所以网络 IO 和 GPU 计算可以重叠</text>
+    <rect x="36" y="414" width="338" height="52" rx="6" fill="#f7f0ff" stroke="#8a5cc7"/>
+    <text x="205" y="436" text-anchor="middle" font-size="11">Executor + Worker（内部可以再 TP）</text>
+    <text x="205" y="454" text-anchor="middle" font-size="11" fill="#555">就是前面几节讲的全部内容</text>
+  </g>
+
+  <rect x="410" y="280" width="370" height="200" rx="10" fill="#f4fbf6" stroke="#3a9a52" stroke-dasharray="5,4"/>
+  <text x="595" y="302" text-anchor="middle" font-weight="bold">引擎进程 DP rank 1</text>
+  <g font-size="12" fill="#555">
+    <text x="426" y="332">结构完全一样，有自己的调度器和 KV 缓存</text>
+    <text x="426" y="360">没活干但 rank 0 还在忙时，会跑"空批"</text>
+    <text x="426" y="380">（dummy batch），让 MoE 这类需要所有</text>
+    <text x="426" y="400">rank 一起通信的模型不至于卡死</text>
+    <text x="426" y="430">每隔几步大家 all-reduce 一次：</text>
+    <text x="426" y="450">"全局还有没有没完的请求？"</text>
+  </g>
+
+  <line x1="200" y1="480" x2="200" y2="500" stroke="#555"/>
+  <rect x="20" y="500" width="760" height="48" rx="8" fill="#fffbe6" stroke="#d4b106"/>
+  <text x="36" y="520" font-size="12" fill="#555">和离线 LLM.generate 的区别只在最外层：换成异步的 AsyncLLM、多了挑引擎和流式返回；引擎核心里的 step 循环一模一样。</text>
+  <text x="36" y="538" font-size="11" fill="#777">入口已迁到 vllm/entrypoints/launchers/api_server/，旧的 openai/api_server.py 只剩兼容转发</text>
+</svg>

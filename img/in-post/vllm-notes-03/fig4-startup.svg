@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 440" font-family="PingFang SC, Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="14">
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#555"/></marker>
+  </defs>
+  <rect width="800" height="440" fill="#fff"/>
+  <text x="400" y="30" text-anchor="middle" font-size="18" font-weight="bold" fill="#222">图 4　LLM(...) 那几十秒：EngineCore 的启动顺序</text>
+
+  <g font-size="12">
+    <!-- step boxes -->
+    <rect x="20" y="60" width="140" height="92" rx="8" fill="#f7f0ff" stroke="#8a5cc7"/>
+    <text x="90" y="82" text-anchor="middle" font-size="13" font-weight="bold">1 init_device</text>
+    <text x="90" y="104" text-anchor="middle" fill="#555">选中 GPU</text>
+    <text x="90" y="122" text-anchor="middle" fill="#555">初始化通信</text>
+    <text x="90" y="140" text-anchor="middle" fill="#555">建 ModelRunner</text>
+
+    <rect x="175" y="60" width="140" height="92" rx="8" fill="#f7f0ff" stroke="#8a5cc7"/>
+    <text x="245" y="82" text-anchor="middle" font-size="13" font-weight="bold">2 load_model</text>
+    <text x="245" y="104" text-anchor="middle" fill="#555">把权重文件</text>
+    <text x="245" y="122" text-anchor="middle" fill="#555">读进显存</text>
+
+    <rect x="330" y="60" width="140" height="92" rx="8" fill="#fff4e0" stroke="#e39b2d"/>
+    <text x="400" y="82" text-anchor="middle" font-size="13" font-weight="bold">3 量显存</text>
+    <text x="400" y="104" text-anchor="middle" fill="#555">profile_run</text>
+    <text x="400" y="122" text-anchor="middle" fill="#555">用假数据试跑一次</text>
+    <text x="400" y="140" text-anchor="middle" fill="#555">看激活峰值多大</text>
+
+    <rect x="485" y="60" width="140" height="92" rx="8" fill="#fff4e0" stroke="#e39b2d"/>
+    <text x="555" y="82" text-anchor="middle" font-size="13" font-weight="bold">4 切 KV 块</text>
+    <text x="555" y="104" text-anchor="middle" fill="#555">剩余显存 ÷ 每块大小</text>
+    <text x="555" y="122" text-anchor="middle" fill="#555">= num_gpu_blocks</text>
+    <text x="555" y="140" text-anchor="middle" fill="#555">分配大张量</text>
+
+    <rect x="640" y="60" width="140" height="92" rx="8" fill="#d9f2df" stroke="#3a9a52"/>
+    <text x="710" y="82" text-anchor="middle" font-size="13" font-weight="bold">5 预热 + 录图</text>
+    <text x="710" y="104" text-anchor="middle" fill="#555">kernel 预热</text>
+    <text x="710" y="122" text-anchor="middle" fill="#555">capture_model</text>
+    <text x="710" y="140" text-anchor="middle" fill="#555">录 CUDA Graph</text>
+  </g>
+  <line x1="160" y1="106" x2="173" y2="106" stroke="#555" stroke-width="1.4" marker-end="url(#a)"/>
+  <line x1="315" y1="106" x2="328" y2="106" stroke="#555" stroke-width="1.4" marker-end="url(#a)"/>
+  <line x1="470" y1="106" x2="483" y2="106" stroke="#555" stroke-width="1.4" marker-end="url(#a)"/>
+  <line x1="625" y1="106" x2="638" y2="106" stroke="#555" stroke-width="1.4" marker-end="url(#a)"/>
+  <text x="400" y="178" text-anchor="middle" font-size="12" fill="#555">1、2 在 Worker 里；3、4、5 由 EngineCore._initialize_kv_caches() 依次调用；最后才创建 Scheduler（它要知道一共有多少块）</text>
+
+  <!-- block size formula -->
+  <rect x="20" y="200" width="760" height="100" rx="8" fill="#fffbe6" stroke="#d4b106"/>
+  <text x="36" y="226" font-size="13" font-weight="bold" fill="#8a6d00">一个 KV 块在一层里占多少字节（page_size_bytes）</text>
+  <text x="36" y="254" font-size="14" fill="#222">2（K 和 V）× 16（block_size）× num_kv_heads × head_size × 每个数的字节数</text>
+  <text x="36" y="282" font-size="12" fill="#555">例：8 个 KV 头、head_size 128、bf16（2 字节）→ 2×16×8×128×2 = 65536 字节 = 64 KiB；模型有 L 层，一个块总共就是 L × 64 KiB</text>
+
+  <!-- memory bar -->
+  <text x="20" y="330" font-size="13" font-weight="bold">一张卡的显存怎么分（gpu_memory_utilization = 0.92）</text>
+  <rect x="20" y="345" width="90" height="40" fill="#f7f0ff" stroke="#8a5cc7"/>
+  <text x="65" y="370" text-anchor="middle" font-size="12">权重</text>
+  <rect x="110" y="345" width="50" height="40" fill="#fff4e0" stroke="#e39b2d"/>
+  <text x="135" y="370" text-anchor="middle" font-size="11">激活</text>
+  <rect x="160" y="345" width="24" height="40" fill="#d9f2df" stroke="#3a9a52"/>
+  <text x="172" y="400" text-anchor="middle" font-size="10">图</text>
+  <rect x="184" y="345" width="536" height="40" fill="#dde8ff" stroke="#4a6fd1"/>
+  <text x="452" y="370" text-anchor="middle" font-size="13">KV 缓存：切成一个个块，块 0 留作"空块"占位</text>
+  <rect x="720" y="345" width="60" height="40" fill="#eee" stroke="#999" stroke-dasharray="4,3"/>
+  <text x="750" y="370" text-anchor="middle" font-size="11" fill="#777">不用 8%</text>
+  <text x="20" y="420" font-size="12" fill="#555">KV 缓存 = 总显存 × 0.92 − 权重 − 激活峰值 − CUDA Graph 预估。数学细节见 01 篇 1.2 节。</text>
+</svg>

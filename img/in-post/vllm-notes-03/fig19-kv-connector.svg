@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 460" font-family="PingFang SC, Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="14">
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#555"/></marker>
+  </defs>
+  <rect width="800" height="460" fill="#fff"/>
+  <text x="400" y="30" text-anchor="middle" font-size="18" font-weight="bold" fill="#222">图 19　KV 连接器：挂在调度器和 Worker 上的几个钩子</text>
+
+  <!-- scheduler side -->
+  <rect x="20" y="50" width="370" height="290" rx="10" fill="#fff4e0" stroke="#e39b2d" stroke-width="1.5"/>
+  <text x="205" y="74" text-anchor="middle" font-weight="bold">调度器这一侧（管"要不要搬、搬哪些"）</text>
+  <g font-size="12">
+    <text x="36" y="104" font-weight="bold">get_num_new_matched_tokens</text>
+    <text x="48" y="122" fill="#555">接新请求时问：外部存储里有这段前缀的 KV 吗？</text>
+    <text x="48" y="138" fill="#555">有几个 token 可以直接搬过来，不用算</text>
+    <text x="36" y="166" font-weight="bold">update_state_after_alloc</text>
+    <text x="48" y="184" fill="#555">allocate_slots 之后：记下搬来的 KV 放进哪些块</text>
+    <text x="36" y="212" font-weight="bold">build_connector_meta</text>
+    <text x="48" y="230" fill="#555">schedule() 末尾：把本步的搬运清单</text>
+    <text x="48" y="246" fill="#555">塞进 SchedulerOutput 带给 Worker</text>
+    <text x="36" y="274" font-weight="bold">request_finished</text>
+    <text x="48" y="292" fill="#555">请求结束、释放块之前调用；返回 True 表示</text>
+    <text x="48" y="308" fill="#555">"块先别还，我还在往外发"</text>
+  </g>
+
+  <line x1="390" y1="200" x2="428" y2="200" stroke="#555" stroke-width="1.4" marker-end="url(#a)"/>
+  <text x="409" y="190" text-anchor="middle" font-size="10" fill="#555">元数据</text>
+
+  <!-- worker side -->
+  <rect x="430" y="50" width="350" height="290" rx="10" fill="#f7f0ff" stroke="#8a5cc7" stroke-width="1.5"/>
+  <text x="605" y="74" text-anchor="middle" font-weight="bold">Worker 这一侧（真正动手搬）</text>
+  <g font-size="12">
+    <text x="446" y="104" font-weight="bold">start_load_kv</text>
+    <text x="458" y="122" fill="#555">前向开始前：开始从外部读 KV 到显存块里</text>
+    <text x="446" y="150" font-weight="bold">wait_for_layer_load(层名)</text>
+    <text x="458" y="168" fill="#555">每层注意力开始前：等这一层读完</text>
+    <text x="446" y="196" font-weight="bold">save_kv_layer(层名, …)</text>
+    <text x="458" y="214" fill="#555">每层注意力算完后：把这层 KV 往外存</text>
+    <text x="446" y="242" font-weight="bold">wait_for_save</text>
+    <text x="458" y="260" fill="#555">前向结束：等所有保存完成</text>
+    <text x="446" y="288" font-weight="bold">get_finished</text>
+    <text x="458" y="306" fill="#555">汇报哪些请求搬完了，调度器据此放行</text>
+    <text x="458" y="322" fill="#555">WAITING_FOR_REMOTE_KVS 的请求</text>
+  </g>
+
+  <!-- PD flow -->
+  <rect x="20" y="356" width="760" height="92" rx="8" fill="#fffbe6" stroke="#d4b106"/>
+  <text x="36" y="380" font-size="13" font-weight="bold" fill="#8a6d00">放进 PD 分离里看</text>
+  <text x="36" y="404" font-size="12" fill="#555">预填充实例：正常算提示词，每层 save_kv_layer 把 KV 存出去，max_tokens=1，出一个 token 就结束。</text>
+  <text x="36" y="426" font-size="12" fill="#555">解码实例：接新请求时 get_num_new_matched_tokens 发现"整段都有"，start_load_kv 把 KV 读进来，直接开始解码。</text>
+  <text x="36" y="442" font-size="11" fill="#777">学习用的 example_connector.py 就是把每层 KV 存成 /tmp 下的 safetensors 文件；生产用 NIXL、LMCache、Mooncake 等</text>
+</svg>

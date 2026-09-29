@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 420" font-family="PingFang SC, Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="14">
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#555"/></marker>
+  </defs>
+  <rect width="800" height="420" fill="#fff"/>
+  <text x="400" y="30" text-anchor="middle" font-size="18" font-weight="bold" fill="#222">图 13　slot_mapping：新 token 的 KV 写到哪个格子</text>
+  <text x="400" y="54" text-anchor="middle" font-size="12" fill="#555">为了好画，block_size = 4。请求 0 的块表 = [7, 2]，本步要算位置 5、6 的两个 token</text>
+
+  <!-- block table -->
+  <rect x="20" y="76" width="200" height="90" rx="8" fill="#dde8ff" stroke="#4a6fd1"/>
+  <text x="120" y="98" text-anchor="middle" font-weight="bold">请求 0 的块表</text>
+  <g font-size="12" text-anchor="middle">
+    <rect x="40" y="110" width="80" height="40" fill="#fff" stroke="#4a6fd1"/><text x="80" y="128">第 0 块</text><text x="80" y="144" font-weight="bold">→ 7</text>
+    <rect x="120" y="110" width="80" height="40" fill="#fff" stroke="#4a6fd1"/><text x="160" y="128">第 1 块</text><text x="160" y="144" font-weight="bold">→ 2</text>
+  </g>
+
+  <!-- formula -->
+  <rect x="250" y="76" width="530" height="90" rx="8" fill="#fffbe6" stroke="#d4b106"/>
+  <text x="266" y="100" font-size="13" font-weight="bold" fill="#8a6d00">slot = 块表[pos // block_size] × block_size + pos % block_size</text>
+  <text x="266" y="126" font-size="12">位置 5：5 // 4 = 1 → 物理块 2；2 × 4 + 5 % 4 = <tspan font-weight="bold" fill="#c0392b">9</tspan></text>
+  <text x="266" y="148" font-size="12">位置 6：6 // 4 = 1 → 物理块 2；2 × 4 + 6 % 4 = <tspan font-weight="bold" fill="#c0392b">10</tspan></text>
+
+  <!-- physical memory -->
+  <text x="20" y="206" font-size="13" font-weight="bold">显存里的 KV 缓存（摊平后每个格子装一个 token 的 K 和 V）</text>
+  <g font-size="10" text-anchor="middle">
+    <!-- blocks 0..8, 4 slots each, width 20 each slot => 80 per block -->
+    <rect x="20" y="220" width="80" height="36" fill="#eee" stroke="#999"/><text x="60" y="242">块0 空块</text>
+    <rect x="100" y="220" width="80" height="36" fill="#fff" stroke="#999"/><text x="140" y="242">块1</text>
+    <g>
+      <rect x="180" y="220" width="20" height="36" fill="#d9f2df" stroke="#3a9a52"/>
+      <rect x="200" y="220" width="20" height="36" fill="#fff4e0" stroke="#e39b2d"/>
+      <rect x="220" y="220" width="20" height="36" fill="#fff4e0" stroke="#e39b2d"/>
+      <rect x="240" y="220" width="20" height="36" fill="#fff" stroke="#999"/>
+      <text x="190" y="270">8</text><text x="210" y="270" fill="#c0392b" font-weight="bold">9</text><text x="230" y="270" fill="#c0392b" font-weight="bold">10</text><text x="250" y="270">11</text>
+      <text x="220" y="212" font-size="11">块 2</text>
+    </g>
+    <rect x="260" y="220" width="80" height="36" fill="#fff" stroke="#999"/><text x="300" y="242">块3</text>
+    <rect x="340" y="220" width="80" height="36" fill="#fff" stroke="#999"/><text x="380" y="242">块4</text>
+    <rect x="420" y="220" width="80" height="36" fill="#fff" stroke="#999"/><text x="460" y="242">块5</text>
+    <rect x="500" y="220" width="80" height="36" fill="#fff" stroke="#999"/><text x="540" y="242">块6</text>
+    <rect x="580" y="220" width="80" height="36" fill="#d9f2df" stroke="#3a9a52"/><text x="620" y="242">块7（位置0~3）</text>
+    <rect x="660" y="220" width="80" height="36" fill="#fff" stroke="#999"/><text x="700" y="242">块8</text>
+  </g>
+  <text x="20" y="296" font-size="11" fill="#555">绿色 = 之前步已写好的 KV（位置 0~4），橙色 = 本步要写的（位置 5、6）</text>
+
+  <rect x="20" y="314" width="760" height="94" rx="8" fill="#f7f0ff" stroke="#8a5cc7"/>
+  <text x="36" y="338" font-size="13" font-weight="bold" fill="#5a2f94">注意力层里用到它的两处</text>
+  <text x="36" y="362" font-size="12">写：reshape_and_cache_flash(k, v, kv_cache, slot_mapping)，把本步算出的 K、V 按 slot 散写进去</text>
+  <text x="36" y="384" font-size="12">读：flash_attn_varlen_func(…, block_table, seqused_k=seq_lens)，按块表把历史 KV 找回来做注意力</text>
+  <text x="36" y="402" font-size="11" fill="#777">真实代码里这个公式由一个 Triton kernel（compute_slot_mapping）在 GPU 上批量算；凑数用的填充位置写成 PAD_SLOT_ID，不会写进显存</text>
+</svg>

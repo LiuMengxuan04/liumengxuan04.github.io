@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 470" font-family="PingFang SC, Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="14">
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#555"/></marker>
+  </defs>
+  <rect width="800" height="470" fill="#fff"/>
+  <text x="400" y="30" text-anchor="middle" font-size="18" font-weight="bold" fill="#222">图 18　投机解码：n-gram 起草 + 拒绝采样验证</text>
+
+  <!-- ngram -->
+  <text x="20" y="64" font-size="13" font-weight="bold">(a) n-gram 起草：在已有文本里找"和结尾一样"的片段，把它后面的内容抄过来当猜测</text>
+  <g font-size="12" text-anchor="middle">
+    <rect x="20" y="78" width="60" height="30" fill="#dde8ff" stroke="#4a6fd1"/><text x="50" y="98">南京</text>
+    <rect x="80" y="78" width="60" height="30" fill="#dde8ff" stroke="#4a6fd1"/><text x="110" y="98">是</text>
+    <rect x="140" y="78" width="60" height="30" fill="#fff4e0" stroke="#e39b2d"/><text x="170" y="98">江苏</text>
+    <rect x="200" y="78" width="60" height="30" fill="#fff4e0" stroke="#e39b2d"/><text x="230" y="98">省会</text>
+    <rect x="260" y="78" width="60" height="30" fill="#fff4e0" stroke="#e39b2d"/><text x="290" y="98">，</text>
+    <rect x="320" y="78" width="60" height="30" fill="#fff" stroke="#999"/><text x="350" y="98">……</text>
+    <rect x="380" y="78" width="60" height="30" fill="#dde8ff" stroke="#4a6fd1"/><text x="410" y="98">南京</text>
+    <rect x="440" y="78" width="60" height="30" fill="#dde8ff" stroke="#4a6fd1"/><text x="470" y="98">是</text>
+    <rect x="520" y="78" width="60" height="30" fill="#fff4e0" stroke="#e39b2d" stroke-dasharray="4,3"/><text x="550" y="98">江苏</text>
+    <rect x="580" y="78" width="60" height="30" fill="#fff4e0" stroke="#e39b2d" stroke-dasharray="4,3"/><text x="610" y="98">省会</text>
+    <rect x="640" y="78" width="60" height="30" fill="#fff4e0" stroke="#e39b2d" stroke-dasharray="4,3"/><text x="670" y="98">，</text>
+  </g>
+  <text x="440" y="128" text-anchor="middle" font-size="11" fill="#4a6fd1">↑ 结尾"南京 是"在前面出现过</text>
+  <text x="610" y="128" text-anchor="middle" font-size="11" fill="#e39b2d">↑ k = 3 个草稿</text>
+  <text x="20" y="150" font-size="11" fill="#777">匹配长度在 prompt_lookup_min ~ max 之间取最长的；不需要额外模型，也没有"草稿概率"（当作 1 处理）</text>
+
+  <!-- verify -->
+  <text x="20" y="186" font-size="13" font-weight="bold">(b) 验证：大模型一次前向同时算出 4 个位置的概率，从左往右逐个判定</text>
+  <g font-size="12">
+    <rect x="20" y="200" width="180" height="96" rx="8" fill="#d9f2df" stroke="#3a9a52"/>
+    <text x="110" y="222" text-anchor="middle" font-weight="bold">草稿 1 "江苏"</text>
+    <text x="110" y="244" text-anchor="middle" fill="#555">p 大模型 = 0.7，随机 u = 0.4</text>
+    <text x="110" y="264" text-anchor="middle" fill="#555">p / q ≥ u → 接受</text>
+    <text x="110" y="286" text-anchor="middle" font-weight="bold" fill="#3a9a52">✓</text>
+    <rect x="215" y="200" width="180" height="96" rx="8" fill="#d9f2df" stroke="#3a9a52"/>
+    <text x="305" y="222" text-anchor="middle" font-weight="bold">草稿 2 "省会"</text>
+    <text x="305" y="244" text-anchor="middle" fill="#555">p = 0.9，u = 0.2</text>
+    <text x="305" y="264" text-anchor="middle" fill="#555">接受</text>
+    <text x="305" y="286" text-anchor="middle" font-weight="bold" fill="#3a9a52">✓</text>
+    <rect x="410" y="200" width="180" height="96" rx="8" fill="#fff0f0" stroke="#c0392b"/>
+    <text x="500" y="222" text-anchor="middle" font-weight="bold">草稿 3 "，"</text>
+    <text x="500" y="244" text-anchor="middle" fill="#555">p = 0.1，u = 0.6 → 拒绝</text>
+    <text x="500" y="264" text-anchor="middle" fill="#555">按 max(p − q, 0) 重采一个</text>
+    <text x="500" y="286" text-anchor="middle" font-weight="bold" fill="#c0392b">✗ 换成"也"（recovered）</text>
+    <rect x="605" y="200" width="175" height="96" rx="8" fill="#eee" stroke="#999" stroke-dasharray="4,3"/>
+    <text x="692" y="222" text-anchor="middle" font-weight="bold" fill="#777">bonus 位置</text>
+    <text x="692" y="244" text-anchor="middle" fill="#777">只有草稿全部接受时</text>
+    <text x="692" y="264" text-anchor="middle" fill="#777">才额外白送 1 个</text>
+    <text x="692" y="286" text-anchor="middle" fill="#777">这次作废</text>
+  </g>
+  <text x="20" y="320" font-size="12">这一步输出 3 个 token："江苏 省会 也"。普通解码一步只能出 1 个。</text>
+
+  <rect x="20" y="336" width="760" height="120" rx="8" fill="#fffbe6" stroke="#d4b106"/>
+  <text x="36" y="360" font-size="13" font-weight="bold" fill="#8a6d00">在调度器视角里怎么记账</text>
+  <text x="36" y="384" font-size="12" fill="#555">1. 草稿放进 request.spec_token_ids，于是 num_tokens_with_spec 变大 3，调度器给它排 1 + 3 = 4 个 token</text>
+  <text x="36" y="406" font-size="12" fill="#555">2. 调度完先乐观地 computed += 4；结果回来发现被拒了 1 个 → computed −= 1（update_from_output 里）</text>
+  <text x="36" y="428" font-size="12" fill="#555">3. 被拒位置写进 KV 的内容作废，下一步会被新 token 覆盖。贪心请求更简单：草稿 ≠ argmax 就拒绝</text>
+  <text x="36" y="448" font-size="11" fill="#777">这套规则保证输出分布和不开投机解码完全一样（Leviathan et al. 2023，源码 rejection_sampler.py）</text>
+</svg>

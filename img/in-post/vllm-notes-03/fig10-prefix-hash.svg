@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 480" font-family="PingFang SC, Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="14">
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#555"/></marker>
+  </defs>
+  <rect width="800" height="480" fill="#fff"/>
+  <text x="400" y="30" text-anchor="middle" font-size="18" font-weight="bold" fill="#222">图 10　前缀缓存：链式哈希 + 两次调用的对比</text>
+
+  <!-- chain -->
+  <text x="20" y="66" font-size="13" font-weight="bold">(a) 每个满块的哈希 = hash(前一块的哈希, 本块 token, 附加信息)</text>
+  <g font-size="12">
+    <rect x="20" y="84" width="110" height="50" rx="6" fill="#eee" stroke="#999"/>
+    <text x="75" y="106" text-anchor="middle">NONE_HASH</text><text x="75" y="124" text-anchor="middle" font-size="10" fill="#777">固定种子</text>
+    <rect x="170" y="84" width="150" height="50" rx="6" fill="#dde8ff" stroke="#4a6fd1"/>
+    <text x="245" y="104" text-anchor="middle">块 1：16 个 token</text><text x="245" y="124" text-anchor="middle" font-weight="bold" fill="#223a80">h1</text>
+    <rect x="360" y="84" width="150" height="50" rx="6" fill="#dde8ff" stroke="#4a6fd1"/>
+    <text x="435" y="104" text-anchor="middle">块 2：16 个 token</text><text x="435" y="124" text-anchor="middle" font-weight="bold" fill="#223a80">h2 = H(h1, …)</text>
+    <rect x="550" y="84" width="150" height="50" rx="6" fill="#dde8ff" stroke="#4a6fd1"/>
+    <text x="625" y="104" text-anchor="middle">块 3：16 个 token</text><text x="625" y="124" text-anchor="middle" font-weight="bold" fill="#223a80">h3 = H(h2, …)</text>
+    <rect x="720" y="84" width="60" height="50" rx="6" fill="#fff" stroke="#bbb" stroke-dasharray="4,3"/>
+    <text x="750" y="106" text-anchor="middle" font-size="11" fill="#777">没满</text><text x="750" y="122" text-anchor="middle" font-size="11" fill="#777">无哈希</text>
+    <line x1="130" y1="109" x2="168" y2="109" stroke="#555" marker-end="url(#a)"/><line x1="320" y1="109" x2="358" y2="109" stroke="#555" marker-end="url(#a)"/><line x1="510" y1="109" x2="548" y2="109" stroke="#555" marker-end="url(#a)"/>
+  </g>
+  <text x="20" y="158" font-size="12" fill="#555">h3 命中 ⇔ 前 48 个 token 全都一样。附加信息 extra_keys 里有 LoRA、多模态图片哈希、cache_salt，避免"字一样但含义不同"的误命中。默认算法 sha256。</text>
+
+  <!-- two calls -->
+  <text x="20" y="196" font-size="13" font-weight="bold">(b) 两个请求共享同一段 40 token 的系统提示词</text>
+
+  <rect x="20" y="210" width="370" height="200" rx="8" fill="#f4fbf6" stroke="#3a9a52"/>
+  <text x="205" y="234" text-anchor="middle" font-weight="bold" fill="#1d5e2e">第一次：请求 A（40 + 10 = 50 token）</text>
+  <g font-size="12" fill="#333">
+    <text x="36" y="260">get_computed_blocks：查 h1 → 没有，停</text>
+    <text x="36" y="282">命中 0 个 → 50 个 token 全部要算</text>
+    <text x="36" y="304">allocate_slots 领 4 块：[5, 8, 2, 11]</text>
+    <text x="36" y="326">算完后 cache_blocks：满的 3 块登记</text>
+    <text x="52" y="346" fill="#4a6fd1">h1→5　h2→8　h3→2</text>
+    <text x="36" y="370">A 结束：块回空闲队列，但哈希表里还在</text>
+    <text x="36" y="392" fill="#777" font-size="11">（块 11 没满、没哈希，插到队头最先复用）</text>
+  </g>
+
+  <rect x="410" y="210" width="370" height="200" rx="8" fill="#f3f7ff" stroke="#4a6fd1"/>
+  <text x="595" y="234" text-anchor="middle" font-weight="bold" fill="#223a80">第二次：请求 B（同样开头，40 + 20 token）</text>
+  <g font-size="12" fill="#333">
+    <text x="426" y="260">B 的前 2 块 token 和 A 一样 → h1、h2 相同</text>
+    <text x="426" y="282">查 h1 → 块 5 ✓　查 h2 → 块 8 ✓</text>
+    <text x="426" y="304">第 3 块 token 不同 → 哈希查不到，停</text>
+    <text x="426" y="326" fill="#c0392b">命中 32 个 token，只需算后面 28 个</text>
+    <text x="426" y="348">touch(块 5, 8)：引用计数 +1，摘出空闲队列</text>
+    <text x="426" y="370">再新领 2 块装剩下的</text>
+    <text x="426" y="392" fill="#777" font-size="11">预填充工作量从 60 降到 28</text>
+  </g>
+
+  <rect x="20" y="424" width="760" height="44" rx="8" fill="#fffbe6" stroke="#d4b106"/>
+  <text x="36" y="444" font-size="12" fill="#555">小细节：最多只能命中 num_tokens − 1 个。最后一个 token 必须真的算一遍，才有 logits 可以采样下一个 token；</text>
+  <text x="36" y="460" font-size="12" fill="#555">如果整个提示词正好是整块并且全部命中，最后那一整块会被重算。</text>
+</svg>

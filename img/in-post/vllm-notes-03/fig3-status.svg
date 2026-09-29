@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 420" font-family="PingFang SC, Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="14">
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#555"/></marker>
+  </defs>
+  <rect width="800" height="420" fill="#fff"/>
+  <text x="400" y="30" text-anchor="middle" font-size="18" font-weight="bold" fill="#222">图 3　请求的状态机（RequestStatus）</text>
+
+  <!-- blocked states -->
+  <rect x="20" y="60" width="230" height="130" rx="8" fill="#f3f3f3" stroke="#999"/>
+  <text x="135" y="82" text-anchor="middle" font-size="13" font-weight="bold">"卡住的等待"（可选）</text>
+  <text x="32" y="108" font-size="11" fill="#333">WAITING_FOR_STRUCTURED_</text>
+  <text x="32" y="124" font-size="11" fill="#333">  OUTPUT_GRAMMAR  等语法编译</text>
+  <text x="32" y="148" font-size="11" fill="#333">WAITING_FOR_REMOTE_KVS  等远端 KV</text>
+  <text x="32" y="172" font-size="11" fill="#333">WAITING_FOR_STREAMING_REQ</text>
+
+  <!-- WAITING -->
+  <rect x="300" y="100" width="160" height="56" rx="28" fill="#dde8ff" stroke="#4a6fd1" stroke-width="1.8"/>
+  <text x="380" y="126" text-anchor="middle" font-weight="bold">WAITING</text>
+  <text x="380" y="145" text-anchor="middle" font-size="11" fill="#555">在 waiting 队列里</text>
+  <line x1="250" y1="128" x2="297" y2="128" stroke="#555" stroke-width="1.4" marker-end="url(#a)"/>
+  <text x="274" y="118" text-anchor="middle" font-size="10" fill="#555">准备好</text>
+
+  <!-- RUNNING -->
+  <rect x="560" y="100" width="160" height="56" rx="28" fill="#d9f2df" stroke="#3a9a52" stroke-width="1.8"/>
+  <text x="640" y="126" text-anchor="middle" font-weight="bold">RUNNING</text>
+  <text x="640" y="145" text-anchor="middle" font-size="11" fill="#555">在 running 列表里</text>
+  <line x1="460" y1="120" x2="557" y2="120" stroke="#555" stroke-width="1.4" marker-end="url(#a)"/>
+  <text x="508" y="112" text-anchor="middle" font-size="11" fill="#555">被调度，分到了块</text>
+
+  <!-- PREEMPTED -->
+  <rect x="430" y="210" width="160" height="56" rx="28" fill="#fff0f0" stroke="#c0392b" stroke-width="1.8"/>
+  <text x="510" y="236" text-anchor="middle" font-weight="bold">PREEMPTED</text>
+  <text x="510" y="255" text-anchor="middle" font-size="11" fill="#555">块被收回，排回队首</text>
+  <path d="M630,156 Q620,220 593,236" fill="none" stroke="#c0392b" stroke-width="1.4" marker-end="url(#a)"/>
+  <text x="640" y="200" font-size="11" fill="#c0392b">KV 块不够，被抢占</text>
+  <path d="M440,222 Q400,190 385,159" fill="none" stroke="#c0392b" stroke-width="1.4" marker-end="url(#a)"/>
+  <text x="330" y="205" font-size="11" fill="#c0392b">下次又被调度</text>
+
+  <!-- finished -->
+  <rect x="20" y="300" width="760" height="100" rx="8" fill="#f7f0ff" stroke="#8a5cc7"/>
+  <text x="400" y="322" text-anchor="middle" font-size="13" font-weight="bold" fill="#5a2f94">结束态（数值都比 PREEMPTED 大，源码用 status &gt; PREEMPTED 判断"结束了没"）</text>
+  <g font-size="12" fill="#333">
+    <text x="36" y="350">FINISHED_STOPPED　遇到 EOS / 停止 token / 停止字符串</text>
+    <text x="420" y="350">FINISHED_LENGTH_CAPPED　到了 max_tokens 或上下文上限</text>
+    <text x="36" y="376">FINISHED_ABORTED　被取消（如客户端断开）</text>
+    <text x="420" y="376">FINISHED_IGNORED / ERROR / REPETITION　其他异常情况</text>
+  </g>
+  <line x1="680" y1="156" x2="680" y2="297" stroke="#8a5cc7" stroke-width="1.4" marker-end="url(#a)"/>
+  <text x="688" y="280" font-size="11" fill="#5a2f94">check_stop 判定结束</text>
+</svg>

@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450" font-family="PingFang SC, Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="14">
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#555"/></marker>
+  </defs>
+  <rect width="800" height="450" fill="#fff"/>
+  <text x="400" y="30" text-anchor="middle" font-size="18" font-weight="bold" fill="#222">图 16　新 token 回来以后：两道"该停了吗"的检查</text>
+
+  <!-- engine side -->
+  <rect x="20" y="50" width="370" height="330" rx="10" fill="#fff4e0" stroke="#e39b2d" stroke-width="1.5"/>
+  <text x="205" y="74" text-anchor="middle" font-weight="bold">引擎核心：Scheduler.update_from_output</text>
+  <g font-size="12">
+    <text x="36" y="102">对每个请求：</text>
+    <text x="36" y="126">1. 投机解码被拒的草稿：num_computed_tokens −= 拒绝数</text>
+    <text x="36" y="150">2. append_output_token_ids(新 token)</text>
+    <text x="52" y="168" fill="#555">顺带更新块哈希（新填满的块）</text>
+    <text x="36" y="192">3. <tspan font-weight="bold">check_stop</tspan>：只认 token id 的那些规则</text>
+    <text x="52" y="212" fill="#555">· 是 EOS → FINISHED_STOPPED</text>
+    <text x="52" y="230" fill="#555">· 在 stop_token_ids 里 → STOPPED</text>
+    <text x="52" y="248" fill="#555">· 达到 max_tokens 或上下文上限 → LENGTH_CAPPED</text>
+    <text x="52" y="266" fill="#555">· 还没到 min_tokens → 不许停</text>
+    <text x="36" y="290">4. 结束了？_free_request：还块，记进 finished_req_ids</text>
+    <text x="36" y="314">5. 打包 EngineCoreOutput(request_id,</text>
+    <text x="52" y="332">new_token_ids, finish_reason, …)</text>
+    <text x="36" y="360" fill="#777" font-size="11">所有请求的输出再装进一个 EngineCoreOutputs 发回前端</text>
+  </g>
+
+  <line x1="390" y1="215" x2="428" y2="215" stroke="#555" stroke-width="1.4" marker-end="url(#a)"/>
+
+  <!-- frontend side -->
+  <rect x="430" y="50" width="350" height="330" rx="10" fill="#dde8ff" stroke="#4a6fd1" stroke-width="1.5"/>
+  <text x="605" y="74" text-anchor="middle" font-weight="bold">前端：OutputProcessor.process_outputs</text>
+  <g font-size="12">
+    <text x="446" y="102">对每个 EngineCoreOutput：</text>
+    <text x="446" y="126">1. detokenizer.update：增量反分词</text>
+    <text x="462" y="144" fill="#555">token id → 文字，只解新增的那一点</text>
+    <text x="446" y="168">2. <tspan font-weight="bold">check_stop_strings</tspan>：停止字符串</text>
+    <text x="462" y="186" fill="#555">比如 stop=["\n\n"]，要看文字才知道</text>
+    <text x="462" y="204" fill="#555">命中了就截掉，并通知引擎 abort 这个请求</text>
+    <text x="446" y="228">3. make_request_output</text>
+    <text x="462" y="246" fill="#555">LLM.generate 用 FINAL_ONLY 模式：</text>
+    <text x="462" y="264" fill="#555">没结束就返回 None，结束才给完整结果</text>
+    <text x="462" y="282" fill="#555">在线服务流式模式：每步都给增量</text>
+    <text x="446" y="310">4. RequestOutput(</text>
+    <text x="462" y="328">outputs=[CompletionOutput(text, token_ids,</text>
+    <text x="462" y="346">finish_reason)])</text>
+  </g>
+
+  <rect x="20" y="394" width="760" height="44" rx="8" fill="#fffbe6" stroke="#d4b106"/>
+  <text x="36" y="414" font-size="12" fill="#555">为什么停止检查要分两处：引擎只有 token id，判断"是不是 EOS"很便宜；而停止字符串可能横跨几个 token，</text>
+  <text x="36" y="430" font-size="12" fill="#555">必须先反分词成文字才能判断，这件事放在前端做，不占用引擎核心的时间。</text>
+</svg>

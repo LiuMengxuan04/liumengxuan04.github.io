@@ -1,0 +1,69 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" font-family="PingFang SC, Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="14">
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#555"/></marker>
+  </defs>
+  <rect width="800" height="600" fill="#fff"/>
+  <text x="400" y="30" text-anchor="middle" font-size="18" font-weight="bold" fill="#222">图 7　schedule() 的两段循环</text>
+
+  <!-- left column: running -->
+  <rect x="20" y="50" width="370" height="440" rx="10" fill="#f4fbf6" stroke="#3a9a52"/>
+  <text x="205" y="74" text-anchor="middle" font-size="14" font-weight="bold" fill="#1d5e2e">第一段：先照顾 running 里的老请求</text>
+  <g font-size="12">
+    <rect x="40" y="90" width="330" height="40" rx="6" fill="#fff" stroke="#3a9a52"/>
+    <text x="205" y="115" text-anchor="middle">按顺序取一个正在运行的请求 req</text>
+    <line x1="205" y1="130" x2="205" y2="148" stroke="#555" stroke-width="1.3" marker-end="url(#a)"/>
+    <rect x="40" y="150" width="330" height="56" rx="6" fill="#fff" stroke="#3a9a52"/>
+    <text x="205" y="172" text-anchor="middle">算它这步要几个 token：</text>
+    <text x="205" y="192" text-anchor="middle" fill="#555">差额，再和剩余预算、长度上限取最小</text>
+    <line x1="205" y1="206" x2="205" y2="224" stroke="#555" stroke-width="1.3" marker-end="url(#a)"/>
+    <rect x="40" y="226" width="330" height="40" rx="6" fill="#fff4e0" stroke="#e39b2d"/>
+    <text x="205" y="251" text-anchor="middle">allocate_slots(req, n)：给它要块</text>
+    <line x1="205" y1="266" x2="205" y2="284" stroke="#555" stroke-width="1.3" marker-end="url(#a)"/>
+    <polygon points="205,286 300,316 205,346 110,316" fill="#fff" stroke="#555"/>
+    <text x="205" y="321" text-anchor="middle">块够吗？</text>
+    <text x="316" y="312" fill="#3a9a52">够</text>
+    <line x1="300" y1="316" x2="338" y2="316" stroke="#3a9a52" stroke-width="1.3"/>
+    <line x1="338" y1="316" x2="338" y2="112" stroke="#3a9a52" stroke-width="1.3"/>
+    <line x1="338" y1="112" x2="372" y2="112" stroke="#3a9a52" stroke-width="1.3"/>
+    <text x="342" y="210" fill="#3a9a52" font-size="11">预算扣掉 n，</text>
+    <text x="342" y="226" fill="#3a9a52" font-size="11">下一个</text>
+    <text x="215" y="364" fill="#c0392b">不够</text>
+    <line x1="205" y1="346" x2="205" y2="378" stroke="#c0392b" stroke-width="1.3" marker-end="url(#a)"/>
+    <rect x="40" y="380" width="330" height="92" rx="6" fill="#fff0f0" stroke="#c0392b"/>
+    <text x="205" y="402" text-anchor="middle" font-weight="bold" fill="#c0392b">抢占（_preempt_request）</text>
+    <text x="56" y="424" fill="#555">FCFS：踢掉 running 末尾那个（最晚进来的）</text>
+    <text x="56" y="442" fill="#555">释放它所有块、computed 清零、状态 PREEMPTED、</text>
+    <text x="56" y="460" fill="#555">塞回 waiting 队首；然后重试 allocate_slots</text>
+  </g>
+
+  <!-- right column: waiting -->
+  <rect x="410" y="50" width="370" height="440" rx="10" fill="#f3f7ff" stroke="#4a6fd1"/>
+  <text x="595" y="74" text-anchor="middle" font-size="14" font-weight="bold" fill="#223a80">第二段：预算有剩，再接新请求</text>
+  <g font-size="12">
+    <rect x="430" y="90" width="330" height="40" rx="6" fill="#fff" stroke="#4a6fd1"/>
+    <text x="595" y="115" text-anchor="middle">这一步没人被抢占？才进入这一段</text>
+    <line x1="595" y1="130" x2="595" y2="148" stroke="#555" stroke-width="1.3" marker-end="url(#a)"/>
+    <rect x="430" y="150" width="330" height="40" rx="6" fill="#fff" stroke="#4a6fd1"/>
+    <text x="595" y="175" text-anchor="middle">peek waiting 队首（还没准备好的先挪到一边）</text>
+    <line x1="595" y1="190" x2="595" y2="208" stroke="#555" stroke-width="1.3" marker-end="url(#a)"/>
+    <rect x="430" y="210" width="330" height="56" rx="6" fill="#fff4e0" stroke="#e39b2d"/>
+    <text x="595" y="232" text-anchor="middle">get_computed_blocks：查前缀缓存</text>
+    <text x="595" y="252" text-anchor="middle" fill="#555">命中 k 个 token → 开局 computed = k</text>
+    <line x1="595" y1="266" x2="595" y2="284" stroke="#555" stroke-width="1.3" marker-end="url(#a)"/>
+    <rect x="430" y="286" width="330" height="40" rx="6" fill="#fff" stroke="#4a6fd1"/>
+    <text x="595" y="311" text-anchor="middle">n = 剩下没算的，再被预算截断（分块预填充）</text>
+    <line x1="595" y1="326" x2="595" y2="344" stroke="#555" stroke-width="1.3" marker-end="url(#a)"/>
+    <rect x="430" y="346" width="330" height="40" rx="6" fill="#fff4e0" stroke="#e39b2d"/>
+    <text x="595" y="371" text-anchor="middle">allocate_slots；不够就 break（不抢占别人）</text>
+    <line x1="595" y1="386" x2="595" y2="404" stroke="#555" stroke-width="1.3" marker-end="url(#a)"/>
+    <rect x="430" y="406" width="330" height="66" rx="6" fill="#d9f2df" stroke="#3a9a52"/>
+    <text x="595" y="428" text-anchor="middle">移到 running，状态改 RUNNING</text>
+    <text x="595" y="448" text-anchor="middle" fill="#555">新请求记进 new_reqs，被抢占回来的</text>
+    <text x="595" y="464" text-anchor="middle" fill="#555">记进 resumed_reqs</text>
+  </g>
+
+  <rect x="20" y="505" width="760" height="80" rx="8" fill="#fffbe6" stroke="#d4b106"/>
+  <text x="36" y="530" font-size="13" font-weight="bold" fill="#8a6d00">两段之后</text>
+  <text x="36" y="552" font-size="12" fill="#555">打包 SchedulerOutput（图 11）→ _update_after_schedule：先乐观地把每个请求的 num_computed_tokens 加上本步的 n。</text>
+  <text x="36" y="572" font-size="12" fill="#555">为什么 running 优先：它们已经占着 KV 块，让它们尽快跑完才能腾出块；新请求晚一步开始，影响小得多。</text>
+</svg>

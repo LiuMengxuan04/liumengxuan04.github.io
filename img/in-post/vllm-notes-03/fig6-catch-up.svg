@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 420" font-family="PingFang SC, Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="14">
+  <rect width="800" height="420" fill="#fff"/>
+  <text x="400" y="30" text-anchor="middle" font-size="18" font-weight="bold" fill="#222">图 6　调度器眼里只有两个数：追赶游戏</text>
+  <text x="400" y="54" text-anchor="middle" font-size="12" fill="#555">一个 10 token 的提示词，token 预算每步 6 个；绿色 = 已算好 KV，橙色 = 本步要算，灰色 = 还没轮到</text>
+
+  <g font-size="11">
+    <!-- row helper: 30px per token, start x=200 -->
+    <!-- step 1 -->
+    <text x="20" y="98" font-size="13" font-weight="bold">第 1 步（分块预填充）</text>
+    <g>
+      <rect x="200" y="80" width="30" height="28" fill="#fff4e0" stroke="#e39b2d"/><rect x="230" y="80" width="30" height="28" fill="#fff4e0" stroke="#e39b2d"/><rect x="260" y="80" width="30" height="28" fill="#fff4e0" stroke="#e39b2d"/><rect x="290" y="80" width="30" height="28" fill="#fff4e0" stroke="#e39b2d"/><rect x="320" y="80" width="30" height="28" fill="#fff4e0" stroke="#e39b2d"/><rect x="350" y="80" width="30" height="28" fill="#fff4e0" stroke="#e39b2d"/>
+      <rect x="380" y="80" width="30" height="28" fill="#eee" stroke="#bbb"/><rect x="410" y="80" width="30" height="28" fill="#eee" stroke="#bbb"/><rect x="440" y="80" width="30" height="28" fill="#eee" stroke="#bbb"/><rect x="470" y="80" width="30" height="28" fill="#eee" stroke="#bbb"/>
+    </g>
+    <text x="520" y="92">computed 0 → 6，num_tokens = 10</text>
+    <text x="520" y="106" fill="#c0392b">没算完提示词，不采样</text>
+
+    <!-- step 2 -->
+    <text x="20" y="158" font-size="13" font-weight="bold">第 2 步（预填充收尾）</text>
+    <rect x="200" y="140" width="180" height="28" fill="#d9f2df" stroke="#3a9a52"/>
+    <rect x="380" y="140" width="30" height="28" fill="#fff4e0" stroke="#e39b2d"/><rect x="410" y="140" width="30" height="28" fill="#fff4e0" stroke="#e39b2d"/><rect x="440" y="140" width="30" height="28" fill="#fff4e0" stroke="#e39b2d"/><rect x="470" y="140" width="30" height="28" fill="#fff4e0" stroke="#e39b2d"/>
+    <text x="520" y="152">computed 6 → 10，追平了</text>
+    <text x="520" y="166" fill="#3a9a52">采样出第 1 个新 token "南"</text>
+
+    <!-- step 3 -->
+    <text x="20" y="218" font-size="13" font-weight="bold">第 3 步（解码）</text>
+    <rect x="200" y="200" width="300" height="28" fill="#d9f2df" stroke="#3a9a52"/>
+    <rect x="500" y="200" width="30" height="28" fill="#fff4e0" stroke="#e39b2d"/><text x="515" y="219" text-anchor="middle">南</text>
+    <text x="545" y="212">num_tokens 变成 11，差 1 个</text>
+    <text x="545" y="226" fill="#3a9a52">算"南"的 KV，采出"京"</text>
+
+    <!-- step 4 -->
+    <text x="20" y="278" font-size="13" font-weight="bold">第 4 步（解码）</text>
+    <rect x="200" y="260" width="330" height="28" fill="#d9f2df" stroke="#3a9a52"/>
+    <rect x="530" y="260" width="30" height="28" fill="#fff4e0" stroke="#e39b2d"/><text x="545" y="279" text-anchor="middle">京</text>
+    <text x="575" y="272">又差 1 个，再追 1 个</text>
+  </g>
+
+  <rect x="20" y="310" width="760" height="96" rx="8" fill="#fffbe6" stroke="#d4b106"/>
+  <text x="36" y="334" font-size="13" font-weight="bold" fill="#8a6d00">每步要算几个：num_new_tokens = num_tokens_with_spec − num_computed_tokens（再被预算截断）</text>
+  <text x="36" y="360" font-size="12" fill="#555">· 预填充 = 差得多，一口气追一大截；解码 = 永远只差刚采样出来的那 1 个。调度器根本不需要区分两者。</text>
+  <text x="36" y="382" font-size="12" fill="#555">· 命中前缀缓存 = 开局 computed 就不是 0；投机解码 = 把草稿 token 也算进 with_spec 里，一次多追几个。</text>
+  <text x="36" y="398" font-size="11" fill="#777">（源码 scheduler.py schedule() 开头那段 NOTE(woosuk) 注释讲的就是这件事）</text>
+</svg>

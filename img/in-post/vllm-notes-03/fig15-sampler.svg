@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400" font-family="PingFang SC, Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="14">
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#555"/></marker>
+  </defs>
+  <rect width="800" height="400" fill="#fff"/>
+  <text x="400" y="30" text-anchor="middle" font-size="18" font-weight="bold" fill="#222">图 15　Sampler.forward：从一排分数到一个 token</text>
+
+  <g font-size="12" text-anchor="middle">
+    <rect x="20" y="60" width="130" height="64" rx="8" fill="#eee" stroke="#999"/>
+    <text x="85" y="84" font-weight="bold">logits</text><text x="85" y="104" fill="#555">每个词一个分数</text><text x="85" y="118" font-size="10" fill="#777">[请求数 × 词表大小]</text>
+    <rect x="175" y="60" width="130" height="64" rx="8" fill="#fff" stroke="#999"/>
+    <text x="240" y="84" font-weight="bold">① 先存 logprobs</text><text x="240" y="104" fill="#555">用户要看概率时，</text><text x="240" y="118" fill="#555">用原始分数算</text>
+    <rect x="330" y="60" width="130" height="64" rx="8" fill="#fff4e0" stroke="#e39b2d"/>
+    <text x="395" y="84" font-weight="bold">② 改分数</text><text x="395" y="104" fill="#555">禁用词、logit_bias、</text><text x="395" y="118" fill="#555">min_tokens、重复惩罚</text>
+    <rect x="485" y="60" width="130" height="64" rx="8" fill="#dde8ff" stroke="#4a6fd1"/>
+    <text x="550" y="84" font-weight="bold">③ 贪心</text><text x="550" y="104" fill="#555">argmax 取最大</text><text x="550" y="118" fill="#555">全是贪心就直接返回</text>
+    <rect x="640" y="60" width="140" height="64" rx="8" fill="#d9f2df" stroke="#3a9a52"/>
+    <text x="710" y="84" font-weight="bold">④ 随机采样</text><text x="710" y="104" fill="#555">temperature → min_p</text><text x="710" y="118" fill="#555">→ top_k / top_p</text>
+  </g>
+  <line x1="150" y1="92" x2="173" y2="92" stroke="#555" marker-end="url(#a)"/><line x1="305" y1="92" x2="328" y2="92" stroke="#555" marker-end="url(#a)"/><line x1="460" y1="92" x2="483" y2="92" stroke="#555" marker-end="url(#a)"/><line x1="615" y1="92" x2="638" y2="92" stroke="#555" marker-end="url(#a)"/>
+
+  <!-- temp example -->
+  <text x="20" y="162" font-size="13" font-weight="bold">temperature、top_k、top_p 各做了什么（5 个候选词的玩具例子）</text>
+  <g font-size="11" text-anchor="middle">
+    <!-- bars original -->
+    <text x="110" y="186" font-size="12">原始概率</text>
+    <rect x="40" y="200" width="24" height="90" fill="#4a6fd1"/><rect x="72" y="240" width="24" height="50" fill="#4a6fd1"/><rect x="104" y="260" width="24" height="30" fill="#4a6fd1"/><rect x="136" y="272" width="24" height="18" fill="#4a6fd1"/><rect x="168" y="280" width="24" height="10" fill="#4a6fd1"/>
+    <text x="52" y="306">南</text><text x="84" y="306">北</text><text x="116" y="306">东</text><text x="148" y="306">西</text><text x="180" y="306">中</text>
+
+    <text x="310" y="186" font-size="12">temperature = 0.5（更尖）</text>
+    <rect x="240" y="200" width="24" height="90" fill="#e39b2d"/><rect x="272" y="262" width="24" height="28" fill="#e39b2d"/><rect x="304" y="280" width="24" height="10" fill="#e39b2d"/><rect x="336" y="286" width="24" height="4" fill="#e39b2d"/><rect x="368" y="288" width="24" height="2" fill="#e39b2d"/>
+    <text x="252" y="306">南</text><text x="284" y="306">北</text><text x="316" y="306">东</text><text x="348" y="306">西</text><text x="380" y="306">中</text>
+
+    <text x="510" y="186" font-size="12">top_k = 2（只留前 2 名）</text>
+    <rect x="440" y="200" width="24" height="90" fill="#3a9a52"/><rect x="472" y="240" width="24" height="50" fill="#3a9a52"/><rect x="504" y="289" width="24" height="1" fill="#ccc"/><rect x="536" y="289" width="24" height="1" fill="#ccc"/><rect x="568" y="289" width="24" height="1" fill="#ccc"/>
+    <text x="452" y="306">南</text><text x="484" y="306">北</text><text x="516" y="306" fill="#bbb">东</text><text x="548" y="306" fill="#bbb">西</text><text x="580" y="306" fill="#bbb">中</text>
+
+    <text x="700" y="186" font-size="12">top_p = 0.8</text>
+    <text x="700" y="212" fill="#555">从高到低累加概率，</text>
+    <text x="700" y="230" fill="#555">加到 80% 为止，</text>
+    <text x="700" y="248" fill="#555">其余的全砍掉</text>
+  </g>
+
+  <rect x="20" y="322" width="760" height="66" rx="8" fill="#fffbe6" stroke="#d4b106"/>
+  <text x="36" y="346" font-size="12" fill="#555">最后一步"按概率抽一个"没用 torch.multinomial，而是：每个词生成一个指数分布的随机数 q，选 概率 ÷ q 最大的那个。</text>
+  <text x="36" y="368" font-size="12" fill="#555">数学上等价于按概率抽样，但全程在 GPU 上，不需要和 CPU 同步。同一批里贪心和随机的请求用 torch.where 各取各的结果。</text>
+</svg>

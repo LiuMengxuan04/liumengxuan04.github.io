@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 470" font-family="PingFang SC, Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="14">
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#555"/></marker>
+  </defs>
+  <rect width="800" height="470" fill="#fff"/>
+  <text x="400" y="30" text-anchor="middle" font-size="18" font-weight="bold" fill="#222">图 2　同一个请求的三副面孔</text>
+
+  <!-- prompt -->
+  <rect x="20" y="60" width="200" height="110" rx="8" fill="#f3f3f3" stroke="#999"/>
+  <text x="120" y="84" text-anchor="middle" font-weight="bold">你传进来的</text>
+  <text x="36" y="110" font-size="12" fill="#333">prompt = "介绍一下南京"</text>
+  <text x="36" y="132" font-size="12" fill="#333">SamplingParams(</text>
+  <text x="48" y="152" font-size="12" fill="#333">max_tokens=64)</text>
+  <line x1="220" y1="115" x2="258" y2="115" stroke="#555" stroke-width="1.4" marker-end="url(#a)"/>
+  <text x="239" y="104" text-anchor="middle" font-size="11" fill="#c0392b">分词</text>
+
+  <!-- EngineCoreRequest -->
+  <rect x="260" y="60" width="240" height="250" rx="8" fill="#dde8ff" stroke="#4a6fd1" stroke-width="1.5"/>
+  <text x="380" y="84" text-anchor="middle" font-weight="bold" fill="#223a80">EngineCoreRequest</text>
+  <text x="380" y="102" text-anchor="middle" font-size="11" fill="#555">"快递包裹"：要跨进程发送，只装必要数据</text>
+  <g font-size="12" fill="#333">
+    <text x="276" y="128">request_id = "0"</text>
+    <text x="276" y="150">prompt_token_ids = [100, 23, 57, 9, …]</text>
+    <text x="276" y="172">sampling_params（max_tokens 已补好）</text>
+    <text x="276" y="194">arrival_time 到达时间</text>
+    <text x="276" y="216">priority 优先级（默认 0）</text>
+    <text x="276" y="238">lora_request / mm_features / cache_salt</text>
+    <text x="276" y="260" fill="#777">……（多模态、LoRA 等可选项）</text>
+  </g>
+  <text x="380" y="292" text-anchor="middle" font-size="11" fill="#555">msgspec.Struct，序列化很快</text>
+  <line x1="500" y1="185" x2="538" y2="185" stroke="#555" stroke-width="1.4" marker-end="url(#a)"/>
+  <text x="519" y="174" text-anchor="middle" font-size="11" fill="#c0392b">拆包</text>
+
+  <!-- Request -->
+  <rect x="540" y="60" width="240" height="390" rx="8" fill="#d9f2df" stroke="#3a9a52" stroke-width="1.5"/>
+  <text x="660" y="84" text-anchor="middle" font-weight="bold" fill="#1d5e2e">Request</text>
+  <text x="660" y="102" text-anchor="middle" font-size="11" fill="#555">"病历本"：调度器在引擎里一直用它</text>
+  <g font-size="12" fill="#333">
+    <text x="556" y="128">status = WAITING</text>
+    <text x="556" y="150">prompt_token_ids</text>
+    <text x="556" y="172">_output_token_ids = []</text>
+    <text x="556" y="194">_all_token_ids = 提示词 + 输出</text>
+    <text x="556" y="220" font-weight="bold" fill="#c0392b">num_computed_tokens = 0</text>
+    <text x="568" y="238" font-size="11" fill="#777">已经算好 KV 的 token 数</text>
+    <text x="556" y="262">spec_token_ids = []  草稿 token</text>
+    <text x="556" y="284">block_hashes  每个整块的哈希</text>
+    <text x="556" y="306">num_preemptions  被抢占次数</text>
+  </g>
+  <line x1="552" y1="322" x2="768" y2="322" stroke="#3a9a52" stroke-dasharray="4,3"/>
+  <text x="556" y="344" font-size="12" font-weight="bold" fill="#1d5e2e">常用的派生量（property）</text>
+  <g font-size="12" fill="#333">
+    <text x="556" y="368">num_tokens = len(_all_token_ids)</text>
+    <text x="556" y="390">num_tokens_with_spec</text>
+    <text x="568" y="408" font-size="11" fill="#777">= num_tokens + len(spec_token_ids)</text>
+    <text x="556" y="432">num_output_tokens</text>
+  </g>
+
+  <!-- note -->
+  <rect x="20" y="330" width="480" height="120" rx="8" fill="#fffbe6" stroke="#d4b106"/>
+  <text x="36" y="356" font-size="13" font-weight="bold" fill="#8a6d00">为什么要换两次壳？</text>
+  <text x="36" y="380" font-size="12" fill="#555">EngineCoreRequest 要通过 ZMQ 从前端进程送到引擎进程，越小越好；</text>
+  <text x="36" y="402" font-size="12" fill="#555">Request 是引擎内部的"工作记录"，要随时改状态、追加 token、</text>
+  <text x="36" y="424" font-size="12" fill="#555">记账已算多少，所以多了一堆可变字段。整篇文章最常出现的，</text>
+  <text x="36" y="444" font-size="12" fill="#555">就是右边这个红色的 num_computed_tokens。</text>
+</svg>
